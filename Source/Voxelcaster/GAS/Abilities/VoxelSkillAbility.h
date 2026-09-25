@@ -21,10 +21,16 @@ class VOXELCASTER_API UVoxelSkillAbility : public UVoxelGameplayAbility
 public:
 	UVoxelSkillAbility();
 
+	/** 가속 모디파이어를 반영한 쿨다운 */
+	virtual float GetEffectiveCooldown() const override;
+
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
 protected:
+	/** 시전자의 모디파이어 컴포넌트 (없으면 nullptr) */
+	class UVXModifierComponent* GetModifierComponent() const;
+
 	/** 스킬 본체. 시전자를 받아 형태별 동작을 수행한다. */
 	virtual void ExecuteSkill(AVXCharacterBase* Caster) PURE_VIRTUAL(UVoxelSkillAbility::ExecuteSkill, );
 

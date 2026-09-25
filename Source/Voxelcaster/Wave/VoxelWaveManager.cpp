@@ -12,6 +12,8 @@
 #include "Engine/World.h"
 #include "GAS/VoxelGameplayEffects.h"
 #include "Kismet/GameplayStatics.h"
+#include "Modifier/VXModifierComponent.h"
+#include "Modifier/VXUpgradeSubsystem.h"
 #include "Voxelcaster.h"
 
 namespace
@@ -60,6 +62,11 @@ void UVXWaveManager::BeginPlay()
 	Super::BeginPlay();
 
 	LoadWavesFromTable();
+
+	if (UVXUpgradeSubsystem* Upgrades = GetWorld()->GetSubsystem<UVXUpgradeSubsystem>())
+	{
+		Upgrades->OnChoiceApplied.AddUObject(this, &UVXWaveManager::HandleChoiceApplied);
+	}
 
 	if (bAutoStart)
 	{
@@ -235,7 +242,7 @@ void UVXWaveManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 		break;
 
 	case EVoxelWaveState::Cleared:
-		if (bAutoAdvance)
+		if (bAutoAdvance && false == bWaitingForReward)
 		{
 			StateTime += DeltaTime;
 			if (StateTime >= AutoAdvanceDelay)
@@ -299,9 +306,31 @@ void UVXWaveManager::UpdateClearCondition()
 	}
 
 	// 웨이브 클리어 회복 (마지막 웨이브는 회복 없이 종료)
-	if (AVXCharacterBase* Player = FindLivePlayer())
+	AVXCharacterBase* Player = FindLivePlayer();
+	if (Player)
 	{
 		VoxelEffects::ApplyHeal(Player->GetAbilitySystemComponent(), ClearHealAmount);
+	}
+
+	// 보상 카드 3장 중 1장 선택. 고르면 HandleChoiceApplied에서 다음 웨이브를 시작한다.
+	bWaitingForReward = false;
+	if (bRewardBetweenWaves && Player)
+	{
+		UVXUpgradeSubsystem* Upgrades = GetWorld()->GetSubsystem<UVXUpgradeSubsystem>();
+		UVXModifierComponent* Modifiers = Player->FindComponentByClass<UVXModifierComponent>();
+		if (Upgrades && Modifiers)
+		{
+			bWaitingForReward = Upgrades->DrawChoices(Modifiers);
+		}
+	}
+}
+
+void UVXWaveManager::HandleChoiceApplied(const FVXUpgradeCard& Card)
+{
+	if (bWaitingForReward && EVoxelWaveState::Cleared == State)
+	{
+		bWaitingForReward = false;
+		StartNextWave();
 	}
 }
 

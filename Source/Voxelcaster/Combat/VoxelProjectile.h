@@ -28,6 +28,15 @@ public:
 	void Init(AVXCharacterBase* InCaster, const FGameplayTag& InSkillTag, float InDamage, float InSpeed, float InMaxRange,
 		const FLinearColor& InColor = FLinearColor(0.3f, 0.8f, 1.f));
 
+	/** 관통: 적을 맞힌 뒤에도 이 수만큼 더 나아간다 (관통 모디파이어) */
+	void SetPierceCount(int32 InPierceCount) { PierceRemaining = FMath::Max(0, InPierceCount); }
+
+	/** 파생 투사체(분열)면 명중이 bIsDerived로 처리되어 모디파이어를 다시 발동하지 않는다 */
+	void SetDerived(bool bInDerived) { bIsDerived = bInDerived; }
+
+	/** 이 적은 맞히지 않는다 (분열 투사체가 원본 대상을 다시 맞히지 않도록) */
+	void IgnoreTarget(AActor* Target) { if (Target) { HitActors.Add(Target); } }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -53,4 +62,9 @@ private:
 	float Damage = 0.f;
 	float Speed = 2000.f;
 	float MaxRange = 1500.f;
+	int32 PierceRemaining = 0;
+	bool bIsDerived = false;
+
+	/** 이미 맞힌 적. 같은 적을 두 번 맞히지 않는다 */
+	TSet<TWeakObjectPtr<AActor>> HitActors;
 };

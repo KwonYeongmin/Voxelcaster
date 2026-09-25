@@ -20,6 +20,9 @@
 #include "InputActionValue.h"
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
+#include "Modifier/VXModifierComponent.h"
+#include "Modifier/VXUpgradeSubsystem.h"
+#include "UI/VXRewardSelectWidget.h"
 #include "Wave/VoxelWaveManager.h"
 #include "Voxelcaster.h"
 
@@ -96,6 +99,41 @@ void AVXPlayerController::CreateInputAssets()
 	GameplayContext->MapKey(Skill3Action, EKeys::Gamepad_RightShoulder);
 	GameplayContext->MapKey(DashAction, EKeys::SpaceBar);
 	GameplayContext->MapKey(DashAction, EKeys::Gamepad_FaceButton_Bottom);
+}
+
+void AVXPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (UVXUpgradeSubsystem* Upgrades = GetWorld()->GetSubsystem<UVXUpgradeSubsystem>())
+	{
+		Upgrades->OnChoicesReady.AddUObject(this, &AVXPlayerController::HandleChoicesReady);
+	}
+}
+
+void AVXPlayerController::HandleChoicesReady(const TArray<FVXUpgradeCard>& Choices)
+{
+	UVXRewardSelectWidget* Widget = CreateWidget<UVXRewardSelectWidget>(this, UVXRewardSelectWidget::StaticClass());
+	if (nullptr == Widget)
+	{
+		return;
+	}
+
+	int32 WaveIndex = 0;
+	if (const AVoxelGameMode* GameMode = GetWorld()->GetAuthGameMode<AVoxelGameMode>())
+	{
+		WaveIndex = GameMode->GetWaveManager()->GetCurrentWave();
+	}
+
+	// 보상 선택 중에는 게임을 멈춘다. (DES-RULES-001)
+	Widget->SetChoices(Choices, WaveIndex);
+	Widget->AddToViewport(100);
+	Widget->ActivateWidget();
+	SetPause(true);
+
+	// 포커스는 화면 루트가 아니라 가운데 카드에 준다. (루트는 포커스를 받을 수 없음)
+	SetInputMode(FInputModeUIOnly());
+	Widget->FocusDefaultCard();
 }
 
 void AVXPlayerController::SetupInputComponent()
@@ -458,6 +496,61 @@ void AVXPlayerController::DebugDamageEnemies(float Amount)
 		{
 			VoxelEffects::ApplyDamage(It->GetAbilitySystemComponent(), Amount);
 		}
+	}
+}
+
+void AVXPlayerController::GiveModifier(const FString& Skill, const FString& Modifier)
+{
+	FGameplayTag SkillTag;
+	if (Skill.Equals(TEXT("MagicBolt"), ESearchCase::IgnoreCase))
+	{
+		SkillTag = VoxelTags::Cooldown_MagicBolt;
+	}
+	else if (Skill.Equals(TEXT("Nova"), ESearchCase::IgnoreCase))
+	{
+		SkillTag = VoxelTags::Cooldown_Nova;
+	}
+	else if (Skill.Equals(TEXT("BladeSweep"), ESearchCase::IgnoreCase))
+	{
+		SkillTag = VoxelTags::Cooldown_BladeSweep;
+	}
+
+	const UEnum* ModifierEnum = StaticEnum<EVXModifierType>();
+	const int64 ModifierValue = ModifierEnum->GetValueByNameString(Modifier);
+
+	UVXModifierComponent* Modifiers = nullptr != GetPawn() ? GetPawn()->FindComponentByClass<UVXModifierComponent>() : nullptr;
+	if (false == SkillTag.IsValid() || INDEX_NONE == ModifierValue || nullptr == Modifiers)
+	{
+		UE_LOG(LogVoxel, Warning, TEXT("GiveModifier: usage GiveModifier <MagicBolt|Nova|BladeSweep> <Pierce|Split|Explode|Chain|Haste>"));
+		return;
+	}
+
+	const EVXModifierType Type = static_cast<EVXModifierType>(ModifierValue);
+	if (Modifiers->AddModifier(SkillTag, Type))
+	{
+		UE_LOG(LogVoxel, Log, TEXT("GiveModifier: %s + %s (stack %d)"), *Skill, *Modifier, Modifiers->GetStack(SkillTag, Type));
+	}
+	else
+	{
+		UE_LOG(LogVoxel, Warning, TEXT("GiveModifier: cannot add %s to %s (slots full, max stack, or no effect on this skill)"), *Modifier, *Skill);
+	}
+}
+
+void AVXPlayerController::ShowUpgradeSelect()
+{
+	UVXUpgradeSubsystem* Upgrades = GetWorld()->GetSubsystem<UVXUpgradeSubsystem>();
+	UVXModifierComponent* Modifiers = nullptr != GetPawn() ? GetPawn()->FindComponentByClass<UVXModifierComponent>() : nullptr;
+	if (Upgrades && Modifiers)
+	{
+		Upgrades->DrawChoices(Modifiers);
+	}
+}
+
+void AVXPlayerController::ClearModifiers()
+{
+	if (UVXModifierComponent* Modifiers = nullptr != GetPawn() ? GetPawn()->FindComponentByClass<UVXModifierComponent>() : nullptr)
+	{
+		Modifiers->ResetModifiers();
 	}
 }
 

@@ -6,10 +6,23 @@
 #include "Engine/World.h"
 #include "GAS/VoxelAbilitySystemComponent.h"
 #include "GAS/VoxelHitContext.h"
+#include "Modifier/VXModifierComponent.h"
 
 UVoxelSkillAbility::UVoxelSkillAbility()
 {
 	bBlockedWhileDashing = true;
+}
+
+UVXModifierComponent* UVoxelSkillAbility::GetModifierComponent() const
+{
+	const AActor* Avatar = GetAvatarActorFromActorInfo();
+	return nullptr != Avatar ? Avatar->FindComponentByClass<UVXModifierComponent>() : nullptr;
+}
+
+float UVoxelSkillAbility::GetEffectiveCooldown() const
+{
+	const UVXModifierComponent* Modifiers = GetModifierComponent();
+	return nullptr != Modifiers ? Modifiers->GetModifiedCooldown(GetCooldownTag(), CooldownDuration) : CooldownDuration;
 }
 
 void UVoxelSkillAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

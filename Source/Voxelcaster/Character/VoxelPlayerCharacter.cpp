@@ -10,6 +10,7 @@
 #include "GAS/Abilities/VoxelGA_Nova.h"
 #include "GAS/VoxelAbilitySystemComponent.h"
 #include "GAS/VoxelGameplayTags.h"
+#include "Modifier/VXModifierComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
 AVXPlayerCharacter::AVXPlayerCharacter()
@@ -29,6 +30,8 @@ AVXPlayerCharacter::AVXPlayerCharacter()
 	TopDownCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	TopDownCamera->bUsePawnControlRotation = false;
 	TopDownCamera->FieldOfView = 50.f;
+
+	ModifierComponent = CreateDefaultSubobject<UVXModifierComponent>(TEXT("ModifierComponent"));
 
 	BodyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyMesh"));
 	BodyMesh->SetupAttachment(RootComponent);

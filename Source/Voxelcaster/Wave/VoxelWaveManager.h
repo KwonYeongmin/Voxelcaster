@@ -112,7 +112,11 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Voxel|Wave")
 	float ClearHealAmount = 30.f;
 
-	/** 클리어 후 자동으로 다음 웨이브로 넘어간다. (보상 선택 화면이 생기면 끄고 화면이 StartNextWave를 호출한다) */
+	/** 웨이브 사이에 보상 카드를 고르게 한다. 고르면 다음 웨이브가 시작된다. (마지막 웨이브 제외) */
+	UPROPERTY(EditAnywhere, Category = "Voxel|Wave")
+	bool bRewardBetweenWaves = true;
+
+	/** 클리어 후 자동으로 다음 웨이브로 넘어간다. (보상을 고르는 중에는 기다린다) */
 	UPROPERTY(EditAnywhere, Category = "Voxel|Wave")
 	bool bAutoAdvance = true;
 
@@ -140,6 +144,7 @@ private:
 	void CompactAliveList();
 	void ShowDebugInfo() const;
 
+	void HandleChoiceApplied(const struct FVXUpgradeCard& Card);
 	void HandleEnemyDeath(AVXCharacterBase* Enemy);
 	void HandlePlayerDeath(AVXCharacterBase* Player);
 
@@ -150,6 +155,7 @@ private:
 	float CombatTime = 0.f;
 	float AutoStartTimer = -1.f;
 	bool bPlayerBound = false;
+	bool bWaitingForReward = false;
 
 	/** 이번 웨이브에서 시간순으로 스폰할 적 클래스 */
 	TArray<TSubclassOf<AVXEnemyBase>> SpawnQueue;

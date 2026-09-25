@@ -74,11 +74,28 @@ public:
 	UFUNCTION(Exec)
 	void DebugDamageEnemies(float Amount = 20.f);
 
+	/**
+	 * 스킬에 모디파이어를 1스택 장착한다. (슬롯·스택 제한 적용)
+	 * 예) GiveModifier MagicBolt Explode / GiveModifier Nova Split
+	 * 스킬: MagicBolt, Nova, BladeSweep / 모디파이어: Pierce, Split, Explode, Chain, Haste
+	 */
+	UFUNCTION(Exec)
+	void GiveModifier(const FString& Skill, const FString& Modifier);
+
+	/** 보상 선택 화면을 즉시 연다 (웨이브와 무관, 테스트용) */
+	UFUNCTION(Exec)
+	void ShowUpgradeSelect();
+
+	/** 모든 모디파이어를 뺀다 */
+	UFUNCTION(Exec)
+	void ClearModifiers();
+
 	/** 살아 있는 모든 적을 제거한다. */
 	UFUNCTION(Exec)
 	void DebugKillEnemies();
 
 protected:
+	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void PlayerTick(float DeltaTime) override;
 	virtual bool InputKey(const FInputKeyEventArgs& Params) override;
@@ -95,6 +112,7 @@ private:
 	void HandleAbilityReleased(FGameplayTag InputTag);
 
 	void SetInputDevice(EVoxelInputDevice NewDevice);
+	void HandleChoicesReady(const TArray<struct FVXUpgradeCard>& Choices);
 	/** 화면 좌측 상단에 플레이어 HP를 표시한다 (HUD가 생기면 끈다) */
 	void ShowDebugInfo() const;
 	FVector ResolveAimDirection() const;

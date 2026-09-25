@@ -85,6 +85,12 @@ void AVoxelProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompo
 		return;
 	}
 
+	if (HitActors.Contains(Target))
+	{
+		return;
+	}
+	HitActors.Add(Target);
+
 	FVoxelHitContext Context;
 	Context.SkillTag = SkillTag;
 	Context.Source = SourceCharacter;
@@ -92,11 +98,18 @@ void AVoxelProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompo
 	Context.Location = GetActorLocation();
 	Context.Direction = GetVelocity().GetSafeNormal();
 	Context.Damage = Damage;
-	Context.bIsDerived = false;
+	Context.bIsDerived = bIsDerived;
 
 	if (UVoxelAbilitySystemComponent* ASC = SourceCharacter->GetVoxelAbilitySystemComponent())
 	{
 		ASC->ApplySkillHit(Context);
+	}
+
+	// 관통이 남아 있으면 계속 나아간다. 관통으로 맞힌 다음 적도 새로운 원본 명중이다. (DES-MOD-001 조합 규칙 5)
+	if (PierceRemaining > 0)
+	{
+		--PierceRemaining;
+		return;
 	}
 
 	Destroy();

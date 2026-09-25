@@ -5,6 +5,7 @@
 #include "Combat/VoxelProjectile.h"
 #include "Engine/World.h"
 #include "GAS/VoxelGameplayTags.h"
+#include "Modifier/VXModifierComponent.h"
 
 UVoxelGA_MagicBolt::UVoxelGA_MagicBolt()
 {
@@ -29,6 +30,10 @@ void UVoxelGA_MagicBolt::ExecuteSkill(AVXCharacterBase* Caster)
 	if (Projectile)
 	{
 		Projectile->Init(Caster, GetCooldownTag(), Damage, ProjectileSpeed, MaxRange);
+		if (const UVXModifierComponent* Modifiers = GetModifierComponent())
+		{
+			Projectile->SetPierceCount(Modifiers->GetStack(GetCooldownTag(), EVXModifierType::Pierce));
+		}
 		Projectile->FinishSpawning(FTransform(Direction.Rotation(), SpawnLocation));
 	}
 }
