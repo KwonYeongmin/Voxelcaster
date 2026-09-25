@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Enemy/VoxelShooter.h"
+#include "Animation/AnimMontage.h"
 #include "Combat/VoxelProjectile.h"
 #include "Engine/World.h"
 #include "GameplayTagContainer.h"
@@ -132,6 +133,10 @@ void AVXShooter::TickFiring(float DeltaSeconds)
 
 	if (FireTimer <= 0.f)
 	{
+		if (FireMontage && HasSkeletalMesh())
+		{
+			PlayAnimMontage(FireMontage);
+		}
 		FireAt(Player);
 		FireTimer = FireInterval;
 		CancelTelegraph();

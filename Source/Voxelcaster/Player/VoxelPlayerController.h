@@ -95,6 +95,8 @@ private:
 	void HandleAbilityReleased(FGameplayTag InputTag);
 
 	void SetInputDevice(EVoxelInputDevice NewDevice);
+	/** 화면 좌측 상단에 플레이어 HP를 표시한다 (HUD가 생기면 끈다) */
+	void ShowDebugInfo() const;
 	FVector ResolveAimDirection() const;
 
 	UPROPERTY()
@@ -112,6 +114,10 @@ private:
 	TObjectPtr<UInputAction> Skill3Action;
 	UPROPERTY()
 	TObjectPtr<UInputAction> DashAction;
+
+	/** 화면 좌측 상단에 플레이어 HP를 표시한다 (HUD가 생기면 끈다) */
+	UPROPERTY(EditAnywhere, Category = "Voxel|Debug")
+	bool bShowDebugInfo = true;
 
 	EVoxelInputDevice InputDevice = EVoxelInputDevice::KeyboardMouse;
 

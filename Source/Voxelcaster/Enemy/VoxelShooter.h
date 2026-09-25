@@ -91,6 +91,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Shooter")
 	float ProjectileMaxRange = 2000.f;
 
+	/** 발사 애니메이션. 지정하면 투사체를 쏠 때 재생한다. (스켈레탈 메시를 쓸 때) */
+	UPROPERTY(EditDefaultsOnly, Category = "Shooter")
+	TObjectPtr<UAnimMontage> FireMontage;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Shooter")
 	FLinearColor TelegraphColor = FLinearColor(1.f, 0.9f, 0.2f);
 

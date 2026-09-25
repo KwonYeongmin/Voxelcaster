@@ -7,6 +7,7 @@
 #include "Enemy/VoxelElite.h"
 #include "Enemy/VoxelRunner.h"
 #include "Enemy/VoxelShooter.h"
+#include "Engine/Engine.h"
 #include "EngineUtils.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -297,6 +298,11 @@ void AVXPlayerController::PlayerTick(float DeltaTime)
 		bHasLastMousePosition = true;
 	}
 
+	if (bShowDebugInfo)
+	{
+		ShowDebugInfo();
+	}
+
 	AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPawn());
 	if (nullptr == VoxelChar || VoxelChar->IsDead())
 	{
@@ -313,6 +319,28 @@ void AVXPlayerController::PlayerTick(float DeltaTime)
 	{
 		ASC->ProcessHeldInputs();
 	}
+}
+
+void AVXPlayerController::ShowDebugInfo() const
+{
+	const AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPawn());
+	if (nullptr == GEngine || nullptr == VoxelChar)
+	{
+		return;
+	}
+
+	const float Health = VoxelChar->GetHealth();
+	const float MaxHealth = VoxelChar->GetMaxHealth();
+	const float Ratio = MaxHealth > 0.f ? Health / MaxHealth : 0.f;
+
+	// 30% 이하는 빨강, 60% 이하는 주황 (저체력 경고)
+	const FColor Color = Ratio <= 0.3f ? FColor::Red : (Ratio <= 0.6f ? FColor::Orange : FColor::Green);
+	const FString Text = VoxelChar->IsDead()
+		? FString::Printf(TEXT("HP 0 / %.0f   [DEAD]"), MaxHealth)
+		: FString::Printf(TEXT("HP %.0f / %.0f"), Health, MaxHealth);
+
+	// 웨이브 표시(키 7001) 바로 아래에 오도록 다음 키를 쓴다.
+	GEngine->AddOnScreenDebugMessage(7002, 0.f, Color, Text, true, FVector2D(1.5f, 1.5f));
 }
 
 // ---------------------------------------------------------------------------

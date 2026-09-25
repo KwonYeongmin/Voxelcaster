@@ -9,6 +9,7 @@
 class UStaticMeshComponent;
 class UMaterialInstanceDynamic;
 class UStateTree;
+class UAnimMontage;
 class AVXEnemyBase;
 
 /** 적이 다른 적을 소환했을 때 (웨이브 매니저가 클리어 조건에 포함시킨다) */
@@ -41,8 +42,11 @@ protected:
 	/** 살아 있는 플레이어 캐릭터. 없으면 nullptr */
 	AVXCharacterBase* FindLivePlayer() const;
 
-	/** 몸 색상을 바꾼다 (예고 연출 등). 복셀 에셋 확정 전 임시 표현 */
+	/** 몸 색상을 바꾼다 (예고 연출 등). 임시 큐브 메시를 쓸 때만 동작한다 */
 	void SetBodyColor(const FLinearColor& Color);
+
+	/** 블루프린트에서 스켈레탈 메시를 지정했는지 (임시 큐브 대신 실제 캐릭터를 쓰는지) */
+	bool HasSkeletalMesh() const;
 
 	/** 임시 메시 색상 (복셀 에셋 확정 전) */
 	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Visual")
@@ -54,6 +58,13 @@ protected:
 	/** StateTree 에셋 경로 (자식 클래스 생성자에서 지정) */
 	UPROPERTY(EditDefaultsOnly, Category = "Voxel|AI")
 	TSoftObjectPtr<UStateTree> StateTreeAsset;
+
+	/**
+	 * 사망 애니메이션. 지정하면 사망 시 재생하고, 끝날 때까지 시체를 남긴다.
+	 * 블루프린트에서 스켈레탈 메시(Mesh)를 지정하면 임시 큐브(BodyMesh)는 자동으로 숨겨진다.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Visual")
+	TObjectPtr<UAnimMontage> DeathMontage;
 
 	/** 사망 후 제거까지 시간 (초) */
 	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Enemy")
