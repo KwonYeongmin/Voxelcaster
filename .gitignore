@@ -1,0 +1,56 @@
+# ---- Unreal Engine 5 ----
+# 빌드/캐시 (재생성 가능)
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/*
+!Build/**/*.png
+!Build/**/*.ico
+
+# 플러그인 빌드 산출물
+Plugins/**/Binaries/
+Plugins/**/Intermediate/
+
+# 생성되는 IDE 프로젝트 파일 (.uproject에서 재생성)
+.vs/
+.idea/
+.vscode/
+*.sln
+*.slnx
+*.suo
+*.sdf
+*.opensdf
+*.opendb
+*.VC.db
+*.VC.opendb
+*.xcodeproj
+*.xcworkspace
+*.code-workspace
+
+# 컴파일 산출물
+*.pdb
+*.obj
+*.exe
+*.dll
+*.lib
+*.exp
+*.ilk
+*.a
+*.o
+*.dylib
+*.so
+
+# UE 자동 생성/임시 파일
+*.tmp
+*.log
+*.dmp
+*.autosave
+*.bak
+*_BuiltData.uasset
+# 대용량 에셋은 필요 시 Git LFS로 전환 (.gitattributes)
+
+# ---- OS ----
+Thumbs.db
+Desktop.ini
+.DS_Store
