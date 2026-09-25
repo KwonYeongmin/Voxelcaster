@@ -1,0 +1,102 @@
+[
+ {
+  "Name": "Wave1",
+  "Index": 1,
+  "Spawns": [
+   {
+    "EnemyClass": "/Script/Voxelcaster.VXRunner",
+    "StartTime": 0,
+    "Interval": 4,
+    "CountPerSpawn": 2,
+    "TotalCount": 12
+   }
+  ]
+ },
+ {
+  "Name": "Wave2",
+  "Index": 2,
+  "Spawns": [
+   {
+    "EnemyClass": "/Script/Voxelcaster.VXRunner",
+    "StartTime": 0,
+    "Interval": 4,
+    "CountPerSpawn": 2,
+    "TotalCount": 16
+   },
+   {
+    "EnemyClass": "/Script/Voxelcaster.VXShooter",
+    "StartTime": 10,
+    "Interval": 10,
+    "CountPerSpawn": 1,
+    "TotalCount": 4
+   }
+  ]
+ },
+ {
+  "Name": "Wave3",
+  "Index": 3,
+  "Spawns": [
+   {
+    "EnemyClass": "/Script/Voxelcaster.VXRunner",
+    "StartTime": 0,
+    "Interval": 4,
+    "CountPerSpawn": 2,
+    "TotalCount": 20
+   },
+   {
+    "EnemyClass": "/Script/Voxelcaster.VXShooter",
+    "StartTime": 8,
+    "Interval": 8,
+    "CountPerSpawn": 1,
+    "TotalCount": 8
+   }
+  ]
+ },
+ {
+  "Name": "Wave4",
+  "Index": 4,
+  "Spawns": [
+   {
+    "EnemyClass": "/Script/Voxelcaster.VXRunner",
+    "StartTime": 0,
+    "Interval": 3,
+    "CountPerSpawn": 2,
+    "TotalCount": 28
+   },
+   {
+    "EnemyClass": "/Script/Voxelcaster.VXShooter",
+    "StartTime": 6,
+    "Interval": 6,
+    "CountPerSpawn": 1,
+    "TotalCount": 12
+   }
+  ]
+ },
+ {
+  "Name": "Wave5",
+  "Index": 5,
+  "Spawns": [
+   {
+    "EnemyClass": "/Script/Voxelcaster.VXRunner",
+    "StartTime": 0,
+    "Interval": 3,
+    "CountPerSpawn": 2,
+    "TotalCount": 30
+   },
+   {
+    "EnemyClass": "/Script/Voxelcaster.VXShooter",
+    "StartTime": 6,
+    "Interval": 8,
+    "CountPerSpawn": 1,
+    "TotalCount": 10
+   },
+   {
+    "EnemyClass": "/Script/Voxelcaster.VXElite",
+    "StartTime": 45,
+    "Interval": 0,
+    "CountPerSpawn": 1,
+    "TotalCount": 1
+   }
+  ]
+ }
+]

@@ -1,0 +1,27 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "NativeGameplayTags.h"
+
+/** 프로젝트 공용 네이티브 게임플레이 태그. CDO 생성자에서는 쓰지 말고 런타임 코드에서만 사용한다. */
+namespace VoxelTags
+{
+	// 입력 (InputAction -> Ability 연결용)
+	VOXELCASTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_Skill1);
+	VOXELCASTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_Skill2);
+	VOXELCASTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_Skill3);
+	VOXELCASTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_Dash);
+
+	// 상태
+	VOXELCASTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Dead);
+	VOXELCASTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Dashing);
+	VOXELCASTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(State_Invincible);
+
+	// 쿨다운
+	VOXELCASTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Cooldown_Dash);
+	VOXELCASTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Cooldown_MagicBolt);
+	VOXELCASTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Cooldown_Nova);
+	VOXELCASTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Cooldown_BladeSweep);
+}

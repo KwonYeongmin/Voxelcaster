@@ -7,17 +7,17 @@ public class Voxelcaster : ModuleRules
 	public Voxelcaster(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+
+		// 하위 폴더(GAS/, Character/ 등) 헤더를 "GAS/Foo.h" 형태로 포함하기 위해 모듈 루트를 추가한다.
+		PublicIncludePaths.Add(ModuleDirectory);
+
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
+			"GameplayAbilities", "GameplayTags", "GameplayTasks",
+			"CommonUI", "CommonInput", "UMG", "Slate", "SlateCore", "AIModule", "StateTreeModule", "GameplayStateTreeModule"
+		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
-
-		// Uncomment if you are using Slate UI
-		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
-		
-		// Uncomment if you are using online features
-		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
-
-		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
 	}
 }
