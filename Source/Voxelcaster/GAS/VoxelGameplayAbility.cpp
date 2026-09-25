@@ -58,6 +58,23 @@ UGameplayEffect* UVoxelGameplayAbility::GetCooldownGameplayEffect() const
 	return CooldownEffect;
 }
 
+void UVoxelGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo) const
+{
+	ApplyRuntimeEffectToOwner(Handle, ActorInfo, GetCooldownGameplayEffect());
+}
+
+void UVoxelGameplayAbility::ApplyRuntimeEffectToOwner(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const UGameplayEffect* Effect) const
+{
+	UAbilitySystemComponent* ASC = ActorInfo ? ActorInfo->AbilitySystemComponent.Get() : nullptr;
+	if (nullptr == ASC || nullptr == Effect)
+	{
+		return;
+	}
+
+	ASC->ApplyGameplayEffectToSelf(Effect, GetAbilityLevel(Handle, ActorInfo), MakeEffectContext(Handle, ActorInfo));
+}
+
 const FGameplayTagContainer* UVoxelGameplayAbility::GetCooldownTags() const
 {
 	const FGameplayTag CooldownTag = GetCooldownTag();

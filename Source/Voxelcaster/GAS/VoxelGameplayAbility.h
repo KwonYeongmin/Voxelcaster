@@ -28,10 +28,20 @@ public:
 	virtual UGameplayEffect* GetCooldownGameplayEffect() const override;
 	virtual const FGameplayTagContainer* GetCooldownTags() const override;
 
+	/**
+	 * 코드로 만든 쿨다운 GE를 그대로 적용한다.
+	 * 기본 구현은 GE의 클래스(CDO)로 스펙을 만들기 때문에, 런타임에 만든 GE 객체의 설정(시간·태그)이 사라진다.
+	 */
+	virtual void ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+		const FGameplayAbilityActivationInfo ActivationInfo) const override;
+
 	/** 현재 적용되는 쿨다운(초). 가속 모디파이어 등이 재정의한다. */
 	virtual float GetEffectiveCooldown() const { return CooldownDuration; }
 
 protected:
+	/** 런타임에 만든 GE 객체를 소유자에게 적용한다. (ApplyGameplayEffectToOwner는 GE 클래스의 CDO를 쓰므로 쓰지 않는다) */
+	void ApplyRuntimeEffectToOwner(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const UGameplayEffect* Effect) const;
+
 	/** 이 어빌리티의 쿨다운 태그. 없으면 쿨다운을 쓰지 않는다. */
 	virtual FGameplayTag GetCooldownTag() const { return FGameplayTag(); }
 

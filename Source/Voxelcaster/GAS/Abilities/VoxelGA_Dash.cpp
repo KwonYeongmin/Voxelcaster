@@ -46,8 +46,11 @@ void UVoxelGA_Dash::ActivateAbility(const FGameplayAbilitySpecHandle Handle, con
 	FGameplayTagContainer StateTags;
 	StateTags.AddTag(VoxelTags::State_Dashing);
 	StateTags.AddTag(VoxelTags::State_Invincible);
-	UGameplayEffect* StateEffect = VoxelEffects::MakeTagDurationEffect(this, TEXT("GE_DashState"), StateTags, InvincibleTime);
-	ApplyGameplayEffectToOwner(Handle, ActorInfo, ActivationInfo, StateEffect, 1.f);
+	if (nullptr == DashStateEffect)
+	{
+		DashStateEffect = VoxelEffects::MakeTagDurationEffect(this, TEXT("GE_DashState"), StateTags, InvincibleTime);
+	}
+	ApplyRuntimeEffectToOwner(Handle, ActorInfo, DashStateEffect);
 
 	const FVector Direction = Character->GetDashDirection();
 	const float Strength = Distance / FMath::Max(Duration, KINDA_SMALL_NUMBER);
