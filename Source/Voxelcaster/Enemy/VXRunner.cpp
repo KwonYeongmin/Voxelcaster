@@ -15,6 +15,10 @@ AVXRunner::AVXRunner()
 	DefaultMaxHealth = 40.f;
 	DefaultMoveSpeed = 500.f;
 	BodyColor = FLinearColor(0.9f, 0.15f, 0.1f);
+
+	// 러너는 떼 지어 몰려온다 (추적보다 약하게 둬야 플레이어를 놓치지 않는다)
+	AlignmentWeight = 0.35f;
+	CohesionWeight = 0.25f;
 }
 
 void AVXRunner::ApplyEnemyStats(const FVXEnemyRow& Row)

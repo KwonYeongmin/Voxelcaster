@@ -13,6 +13,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "UI/VXHealthBarWidget.h"
 #include "Voxelcaster.h"
+#include "DrawDebugHelpers.h"
+#include "HAL/IConsoleManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/ConstructorHelpers.h"
@@ -46,6 +48,13 @@ AVXEnemyBase::AVXEnemyBase()
 	}
 }
 
+namespace
+{
+	TAutoConsoleVariable<int32> CVarDebugFlock(
+		TEXT("VX.Debug.Flock"), 0,
+		TEXT("1: 적 머리 위에 군집 힘을 그린다 (빨강 분리, 파랑 정렬, 초록 결합)"));
+}
+
 bool AVXEnemyBase::bEasyMode = false;
 TArray<TWeakObjectPtr<AVXEnemyBase>> AVXEnemyBase::AliveEnemies;
 
@@ -72,6 +81,24 @@ void AVXEnemyBase::ApplyEnemyStats(const FVXEnemyRow& Row)
 {
 	DefaultMaxHealth = Row.MaxHealth;
 	DefaultMoveSpeed = Row.MoveSpeed;
+
+	// 군집: 음수(열 없음)면 코드 기본값 유지
+	if (Row.FlockRadius >= 0.f)
+	{
+		FlockRadius = Row.FlockRadius;
+	}
+	if (Row.SeparationWeight >= 0.f)
+	{
+		SeparationWeight = Row.SeparationWeight;
+	}
+	if (Row.AlignmentWeight >= 0.f)
+	{
+		AlignmentWeight = Row.AlignmentWeight;
+	}
+	if (Row.CohesionWeight >= 0.f)
+	{
+		CohesionWeight = Row.CohesionWeight;
+	}
 }
 
 void AVXEnemyBase::BeginPlay()
@@ -111,17 +138,23 @@ void AVXEnemyBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void AVXEnemyBase::ApplySeparation()
+void AVXEnemyBase::ApplyFlocking()
 {
-	if (SeparationWeight <= 0.f)
+	const bool bUseFlock = (AlignmentWeight > 0.f || CohesionWeight > 0.f) && FlockRadius > 0.f;
+	if (SeparationWeight <= 0.f && false == bUseFlock)
 	{
 		return;
 	}
 
-	// 가까운 적에게서 멀어지는 방향의 합 (가까울수록 강하게). 적이 최대 30마리 정도라 전체를 훑어도 가볍다.
+	// 이웃 찾기: 살아 있는 적 목록 전체를 훑는다. (필드 최대 30마리라 가볍다)
 	const FVector MyLocation = GetActorLocation();
-	const float RadiusSq = SeparationRadius * SeparationRadius;
-	FVector Push = FVector::ZeroVector;
+	const float SeparationRadiusSq = SeparationRadius * SeparationRadius;
+	const float FlockRadiusSq = FlockRadius * FlockRadius;
+
+	FVector Separation = FVector::ZeroVector;
+	FVector HeadingSum = FVector::ZeroVector;
+	FVector CenterSum = FVector::ZeroVector;
+	int32 FlockCount = 0;
 
 	for (const TWeakObjectPtr<AVXEnemyBase>& Entry : AliveEnemies)
 	{
@@ -131,22 +164,66 @@ void AVXEnemyBase::ApplySeparation()
 			continue;
 		}
 
-		const FVector Away = FVector(MyLocation.X - Other->GetActorLocation().X, MyLocation.Y - Other->GetActorLocation().Y, 0.f);
+		const FVector OtherLocation = Other->GetActorLocation();
+		const FVector Away(MyLocation.X - OtherLocation.X, MyLocation.Y - OtherLocation.Y, 0.f);
 		const float DistSq = Away.SizeSquared();
-		if (DistSq >= RadiusSq)
+
+		// 분리: 종류와 상관없이 가까울수록 강하게. 완전히 겹치면 무작위 방향으로 떼어 낸다.
+		if (DistSq < SeparationRadiusSq)
 		{
-			continue;
+			const FVector Direction = DistSq > KINDA_SMALL_NUMBER ? Away.GetSafeNormal()
+				: FVector(FMath::FRandRange(-1.f, 1.f), FMath::FRandRange(-1.f, 1.f), 0.f).GetSafeNormal();
+			Separation += Direction * (1.f - FMath::Sqrt(DistSq) / SeparationRadius);
 		}
 
-		// 완전히 겹쳐 있으면 무작위 방향으로 떼어 낸다
-		const FVector Direction = DistSq > KINDA_SMALL_NUMBER ? Away.GetSafeNormal() : FVector(FMath::FRandRange(-1.f, 1.f), FMath::FRandRange(-1.f, 1.f), 0.f).GetSafeNormal();
-		Push += Direction * (1.f - FMath::Sqrt(DistSq) / SeparationRadius);
+		// 정렬·결합: 같은 종류(DT_Enemies 행)끼리만 무리 짓는다.
+		if (bUseFlock && DistSq < FlockRadiusSq && Other->StatRowName == StatRowName)
+		{
+			HeadingSum += Other->GetVelocity().GetSafeNormal2D();
+			CenterSum += OtherLocation;
+			++FlockCount;
+		}
 	}
 
-	if (false == Push.IsNearlyZero())
+	const FVector SeparationForce = Separation.GetClampedToMaxSize(1.f) * SeparationWeight;
+	FVector AlignmentForce = FVector::ZeroVector;
+	FVector CohesionForce = FVector::ZeroVector;
+
+	if (FlockCount > 0)
 	{
-		AddMovementInput(Push.GetClampedToMaxSize(1.f), SeparationWeight);
+		// 플레이어 가까이에서는 무리를 풀어 둘러싸게 한다.
+		float FlockScale = 1.f;
+		if (const AVXCharacterBase* Player = FindLivePlayer())
+		{
+			const float DistToPlayer = FVector::Dist2D(MyLocation, Player->GetActorLocation());
+			FlockScale = FMath::GetMappedRangeValueClamped(FVector2D(FlockReleaseDistance, FlockReleaseDistance * 2.f), FVector2D(0.f, 1.f), DistToPlayer);
+		}
+
+		AlignmentForce = HeadingSum.GetSafeNormal2D() * AlignmentWeight * FlockScale;
+
+		// 결합: 무리 중심까지 멀수록 강하게 (반경 끝에서 최대)
+		const FVector ToCenter = CenterSum / FlockCount - MyLocation;
+		const float CenterPull = FMath::Min(ToCenter.Size2D() / FlockRadius, 1.f);
+		CohesionForce = ToCenter.GetSafeNormal2D() * CenterPull * CohesionWeight * FlockScale;
 	}
+
+	// 추적 입력(크기 1)과 합쳐진 뒤 이동 컴포넌트가 크기 1로 자른다 → 방향이 섞인다.
+	const FVector Steer = SeparationForce + AlignmentForce + CohesionForce;
+	if (false == Steer.IsNearlyZero())
+	{
+		AddMovementInput(Steer, 1.f);
+	}
+
+#if ENABLE_DRAW_DEBUG
+	if (CVarDebugFlock.GetValueOnGameThread() > 0)
+	{
+		const FVector Origin = MyLocation + FVector(0.f, 0.f, 120.f);
+		const float Length = 150.f;
+		DrawDebugLine(GetWorld(), Origin, Origin + SeparationForce * Length, FColor::Red, false, 0.f, 0, 3.f);
+		DrawDebugLine(GetWorld(), Origin, Origin + AlignmentForce * Length, FColor::Blue, false, 0.f, 0, 3.f);
+		DrawDebugLine(GetWorld(), Origin, Origin + CohesionForce * Length, FColor::Green, false, 0.f, 0, 3.f);
+	}
+#endif
 }
 
 USceneComponent* AVXEnemyBase::GetVisualMesh() const
@@ -177,7 +254,7 @@ void AVXEnemyBase::Tick(float DeltaSeconds)
 
 	if (false == IsDead())
 	{
-		ApplySeparation();
+		ApplyFlocking();
 	}
 
 	USceneComponent* Visual = GetVisualMesh();

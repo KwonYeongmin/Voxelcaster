@@ -64,13 +64,34 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void HandleDeath() override;
 
-	/** 적끼리 밀어내는 반경 (cm). 이 거리 안의 다른 적에게서 멀어지는 방향을 이동에 섞는다 */
-	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Enemy")
+	// ---- 군집 이동 (Boids: 분리·정렬·결합). 매 틱 이동 입력에 더해진다. 가중치는 DT_Enemies에서 덮어쓴다 ----
+
+	/** 분리 반경 (cm). 이 거리 안의 다른 적(종류 무관)에게서 멀어진다 */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Flock")
 	float SeparationRadius = 140.f;
 
-	/** 밀어내는 힘 (이동 입력 비중, 0이면 끔) */
-	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Enemy")
+	/** 분리 힘 (0이면 끔) */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Flock")
 	float SeparationWeight = 0.8f;
+
+	/** 이웃 거리 (cm). 이 안의 같은 종류 적과 정렬·결합한다 */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Flock")
+	float FlockRadius = 400.f;
+
+	/** 정렬 힘: 이웃의 평균 진행 방향 (0이면 끔) */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Flock")
+	float AlignmentWeight = 0.f;
+
+	/** 결합 힘: 이웃의 평균 위치 (0이면 끔) */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Flock")
+	float CohesionWeight = 0.f;
+
+	/**
+	 * 플레이어와 이 거리(cm) 안이면 정렬·결합을 끈다. 두 배 거리부터 서서히 약해진다.
+	 * 가까이 와서는 무리를 풀고 플레이어를 둘러싸게 한다. (분리는 계속 동작)
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Flock")
+	float FlockReleaseDistance = 350.f;
 
 	/**
 	 * DT_Enemies의 행을 능력치에 적용한다. 자식 클래스는 공격 관련 값을 덧붙여 적용한다.
@@ -141,6 +162,7 @@ private:
 	/** 살아 있는 적 목록 (겹침 방지 계산용). 월드가 여러 개(PIE)여도 같은 월드끼리만 계산한다 */
 	static TArray<TWeakObjectPtr<AVXEnemyBase>> AliveEnemies;
 
-	void ApplySeparation();
+	/** 군집 조향: 분리 + 정렬 + 결합을 이동 입력에 더한다 */
+	void ApplyFlocking();
 	float DeathWorldTime = -1.f;
 };

@@ -35,4 +35,22 @@ struct FVXEnemyRow : public FTableRowBase
 	/** 투사체 속도 (cm/s). 0이면 코드 기본값. 러너는 쓰지 않는다 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
 	float ProjectileSpeed = 0.f;
+
+	// ---- 군집 이동 (Boids). 음수면 코드 기본값 ----
+
+	/** 이웃으로 보는 거리 (cm): 정렬·결합 계산 범위 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flock")
+	float FlockRadius = -1.f;
+
+	/** 분리: 가까운 적(종류 무관)에게서 멀어지는 힘 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flock")
+	float SeparationWeight = -1.f;
+
+	/** 정렬: 같은 종류 이웃의 평균 진행 방향을 따르는 힘 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flock")
+	float AlignmentWeight = -1.f;
+
+	/** 결합: 같은 종류 이웃의 평균 위치로 모이는 힘 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flock")
+	float CohesionWeight = -1.f;
 };

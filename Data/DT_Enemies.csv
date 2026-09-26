@@ -1,4 +1,4 @@
-﻿"Name","MaxHealth","MoveSpeed","AttackDamage","AttackInterval","ProjectileSpeed"
-"Runner","40","500","10","0.8","0"
-"Shooter","60","250","8","1.5","800"
-"Elite","400","200","8","2.0","800"
+﻿"Name","MaxHealth","MoveSpeed","AttackDamage","AttackInterval","ProjectileSpeed","FlockRadius","SeparationWeight","AlignmentWeight","CohesionWeight"
+"Runner","40","500","10","0.8","0","400","0.8","0.35","0.25"
+"Shooter","60","250","8","1.5","800","400","0.8","0","0"
+"Elite","400","200","8","2.0","800","400","0.8","0","0"
