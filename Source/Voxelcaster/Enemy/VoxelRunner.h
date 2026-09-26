@@ -21,6 +21,8 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 protected:
+	virtual void ApplyEnemyStats(const FVXEnemyRow& Row) override;
+
 	/** 접촉 피해 */
 	UPROPERTY(EditDefaultsOnly, Category = "Runner")
 	float ContactDamage = 10.f;

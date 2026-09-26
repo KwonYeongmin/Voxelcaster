@@ -46,6 +46,20 @@ namespace
 		{ TEXT("UI.RewardHint"),  TEXT("좌우로 선택   ·   Enter / 클릭 / (A) 로 확정"),  TEXT("Left / Right to choose   ·   Enter / Click / (A) to confirm") },
 		{ TEXT("UI.BuildOf"),     TEXT("{0} 빌드:"),                                      TEXT("{0} build:") },
 		{ TEXT("UI.Build"),       TEXT("빌드"),                                           TEXT("BUILD") },
+
+		{ TEXT("UI.Wave"),        TEXT("웨이브 {0} / {1}"),   TEXT("WAVE {0} / {1}") },
+		{ TEXT("UI.Remaining"),   TEXT("남은 적 {0}"),        TEXT("Enemies {0}") },
+		{ TEXT("UI.Kills"),       TEXT("처치 {0}"),           TEXT("Kills {0}") },
+		{ TEXT("UI.Dash"),        TEXT("대시"),               TEXT("Dash") },
+		{ TEXT("UI.Paused"),      TEXT("일시정지"),           TEXT("PAUSED") },
+		{ TEXT("UI.Resume"),      TEXT("재개"),               TEXT("Resume") },
+		{ TEXT("UI.Restart"),     TEXT("재시작"),             TEXT("Restart") },
+		{ TEXT("UI.Quit"),        TEXT("종료"),               TEXT("Quit") },
+		{ TEXT("UI.Victory"),     TEXT("승리"),               TEXT("VICTORY") },
+		{ TEXT("UI.Defeat"),      TEXT("패배"),               TEXT("DEFEAT") },
+		{ TEXT("UI.ReachedWave"), TEXT("도달 웨이브 {0} / {1}"), TEXT("Reached wave {0} / {1}") },
+		{ TEXT("UI.PlayTime"),    TEXT("플레이 시간 {0}"),    TEXT("Play time {0}") },
+		{ TEXT("UI.FinalBuild"),  TEXT("최종 빌드"),          TEXT("FINAL BUILD") },
 	};
 
 	const UDataTable* LoadTable()

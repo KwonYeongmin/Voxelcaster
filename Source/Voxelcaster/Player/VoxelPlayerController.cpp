@@ -23,7 +23,16 @@
 #include "Cheat/VXCheatManager.h"
 #include "Modifier/VXModifierComponent.h"
 #include "Modifier/VXUpgradeSubsystem.h"
+#include "UI/VXHUDWidget.h"
+#include "UI/VXText.h"
+#include "UI/ViewModel/VXHudViewModel.h"
+#include "GameplayEffect.h"
+#include "UI/VXPauseWidget.h"
+#include "UI/VXResultWidget.h"
 #include "UI/VXRewardSelectWidget.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "TimerManager.h"
 #include "Wave/VoxelWaveManager.h"
 #include "Voxelcaster.h"
 
@@ -31,8 +40,30 @@ AVXPlayerController::AVXPlayerController()
 {
 	CheatClass = UVXCheatManager::StaticClass();
 
+	HUDWidgetClass = TSoftClassPtr<UVXHUDWidget>(FSoftObjectPath(TEXT("/Game/Voxelcaster/UI/WBP_HUD.WBP_HUD_C")));
+	RewardSelectWidgetClass = TSoftClassPtr<UVXRewardSelectWidget>(FSoftObjectPath(TEXT("/Game/Voxelcaster/UI/WBP_RewardSelect.WBP_RewardSelect_C")));
+	PauseWidgetClass = TSoftClassPtr<UVXPauseWidget>(FSoftObjectPath(TEXT("/Game/Voxelcaster/UI/WBP_Pause.WBP_Pause_C")));
+	ResultWidgetClass = TSoftClassPtr<UVXResultWidget>(FSoftObjectPath(TEXT("/Game/Voxelcaster/UI/WBP_Result.WBP_Result_C")));
+
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
+}
+
+namespace
+{
+	/** WBP 클래스가 있으면 그것을, 없으면 C++ 기본 화면 클래스를 쓴다 */
+	template<typename T>
+	TSubclassOf<T> ResolveWidgetClass(const TSoftClassPtr<T>& SoftClass)
+	{
+		if (false == SoftClass.IsNull())
+		{
+			if (UClass* Loaded = SoftClass.LoadSynchronous())
+			{
+				return Loaded;
+			}
+		}
+		return T::StaticClass();
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -54,6 +85,7 @@ void AVXPlayerController::CreateInputAssets()
 	Skill2Action = MakeAction(TEXT("IA_Skill2"), EInputActionValueType::Boolean);
 	Skill3Action = MakeAction(TEXT("IA_Skill3"), EInputActionValueType::Boolean);
 	DashAction = MakeAction(TEXT("IA_Dash"), EInputActionValueType::Boolean);
+	PauseAction = MakeAction(TEXT("IA_Pause"), EInputActionValueType::Boolean);
 
 	GameplayContext = NewObject<UInputMappingContext>(this, TEXT("IMC_Gameplay"));
 
@@ -102,6 +134,9 @@ void AVXPlayerController::CreateInputAssets()
 	GameplayContext->MapKey(Skill3Action, EKeys::Gamepad_RightShoulder);
 	GameplayContext->MapKey(DashAction, EKeys::SpaceBar);
 	GameplayContext->MapKey(DashAction, EKeys::Gamepad_FaceButton_Bottom);
+	// 일시정지: Esc / 패드 Menu(Options)
+	GameplayContext->MapKey(PauseAction, EKeys::Escape);
+	GameplayContext->MapKey(PauseAction, EKeys::Gamepad_Special_Right);
 }
 
 void AVXPlayerController::BeginPlay()
@@ -112,6 +147,119 @@ void AVXPlayerController::BeginPlay()
 	{
 		Upgrades->OnChoicesReady.AddUObject(this, &AVXPlayerController::HandleChoicesReady);
 	}
+
+	if (AVoxelGameMode* GameMode = GetWorld()->GetAuthGameMode<AVoxelGameMode>())
+	{
+		GameMode->GetWaveManager()->OnGameWon.AddUObject(this, &AVXPlayerController::HandleGameEnded, true);
+		GameMode->GetWaveManager()->OnGameLost.AddUObject(this, &AVXPlayerController::HandleGameEnded, false);
+	}
+
+	// 전투 HUD (CommonUI)
+	if (IsLocalController())
+	{
+		HudViewModel = NewObject<UVXHudViewModel>(this);
+		HUDWidget = CreateWidget<UVXHUDWidget>(this, ResolveWidgetClass(HUDWidgetClass));
+		if (HUDWidget)
+		{
+			HUDWidget->SetViewModel(HudViewModel);
+			HUDWidget->AddToViewport(0);
+		}
+	}
+}
+
+// ---------------------------------------------------------------------------
+// 메뉴 (일시정지·결과)
+// ---------------------------------------------------------------------------
+
+void AVXPlayerController::HandlePause(const FInputActionValue& Value)
+{
+	// 메뉴가 열려 있을 때는 메뉴가 입력을 받으므로 여기로 오지 않는다. (UI 전용 입력 모드)
+	const AVoxelGameMode* GameMode = GetWorld()->GetAuthGameMode<AVoxelGameMode>();
+	if (IsMenuOpen() || (GameMode && EVoxelWaveState::Finished == GameMode->GetWaveManager()->GetState()))
+	{
+		return;
+	}
+
+	OpenMenu(CreateWidget<UVXPauseWidget>(this, ResolveWidgetClass(PauseWidgetClass)));
+}
+
+void AVXPlayerController::OpenMenu(UCommonActivatableWidget* Menu)
+{
+	if (nullptr == Menu)
+	{
+		return;
+	}
+
+	CloseMenu();
+	CurrentMenu = Menu;
+	Menu->AddToViewport(50);
+	Menu->ActivateWidget();
+	SetPause(true);
+
+	SetInputMode(FInputModeUIOnly());
+	if (UWidget* Focus = Menu->GetDesiredFocusTarget())
+	{
+		Focus->SetFocus();
+	}
+}
+
+void AVXPlayerController::CloseMenu()
+{
+	if (nullptr == CurrentMenu)
+	{
+		return;
+	}
+
+	CurrentMenu->DeactivateWidget();
+	CurrentMenu->RemoveFromParent();
+	CurrentMenu = nullptr;
+
+	SetPause(false);
+	FInputModeGameOnly InputMode;
+	InputMode.SetConsumeCaptureMouseDown(false);
+	SetInputMode(InputMode);
+}
+
+void AVXPlayerController::RestartGame()
+{
+	SetPause(false);
+	UGameplayStatics::OpenLevel(this, FName(*UGameplayStatics::GetCurrentLevelName(this)));
+}
+
+void AVXPlayerController::QuitGame()
+{
+	UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+}
+
+void AVXPlayerController::HandleGameEnded(bool bVictory)
+{
+	// 사망 연출이 보이도록 잠시 뒤에 결과 화면을 연다.
+	FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &AVXPlayerController::ShowResult, bVictory);
+	GetWorldTimerManager().SetTimer(ResultTimer, Delegate, bVictory ? 0.5f : 1.f, false);
+}
+
+void AVXPlayerController::ShowResult(bool bVictory)
+{
+	UVXResultWidget* Result = CreateWidget<UVXResultWidget>(this, ResolveWidgetClass(ResultWidgetClass));
+	if (nullptr == Result)
+	{
+		return;
+	}
+
+	FVXRunResult Run;
+	Run.bVictory = bVictory;
+	if (const AVoxelGameMode* GameMode = GetWorld()->GetAuthGameMode<AVoxelGameMode>())
+	{
+		const UVXWaveManager* Waves = GameMode->GetWaveManager();
+		Run.ReachedWave = Waves->GetCurrentWave();
+		Run.TotalWaves = Waves->GetTotalWaves();
+		Run.Kills = Waves->GetKillCount();
+		Run.PlayTime = Waves->GetPlayTime();
+	}
+
+	const UVXModifierComponent* Modifiers = nullptr != GetPawn() ? GetPawn()->FindComponentByClass<UVXModifierComponent>() : nullptr;
+	Result->SetResult(Run, Modifiers);
+	OpenMenu(Result);
 }
 
 void AVXPlayerController::HandleChoicesReady(const TArray<FVXUpgradeCard>& Choices)
@@ -121,7 +269,7 @@ void AVXPlayerController::HandleChoicesReady(const TArray<FVXUpgradeCard>& Choic
 
 void AVXPlayerController::OpenRewardSelect(const TArray<FVXUpgradeCard>& Choices)
 {
-	UVXRewardSelectWidget* Widget = CreateWidget<UVXRewardSelectWidget>(this, UVXRewardSelectWidget::StaticClass());
+	UVXRewardSelectWidget* Widget = CreateWidget<UVXRewardSelectWidget>(this, ResolveWidgetClass(RewardSelectWidgetClass));
 	if (nullptr == Widget)
 	{
 		return;
@@ -184,6 +332,8 @@ void AVXPlayerController::BindInputActions()
 	BindAbility(Skill2Action, VoxelTags::Input_Skill2);
 	BindAbility(Skill3Action, VoxelTags::Input_Skill3);
 	BindAbility(DashAction, VoxelTags::Input_Dash);
+
+	EnhancedInput->BindAction(PauseAction, ETriggerEvent::Started, this, &AVXPlayerController::HandlePause);
 }
 
 // ---------------------------------------------------------------------------
@@ -349,6 +499,8 @@ void AVXPlayerController::PlayerTick(float DeltaTime)
 		ShowDebugInfo();
 	}
 
+	UpdateHudViewModel();
+
 	AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPawn());
 	if (nullptr == VoxelChar || VoxelChar->IsDead())
 	{
@@ -364,6 +516,100 @@ void AVXPlayerController::PlayerTick(float DeltaTime)
 	if (UVoxelAbilitySystemComponent* ASC = VoxelChar->GetVoxelAbilitySystemComponent())
 	{
 		ASC->ProcessHeldInputs();
+	}
+}
+
+void AVXPlayerController::UpdateHudViewModel()
+{
+	const AVXCharacterBase* VoxelPlayer = Cast<AVXCharacterBase>(GetPawn());
+	if (nullptr == HudViewModel || nullptr == VoxelPlayer)
+	{
+		return;
+	}
+
+	// ---- 체력
+	const float Health = VoxelPlayer->GetHealth();
+	const float MaxHealth = VoxelPlayer->GetMaxHealth();
+	const float Ratio = MaxHealth > 0.f ? Health / MaxHealth : 0.f;
+	const UAbilitySystemComponent* ASC = VoxelPlayer->GetAbilitySystemComponent();
+
+	FString HealthString = FString::Printf(TEXT("HP %.0f / %.0f"), Health, MaxHealth);
+	if (ASC && ASC->HasMatchingGameplayTag(VoxelTags::State_God))
+	{
+		HealthString += TEXT("   [GOD]");
+	}
+	HudViewModel->SetHealthPercent(Ratio);
+	HudViewModel->SetbLowHealth(Ratio <= 0.3f);
+	HudViewModel->SetHealthText(FText::FromString(HealthString));
+
+	// ---- 웨이브
+	if (const AVoxelGameMode* GameMode = GetWorld()->GetAuthGameMode<AVoxelGameMode>())
+	{
+		const UVXWaveManager* Waves = GameMode->GetWaveManager();
+		HudViewModel->SetWaveText(FText::FromString(VXText::Format(TEXT("UI.Wave"), { Waves->GetCurrentWave(), Waves->GetTotalWaves() })));
+		HudViewModel->SetEnemiesText(FText::FromString(
+			VXText::Format(TEXT("UI.Remaining"), { Waves->GetRemainingEnemies() }) + TEXT("     ") +
+			VXText::Format(TEXT("UI.Kills"), { Waves->GetKillCount() })));
+	}
+
+	// ---- 스킬 슬롯 (스킬 3 + 대시)
+	if (nullptr == ASC)
+	{
+		return;
+	}
+
+	struct FSlotDef { UVXSkillSlotViewModel* ViewModel; FGameplayTag Tag; const TCHAR* NameKey; const TCHAR* Kbm; const TCHAR* Pad; };
+	const FSlotDef Defs[] =
+	{
+		{ HudViewModel->GetSkillSlot0(), VoxelTags::Cooldown_MagicBolt,  TEXT("Skill.MagicBolt"),  TEXT("LMB"),   TEXT("RT") },
+		{ HudViewModel->GetSkillSlot1(), VoxelTags::Cooldown_Nova,       TEXT("Skill.Nova"),       TEXT("RMB"),   TEXT("LT") },
+		{ HudViewModel->GetSkillSlot2(), VoxelTags::Cooldown_BladeSweep, TEXT("Skill.BladeSweep"), TEXT("Q"),     TEXT("RB") },
+		{ HudViewModel->GetSkillSlot3(), VoxelTags::Cooldown_Dash,       TEXT("UI.Dash"),          TEXT("Space"), TEXT("A") },
+	};
+
+	const bool bGamepad = EVoxelInputDevice::Gamepad == InputDevice;
+	const UVXModifierComponent* Modifiers = VoxelPlayer->FindComponentByClass<UVXModifierComponent>();
+
+	for (const FSlotDef& Def : Defs)
+	{
+		UVXSkillSlotViewModel* Slot = Def.ViewModel;
+		if (nullptr == Slot)
+		{
+			continue;
+		}
+
+		// 입력 키는 마지막으로 쓴 장치에 맞춘다 (DES-CTRL-001)
+		Slot->SetKeyText(FText::FromString(bGamepad ? Def.Pad : Def.Kbm));
+		Slot->SetSkillName(FText::FromString(VXText::Get(Def.NameKey)));
+
+		// 쿨다운: 이 태그를 부여하는 활성 GE의 남은 시간
+		float Remaining = 0.f;
+		float Duration = 0.f;
+		const FGameplayEffectQuery Query = FGameplayEffectQuery::MakeQuery_MatchAnyOwningTags(FGameplayTagContainer(Def.Tag));
+		for (const TPair<float, float>& Pair : ASC->GetActiveEffectsTimeRemainingAndDuration(Query))
+		{
+			if (Pair.Key > Remaining)
+			{
+				Remaining = Pair.Key;
+				Duration = Pair.Value;
+			}
+		}
+
+		const bool bReady = Remaining <= 0.f;
+		Slot->SetbReady(bReady);
+		Slot->SetCooldownPercent(bReady || Duration <= 0.f ? 1.f : 1.f - Remaining / Duration);
+		// 0.1초 단위로 바뀌므로 알림도 그때만 간다
+		Slot->SetCooldownText(bReady ? FText::GetEmpty() : FText::FromString(FString::Printf(TEXT("%.1f"), Remaining)));
+
+		FString ModText;
+		if (const FVXModifierSlots* Slots = nullptr != Modifiers ? Modifiers->FindSlots(Def.Tag) : nullptr)
+		{
+			for (const EVXModifierType Type : Slots->Slots)
+			{
+				ModText += FString::Printf(TEXT("[%s]"), *UVXModifierComponent::GetModifierDisplayName(Type));
+			}
+		}
+		Slot->SetModifiersText(FText::FromString(ModText));
 	}
 }
 

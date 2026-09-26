@@ -135,7 +135,7 @@ protected:
 
 	/** 화면 좌측 상단에 현재 빌드를 표시한다 (HUD가 생기면 끈다) */
 	UPROPERTY(EditAnywhere, Category = "Voxel|Debug")
-	bool bShowDebugInfo = true;
+	bool bShowDebugInfo = false;
 
 private:
 	void HandleSkillHit(const FVoxelHitContext& Context);

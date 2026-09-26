@@ -3,6 +3,7 @@
 #include "Enemy/VoxelShooter.h"
 #include "Animation/AnimMontage.h"
 #include "Combat/VoxelProjectile.h"
+#include "Data/VXEnemyData.h"
 #include "Engine/World.h"
 #include "GameplayTagContainer.h"
 #include "StateTree.h"
@@ -11,6 +12,7 @@ AVXShooter::AVXShooter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	StatRowName = TEXT("Shooter");
 	DefaultMaxHealth = 60.f;
 	DefaultMoveSpeed = 250.f;
 	BodyColor = FLinearColor(0.55f, 0.2f, 0.9f);
@@ -25,6 +27,17 @@ void AVXShooter::BeginPlay()
 
 	// 여러 슈터가 동시에 쏘지 않도록 첫 발사 시점을 흩는다.
 	FireTimer = FMath::FRandRange(0.f, FireInterval);
+}
+
+void AVXShooter::ApplyEnemyStats(const FVXEnemyRow& Row)
+{
+	Super::ApplyEnemyStats(Row);
+	ProjectileDamage = Row.AttackDamage;
+	FireInterval = Row.AttackInterval;
+	if (Row.ProjectileSpeed > 0.f)
+	{
+		ProjectileSpeed = Row.ProjectileSpeed;
+	}
 }
 
 void AVXShooter::Tick(float DeltaSeconds)

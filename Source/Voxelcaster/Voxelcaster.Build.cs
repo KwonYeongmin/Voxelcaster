@@ -15,7 +15,7 @@ public class Voxelcaster : ModuleRules
 		{
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
 			"GameplayAbilities", "GameplayTags", "GameplayTasks",
-			"CommonUI", "CommonInput", "UMG", "Slate", "SlateCore", "AIModule", "StateTreeModule", "GameplayStateTreeModule"
+			"CommonUI", "CommonInput", "UMG", "Slate", "SlateCore", "AIModule", "StateTreeModule", "GameplayStateTreeModule", "ModelViewViewModel", "FieldNotification"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

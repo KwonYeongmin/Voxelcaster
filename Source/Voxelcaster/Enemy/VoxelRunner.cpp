@@ -4,15 +4,24 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "GAS/VoxelAbilitySystemComponent.h"
+#include "Data/VXEnemyData.h"
 #include "GAS/VoxelGameplayEffects.h"
 
 AVXRunner::AVXRunner()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	StatRowName = TEXT("Runner");
 	DefaultMaxHealth = 40.f;
 	DefaultMoveSpeed = 500.f;
 	BodyColor = FLinearColor(0.9f, 0.15f, 0.1f);
+}
+
+void AVXRunner::ApplyEnemyStats(const FVXEnemyRow& Row)
+{
+	Super::ApplyEnemyStats(Row);
+	ContactDamage = Row.AttackDamage;
+	ContactCooldown = Row.AttackInterval;
 }
 
 void AVXRunner::Tick(float DeltaSeconds)

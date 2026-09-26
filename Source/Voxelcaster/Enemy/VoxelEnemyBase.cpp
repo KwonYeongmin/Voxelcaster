@@ -7,7 +7,9 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Data/VXEnemyData.h"
 #include "UI/VXHealthBarWidget.h"
+#include "Voxelcaster.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/ConstructorHelpers.h"
@@ -36,6 +38,51 @@ AVXEnemyBase::AVXEnemyBase()
 	{
 		BodyMesh->SetStaticMesh(CubeMesh.Object);
 	}
+}
+
+namespace
+{
+	/** DT_Enemies를 한 번만 읽는다. 없으면 nullptr (코드 기본값 사용) */
+	const UDataTable* LoadEnemyTable()
+	{
+		static TWeakObjectPtr<const UDataTable> Cached;
+		static bool bTried = false;
+		if (false == bTried)
+		{
+			bTried = true;
+			const TSoftObjectPtr<UDataTable> Soft{ FSoftObjectPath(TEXT("/Game/Voxelcaster/Data/DT_Enemies.DT_Enemies")) };
+			const UDataTable* Table = Soft.LoadSynchronous();
+			if (Table && Table->GetRowStruct() == FVXEnemyRow::StaticStruct())
+			{
+				Cached = Table;
+			}
+			else
+			{
+				UE_LOG(LogVoxel, Log, TEXT("DT_Enemies not found or wrong row struct: using enemy defaults in code"));
+			}
+		}
+		return Cached.Get();
+	}
+}
+
+void AVXEnemyBase::PostInitializeComponents()
+{
+	// 부모(AVXCharacterBase)가 DefaultMaxHealth·DefaultMoveSpeed로 어트리뷰트를 초기화하므로 그 전에 적용한다.
+	if (const UDataTable* Table = LoadEnemyTable())
+	{
+		if (const FVXEnemyRow* Row = Table->FindRow<FVXEnemyRow>(StatRowName, TEXT("VXEnemy"), false))
+		{
+			ApplyEnemyStats(*Row);
+		}
+	}
+
+	Super::PostInitializeComponents();
+}
+
+void AVXEnemyBase::ApplyEnemyStats(const FVXEnemyRow& Row)
+{
+	DefaultMaxHealth = Row.MaxHealth;
+	DefaultMoveSpeed = Row.MoveSpeed;
 }
 
 void AVXEnemyBase::BeginPlay()

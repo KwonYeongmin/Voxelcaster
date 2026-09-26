@@ -62,6 +62,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void ApplyEnemyStats(const FVXEnemyRow& Row) override;
 
 	/** 이 거리보다 멀면 접근 (cm) */
 	UPROPERTY(EditDefaultsOnly, Category = "Shooter")

@@ -216,6 +216,11 @@ void UVXWaveManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	BindPlayerIfNeeded();
 	CompactAliveList();
 
+	if (CurrentWave > 0 && EVoxelWaveState::Finished != State && EVoxelWaveState::Idle != State)
+	{
+		PlayTime += DeltaTime;
+	}
+
 	if (AutoStartTimer >= 0.f)
 	{
 		AutoStartTimer -= DeltaTime;

@@ -11,6 +11,7 @@ class UMaterialInstanceDynamic;
 class UStateTree;
 class UAnimMontage;
 class UWidgetComponent;
+struct FVXEnemyRow;
 class AVXEnemyBase;
 
 /** 적이 다른 적을 소환했을 때 (웨이브 매니저가 클리어 조건에 포함시킨다) */
@@ -37,8 +38,19 @@ public:
 	bool IsDrivenByStateTree() const;
 
 protected:
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void HandleDeath() override;
+
+	/**
+	 * DT_Enemies의 행을 능력치에 적용한다. 자식 클래스는 공격 관련 값을 덧붙여 적용한다.
+	 * 체력·이동 속도는 어트리뷰트 초기화 전에 적용된다.
+	 */
+	virtual void ApplyEnemyStats(const FVXEnemyRow& Row);
+
+	/** DT_Enemies에서 찾을 행 이름 (Runner, Shooter, Elite) */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Enemy")
+	FName StatRowName;
 
 	/** 살아 있는 플레이어 캐릭터. 없으면 nullptr */
 	AVXCharacterBase* FindLivePlayer() const;

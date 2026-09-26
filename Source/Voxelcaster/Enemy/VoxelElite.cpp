@@ -10,6 +10,7 @@
 
 AVXElite::AVXElite()
 {
+	StatRowName = TEXT("Elite");
 	DefaultMaxHealth = 400.f;
 	DefaultMoveSpeed = 200.f;
 	BodyColor = FLinearColor(0.9f, 0.1f, 0.45f);

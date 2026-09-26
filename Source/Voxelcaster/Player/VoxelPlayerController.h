@@ -9,6 +9,12 @@
 
 class UInputAction;
 class UInputMappingContext;
+class UCommonActivatableWidget;
+class UVXHUDWidget;
+class UVXHudViewModel;
+class UVXPauseWidget;
+class UVXResultWidget;
+class UVXRewardSelectWidget;
 struct FInputActionValue;
 
 /** 마지막으로 입력이 들어온 장치. 게임패드는 Xbox·PlayStation 등 콘솔 컨트롤러를 모두 포함한다. */
@@ -39,6 +45,16 @@ public:
 	/** 보상 카드 추첨 결과를 받아 보상 선택 화면을 연다 (치트에서도 호출) */
 	void OpenRewardSelect(const TArray<struct FVXUpgradeCard>& Choices);
 
+	/** 메뉴 화면(일시정지·결과)을 띄운다: 게임 정지, UI 입력, 기본 포커스 */
+	void OpenMenu(UCommonActivatableWidget* Menu);
+	/** 열린 메뉴를 닫고 게임을 재개한다 */
+	void CloseMenu();
+	bool IsMenuOpen() const { return nullptr != CurrentMenu; }
+
+	/** 현재 레벨을 다시 연다 (웨이브·체력·빌드·처치 수 모두 초기화) */
+	void RestartGame();
+	void QuitGame();
+
 	EVoxelInputDevice GetInputDevice() const { return InputDevice; }
 
 	/** 입력 장치가 바뀔 때 (HUD 버튼 아이콘, 커서 표시 갱신용) */
@@ -60,6 +76,10 @@ private:
 	void HandleAimCompleted(const FInputActionValue& Value);
 	void HandleAbilityPressed(FGameplayTag InputTag);
 	void HandleAbilityReleased(FGameplayTag InputTag);
+	void HandlePause(const FInputActionValue& Value);
+	void HandleGameEnded(bool bVictory);
+	void ShowResult(bool bVictory);
+	void UpdateHudViewModel();
 
 	void SetInputDevice(EVoxelInputDevice NewDevice);
 	void HandleChoicesReady(const TArray<struct FVXUpgradeCard>& Choices);
@@ -82,10 +102,40 @@ private:
 	TObjectPtr<UInputAction> Skill3Action;
 	UPROPERTY()
 	TObjectPtr<UInputAction> DashAction;
+	UPROPERTY()
+	TObjectPtr<UInputAction> PauseAction;
+
+	/**
+	 * 화면 클래스. WBP를 만들면 여기로 연결된다 (기본 경로 /Game/Voxelcaster/UI/WBP_*).
+	 * WBP가 없으면 C++ 기본 화면을 쓴다.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|UI")
+	TSoftClassPtr<UVXHUDWidget> HUDWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|UI")
+	TSoftClassPtr<UVXRewardSelectWidget> RewardSelectWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|UI")
+	TSoftClassPtr<UVXPauseWidget> PauseWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|UI")
+	TSoftClassPtr<UVXResultWidget> ResultWidgetClass;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UVXHUDWidget> HUDWidget;
+
+	/** HUD 뷰모델. 매 프레임 게임 상태로 채운다 (바뀐 값만 WBP에 알려진다) */
+	UPROPERTY(Transient)
+	TObjectPtr<UVXHudViewModel> HudViewModel;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UCommonActivatableWidget> CurrentMenu;
+
+	FTimerHandle ResultTimer;
 
 	/** 화면 좌측 상단에 플레이어 HP를 표시한다 (HUD가 생기면 끈다) */
 	UPROPERTY(EditAnywhere, Category = "Voxel|Debug")
-	bool bShowDebugInfo = true;
+	bool bShowDebugInfo = false;
 
 	EVoxelInputDevice InputDevice = EVoxelInputDevice::KeyboardMouse;
 

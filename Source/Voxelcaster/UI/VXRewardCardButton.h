@@ -9,10 +9,13 @@
 
 class UBorder;
 class UTextBlock;
+class UVXRewardCardViewModel;
 
 /**
- * 보상 카드 버튼 (DES-UI-REWARD-001). 위젯 트리를 코드로 만든다. (에디터 에셋 없이 동작)
- * 포커스(게임패드)나 호버(마우스)되면 확대·강조된다.
+ * 보상 카드 버튼 (DES-UI-REWARD-001). WBP_RewardCard의 부모 클래스. CommonUI 버튼이다.
+ * - 값은 UVXRewardCardViewModel에 있다. WBP는 Viewmodels 패널에 VXRewardCardViewModel(Manual)을 추가해 연결한다.
+ *   강조 연출은 뷰모델의 bHighlighted에 바인딩한다.
+ * - WBP가 없으면 C++ 기본 위젯 트리를 만들고 직접 표시·강조한다.
  */
 UCLASS()
 class VOXELCASTER_API UVXRewardCardButton : public UCommonButtonBase
@@ -22,7 +25,8 @@ class VOXELCASTER_API UVXRewardCardButton : public UCommonButtonBase
 public:
 	virtual bool Initialize() override;
 
-	void SetCard(const FVXUpgradeCard& InCard, int32 InIndex);
+	/** 카드 내용을 뷰모델에 채우고 이 위젯에 연결한다 */
+	void SetCard(const FVXUpgradeCard& InCard, int32 InIndex, UVXRewardCardViewModel* InViewModel);
 	const FVXUpgradeCard& GetCard() const { return Card; }
 	int32 GetCardIndex() const { return CardIndex; }
 
@@ -30,6 +34,13 @@ public:
 	void SetHighlighted(bool bInHighlighted);
 
 private:
+	void BuildDefaultTree();
+
+	UPROPERTY(Transient)
+	TObjectPtr<UVXRewardCardViewModel> ViewModel;
+
+	bool bBuiltInCode = false;
+
 	UPROPERTY(Transient)
 	TObjectPtr<UBorder> CardBorder;
 

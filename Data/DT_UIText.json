@@ -98,5 +98,70 @@
   "Name": "UI.Build",
   "Ko": "빌드",
   "En": "BUILD"
+ },
+ {
+  "Name": "UI.Wave",
+  "Ko": "웨이브 {0} / {1}",
+  "En": "WAVE {0} / {1}"
+ },
+ {
+  "Name": "UI.Remaining",
+  "Ko": "남은 적 {0}",
+  "En": "Enemies {0}"
+ },
+ {
+  "Name": "UI.Kills",
+  "Ko": "처치 {0}",
+  "En": "Kills {0}"
+ },
+ {
+  "Name": "UI.Dash",
+  "Ko": "대시",
+  "En": "Dash"
+ },
+ {
+  "Name": "UI.Paused",
+  "Ko": "일시정지",
+  "En": "PAUSED"
+ },
+ {
+  "Name": "UI.Resume",
+  "Ko": "재개",
+  "En": "Resume"
+ },
+ {
+  "Name": "UI.Restart",
+  "Ko": "재시작",
+  "En": "Restart"
+ },
+ {
+  "Name": "UI.Quit",
+  "Ko": "종료",
+  "En": "Quit"
+ },
+ {
+  "Name": "UI.Victory",
+  "Ko": "승리",
+  "En": "VICTORY"
+ },
+ {
+  "Name": "UI.Defeat",
+  "Ko": "패배",
+  "En": "DEFEAT"
+ },
+ {
+  "Name": "UI.ReachedWave",
+  "Ko": "도달 웨이브 {0} / {1}",
+  "En": "Reached wave {0} / {1}"
+ },
+ {
+  "Name": "UI.PlayTime",
+  "Ko": "플레이 시간 {0}",
+  "En": "Play time {0}"
+ },
+ {
+  "Name": "UI.FinalBuild",
+  "Ko": "최종 빌드",
+  "En": "FINAL BUILD"
  }
 ]

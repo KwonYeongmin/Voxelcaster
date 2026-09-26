@@ -12,24 +12,10 @@
 #include "GameFramework/PlayerController.h"
 #include "Input/UIActionBindingHandle.h"
 #include "Modifier/VXModifierComponent.h"
-#include "Styling/CoreStyle.h"
 #include "UI/VXRewardCardButton.h"
 #include "UI/VXText.h"
-
-namespace
-{
-	UTextBlock* AddText(UWidgetTree* Tree, UVerticalBox* Parent, int32 Size, const FLinearColor& Color, const FMargin& Padding)
-	{
-		UTextBlock* Text = Tree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
-		Text->SetFont(FCoreStyle::GetDefaultFontStyle("Bold", Size));
-		Text->SetColorAndOpacity(FSlateColor(Color));
-		Text->SetJustification(ETextJustify::Center);
-		UVerticalBoxSlot* BoxSlot = Parent->AddChildToVerticalBox(Text);
-		BoxSlot->SetHorizontalAlignment(HAlign_Center);
-		BoxSlot->SetPadding(Padding);
-		return Text;
-	}
-}
+#include "UI/VXUIBuilder.h"
+#include "UI/ViewModel/VXRewardViewModel.h"
 
 bool UVXRewardSelectWidget::Initialize()
 {
@@ -37,27 +23,10 @@ bool UVXRewardSelectWidget::Initialize()
 	{
 		WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"), RF_Transient);
 	}
-
 	if (nullptr == WidgetTree->RootWidget)
 	{
-		// 화면 전체를 어둡게 덮는 배경
-		UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
-		Dim->SetBrushColor(FLinearColor(0.f, 0.f, 0.f, 0.7f));
-		Dim->SetHorizontalAlignment(HAlign_Center);
-		Dim->SetVerticalAlignment(VAlign_Center);
-		WidgetTree->RootWidget = Dim;
-
-		UVerticalBox* Box = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
-		Dim->AddChild(Box);
-
-		TitleText = AddText(WidgetTree, Box, 32, FLinearColor(1.f, 0.85f, 0.4f), FMargin(0, 0, 0, 32));
-
-		CardRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-		UVerticalBoxSlot* RowSlot = Box->AddChildToVerticalBox(CardRow);
-		RowSlot->SetHorizontalAlignment(HAlign_Center);
-
-		BuildText = AddText(WidgetTree, Box, 18, FLinearColor(0.7f, 0.9f, 1.f), FMargin(0, 40, 0, 8));
-		HintText = AddText(WidgetTree, Box, 16, FLinearColor(0.8f, 0.8f, 0.8f), FMargin(0, 8, 0, 0));
+		BuildDefaultTree();
+		bBuiltInCode = true;
 	}
 
 	// 뒤로가기 핸들러(bIsBackHandler)는 켜지 않는다. 켜면 CommonUI 뒤로가기 액션 데이터가 필요하다.
@@ -65,34 +34,92 @@ bool UVXRewardSelectWidget::Initialize()
 	return Super::Initialize();
 }
 
+void UVXRewardSelectWidget::BuildDefaultTree()
+{
+	UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
+	Dim->SetBrushColor(VXUI::Dim);
+	Dim->SetHorizontalAlignment(HAlign_Center);
+	Dim->SetVerticalAlignment(VAlign_Center);
+	WidgetTree->RootWidget = Dim;
+
+	UVerticalBox* Box = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
+	Dim->AddChild(Box);
+
+	const auto Add = [this, Box](int32 Size, const FLinearColor& Color, const FMargin& InPadding)
+	{
+		UTextBlock* Text = VXUI::MakeText(WidgetTree, Size, Color);
+		Text->SetJustification(ETextJustify::Center);
+		UVerticalBoxSlot* BoxSlot = Box->AddChildToVerticalBox(Text);
+		BoxSlot->SetHorizontalAlignment(HAlign_Center);
+		BoxSlot->SetPadding(InPadding);
+		return Text;
+	};
+
+	TitleText = Add(32, VXUI::Title, FMargin(0, 0, 0, 32));
+
+	CardRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+	Box->AddChildToVerticalBox(CardRow)->SetHorizontalAlignment(HAlign_Center);
+
+	BuildText = Add(18, VXUI::Accent, FMargin(0, 40, 0, 8));
+	HintText = Add(16, VXUI::Muted, FMargin(0, 8, 0, 0));
+}
+
 void UVXRewardSelectWidget::SetChoices(const TArray<FVXUpgradeCard>& InChoices, int32 WaveIndex)
 {
-	if (TitleText)
+	ViewModel = NewObject<UVXRewardViewModel>(this);
+	ViewModel->SetTitleText(FText::FromString(VXText::Format(TEXT("UI.RewardTitle"), { WaveIndex })));
+	ViewModel->SetHintText(FText::FromString(VXText::Get(TEXT("UI.RewardHint"))));
+	ViewModel->SetCardCount(InChoices.Num());
+	VXUI::SetViewModel(this, ViewModel);
+
+	if (bBuiltInCode)
 	{
-		TitleText->SetText(FText::FromString(VXText::Format(TEXT("UI.RewardTitle"), { WaveIndex })));
+		VXUI::SetText(TitleText, ViewModel->GetTitleText());
+		VXUI::SetText(HintText, ViewModel->GetHintText());
 	}
 
-	if (HintText)
-	{
-		HintText->SetText(FText::FromString(VXText::Get(TEXT("UI.RewardHint"))));
-	}
-
-	CardRow->ClearChildren();
+	// 카드 위젯 준비: WBP면 Card0~2, 기본 트리면 새로 만든다.
 	Cards.Reset();
-
-	for (int32 i = 0; i < InChoices.Num(); ++i)
+	if (bBuiltInCode)
 	{
-		UVXRewardCardButton* Card = CreateWidget<UVXRewardCardButton>(this, UVXRewardCardButton::StaticClass());
-		Card->SetCard(InChoices[i], i);
+		CardRow->ClearChildren();
+		for (int32 i = 0; i < InChoices.Num(); ++i)
+		{
+			UVXRewardCardButton* Card = CreateWidget<UVXRewardCardButton>(this, UVXRewardCardButton::StaticClass());
+			UHorizontalBoxSlot* CardSlot = CardRow->AddChildToHorizontalBox(Card);
+			CardSlot->SetPadding(FMargin(20.f, 0.f));
+			CardSlot->SetVerticalAlignment(VAlign_Center);
+			Cards.Add(Card);
+		}
+	}
+	else
+	{
+		UVXRewardCardButton* Bound[] = { Card0, Card1, Card2 };
+		for (int32 i = 0; i < UE_ARRAY_COUNT(Bound); ++i)
+		{
+			if (nullptr == Bound[i])
+			{
+				continue;
+			}
+			const bool bUsed = i < InChoices.Num();
+			Bound[i]->SetVisibility(bUsed ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+			if (bUsed)
+			{
+				Cards.Add(Bound[i]);
+			}
+		}
+	}
+
+	UVXRewardCardViewModel* CardViewModels[] = { ViewModel->GetCard0(), ViewModel->GetCard1(), ViewModel->GetCard2() };
+	for (int32 i = 0; i < Cards.Num() && i < InChoices.Num(); ++i)
+	{
+		UVXRewardCardButton* Card = Cards[i];
+		Card->SetCard(InChoices[i], i, CardViewModels[i]);
+
 		// 공개 네이티브 이벤트에 카드 자신을 인자로 넘겨 연결한다.
 		Card->OnFocusReceived().AddUObject(this, &UVXRewardSelectWidget::HandleCardFocused, static_cast<UCommonButtonBase*>(Card));
 		Card->OnHovered().AddUObject(this, &UVXRewardSelectWidget::HandleCardFocused, static_cast<UCommonButtonBase*>(Card));
 		Card->OnClicked().AddUObject(this, &UVXRewardSelectWidget::HandleCardClicked, static_cast<UCommonButtonBase*>(Card));
-
-		UHorizontalBoxSlot* CardSlot = CardRow->AddChildToHorizontalBox(Card);
-		CardSlot->SetPadding(FMargin(20.f, 0.f));
-		CardSlot->SetVerticalAlignment(VAlign_Center);
-		Cards.Add(Card);
 	}
 
 	if (Cards.Num() > 0)
@@ -120,12 +147,6 @@ void UVXRewardSelectWidget::FocusDefaultCard()
 	}
 }
 
-bool UVXRewardSelectWidget::NativeOnHandleBackAction()
-{
-	// 반드시 1장을 골라야 하므로 뒤로가기는 소비만 하고 닫지 않는다.
-	return true;
-}
-
 void UVXRewardSelectWidget::HandleCardFocused(UCommonButtonBase* Button)
 {
 	if (ConfirmTimer >= 0.f)
@@ -146,11 +167,6 @@ void UVXRewardSelectWidget::HandleCardFocused(UCommonButtonBase* Button)
 
 void UVXRewardSelectWidget::UpdateBuildText(const FVXUpgradeCard& Card)
 {
-	if (nullptr == BuildText)
-	{
-		return;
-	}
-
 	FString Text = VXText::Format(TEXT("UI.BuildOf"), { UVXModifierComponent::GetSkillDisplayName(Card.SkillTag) });
 	const APlayerController* PC = GetOwningPlayer();
 	const UVXModifierComponent* Modifiers = (PC && PC->GetPawn()) ? PC->GetPawn()->FindComponentByClass<UVXModifierComponent>() : nullptr;
@@ -173,7 +189,15 @@ void UVXRewardSelectWidget::UpdateBuildText(const FVXUpgradeCard& Card)
 			Text += TEXT("  [   ]");
 		}
 	}
-	BuildText->SetText(FText::FromString(Text));
+
+	if (ViewModel)
+	{
+		ViewModel->SetBuildText(FText::FromString(Text));
+	}
+	if (bBuiltInCode)
+	{
+		VXUI::SetText(BuildText, FText::FromString(Text));
+	}
 }
 
 void UVXRewardSelectWidget::HandleCardClicked(UCommonButtonBase* Button)

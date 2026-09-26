@@ -65,6 +65,8 @@ public:
 	/** 필드의 적 + 아직 스폰 안 된 적 */
 	int32 GetRemainingEnemies() const;
 	int32 GetKillCount() const { return KillCount; }
+	/** 첫 웨이브 시작부터 종료까지 흐른 시간 (초). 일시정지 중에는 멈춘다 */
+	float GetPlayTime() const { return PlayTime; }
 
 	FVXWaveEventSignature OnWaveStarted;
 	FVXWaveEventSignature OnWaveCleared;
@@ -125,7 +127,7 @@ protected:
 
 	/** 화면 좌측 상단에 웨이브 상태를 표시한다 (HUD가 생기면 끈다) */
 	UPROPERTY(EditAnywhere, Category = "Voxel|Wave")
-	bool bShowDebugInfo = true;
+	bool bShowDebugInfo = false;
 
 private:
 	/** WaveTable에서 웨이브 목록을 읽어 Waves를 채운다. 성공하면 true */
@@ -153,6 +155,7 @@ private:
 	int32 KillCount = 0;
 	float StateTime = 0.f;
 	float CombatTime = 0.f;
+	float PlayTime = 0.f;
 	float AutoStartTimer = -1.f;
 	bool bPlayerBound = false;
 	bool bWaitingForReward = false;

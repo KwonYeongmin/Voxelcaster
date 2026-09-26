@@ -1,0 +1,26 @@
+[
+ {
+  "Name": "Runner",
+  "MaxHealth": 40,
+  "MoveSpeed": 500,
+  "AttackDamage": 10,
+  "AttackInterval": 0.8,
+  "ProjectileSpeed": 0
+ },
+ {
+  "Name": "Shooter",
+  "MaxHealth": 60,
+  "MoveSpeed": 250,
+  "AttackDamage": 8,
+  "AttackInterval": 1.5,
+  "ProjectileSpeed": 800
+ },
+ {
+  "Name": "Elite",
+  "MaxHealth": 400,
+  "MoveSpeed": 200,
+  "AttackDamage": 8,
+  "AttackInterval": 2.0,
+  "ProjectileSpeed": 800
+ }
+]
