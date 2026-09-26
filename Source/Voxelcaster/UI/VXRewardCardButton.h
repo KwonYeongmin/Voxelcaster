@@ -12,7 +12,7 @@ class UTextBlock;
 class UVX_VM_RewardCard;
 
 /**
- * 보상 카드 버튼 (DES-UI-REWARD-001). WBP_RewardCard의 부모 클래스. CommonUI 버튼이다.
+ * 보상 카드 버튼 (DES-UI-REWARD-001). WBP_VX_RewardCard의 부모 클래스. CommonUI 버튼이다.
  * - 값은 UVX_VM_RewardCard에 있다. WBP는 Viewmodels 패널에 VX_VM_RewardCard(Manual)을 추가해 연결한다.
  *   강조 연출은 뷰모델의 bHighlighted에 바인딩한다.
  * - WBP가 없으면 C++ 기본 위젯 트리를 만들고 직접 표시·강조한다.

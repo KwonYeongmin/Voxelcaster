@@ -11,9 +11,10 @@ namespace
 		TEXT("Voxel.Language"), TEXT("ko"),
 		TEXT("화면 문구 언어: ko(한국어) / en(영어)"));
 
-	const TCHAR* TablePath = TEXT("/Game/Voxelcaster/Data/DT_UIText.DT_UIText");
+	const TCHAR* KoreanTablePath = TEXT("/Game/Voxelcaster/Data/DS_UIText_Kor.DS_UIText_Kor");
+	const TCHAR* EnglishTablePath = TEXT("/Game/Voxelcaster/Data/DS_UIText_Eng.DS_UIText_Eng");
 
-	/** 테이블을 못 읽을 때 쓰는 기본 문구. Data/DT_UIText.json과 같은 내용이다. */
+	/** 테이블을 못 읽을 때 쓰는 기본 문구. Data/DS_UIText_Kor.csv, DS_UIText_Eng.csv와 같은 내용이다. */
 	struct FDefaultText
 	{
 		const TCHAR* Key;
@@ -62,26 +63,29 @@ namespace
 		{ TEXT("UI.FinalBuild"),  TEXT("최종 빌드"),          TEXT("FINAL BUILD") },
 	};
 
-	const UDataTable* LoadTable()
+	/** 언어별 테이블을 한 번만 읽는다. 없으면 nullptr (기본 문구 사용) */
+	const UDataTable* LoadTable(bool bKorean)
 	{
-		// 한 번만 시도한다. 테이블이 없으면 기본 문구를 쓴다.
-		static TWeakObjectPtr<const UDataTable> Cached;
-		static bool bTried = false;
-		if (false == bTried)
+		static TWeakObjectPtr<const UDataTable> Cached[2];
+		static bool bTried[2] = { false, false };
+
+		const int32 Index = bKorean ? 0 : 1;
+		if (false == bTried[Index])
 		{
-			bTried = true;
-			const TSoftObjectPtr<UDataTable> Soft{ FSoftObjectPath(TablePath) };
+			bTried[Index] = true;
+			const TSoftObjectPtr<UDataTable> Soft{ FSoftObjectPath(bKorean ? KoreanTablePath : EnglishTablePath) };
 			const UDataTable* Table = Soft.LoadSynchronous();
 			if (Table && Table->GetRowStruct() == FVXTextRow::StaticStruct())
 			{
-				Cached = Table;
+				Cached[Index] = Table;
 			}
 			else
 			{
-				UE_LOG(LogVoxel, Log, TEXT("DT_UIText not found or wrong row struct: using built-in texts"));
+				UE_LOG(LogVoxel, Log, TEXT("%s not found or wrong row struct: using built-in texts"),
+					bKorean ? TEXT("DS_UIText_Kor") : TEXT("DS_UIText_Eng"));
 			}
 		}
-		return Cached.Get();
+		return Cached[Index].Get();
 	}
 }
 
@@ -96,14 +100,14 @@ namespace VXText
 	{
 		const bool bKorean = IsKorean();
 
-		if (const UDataTable* Table = LoadTable())
+		if (const UDataTable* Table = LoadTable(bKorean))
 		{
 			if (const FVXTextRow* Row = Table->FindRow<FVXTextRow>(Key, TEXT("VXText"), false))
 			{
-				const FString& Text = bKorean ? Row->Ko : Row->En;
-				if (false == Text.IsEmpty())
+				if (false == Row->Text.IsEmpty())
 				{
-					return Text.Replace(TEXT("\\n"), TEXT("\n"));
+					// CSV에는 줄바꿈을 \n 두 글자로 적는다.
+					return Row->Text.Replace(TEXT("\\n"), TEXT("\n"));
 				}
 			}
 		}

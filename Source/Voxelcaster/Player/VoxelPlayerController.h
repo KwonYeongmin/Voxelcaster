@@ -106,7 +106,7 @@ private:
 	TObjectPtr<UInputAction> PauseAction;
 
 	/**
-	 * 화면 클래스. WBP를 만들면 여기로 연결된다 (기본 경로 /Game/Voxelcaster/UI/WBP_*).
+	 * 화면 클래스. WBP를 만들면 여기로 연결된다 (기본 경로 /Game/Voxelcaster/UI/WBP_VX_*).
 	 * WBP가 없으면 C++ 기본 화면을 쓴다.
 	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Voxel|UI")

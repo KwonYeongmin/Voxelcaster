@@ -34,9 +34,9 @@ struct FVXHUDSkillSlotWidgets
 };
 
 /**
- * 전투 HUD (DES-UI-HUD-001). WBP_HUD의 부모 클래스.
+ * 전투 HUD (DES-UI-HUD-001). WBP_VX_HUD의 부모 클래스.
  * - 값은 UVX_VM_Hud에 있다. 플레이어 컨트롤러가 채운다.
- * - WBP_HUD: Viewmodels 패널에 VX_VM_Hud(Manual)을 추가하고 View Bindings로 연결한다.
+ * - WBP_VX_HUD: Viewmodels 패널에 VX_VM_Hud(Manual)을 추가하고 View Bindings로 연결한다.
  * - WBP가 없으면 C++ 기본 위젯 트리를 만들고 뷰모델 값을 직접 읽어 표시한다.
  */
 UCLASS()

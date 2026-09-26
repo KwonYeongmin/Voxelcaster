@@ -40,10 +40,10 @@ AVXPlayerController::AVXPlayerController()
 {
 	CheatClass = UVXCheatManager::StaticClass();
 
-	HUDWidgetClass = TSoftClassPtr<UVXHUDWidget>(FSoftObjectPath(TEXT("/Game/Voxelcaster/UI/WBP_HUD.WBP_HUD_C")));
-	RewardSelectWidgetClass = TSoftClassPtr<UVXRewardSelectWidget>(FSoftObjectPath(TEXT("/Game/Voxelcaster/UI/WBP_RewardSelect.WBP_RewardSelect_C")));
-	PauseWidgetClass = TSoftClassPtr<UVXPauseWidget>(FSoftObjectPath(TEXT("/Game/Voxelcaster/UI/WBP_Pause.WBP_Pause_C")));
-	ResultWidgetClass = TSoftClassPtr<UVXResultWidget>(FSoftObjectPath(TEXT("/Game/Voxelcaster/UI/WBP_Result.WBP_Result_C")));
+	HUDWidgetClass = TSoftClassPtr<UVXHUDWidget>(FSoftObjectPath(TEXT("/Game/Voxelcaster/UI/WBP_VX_HUD.WBP_VX_HUD_C")));
+	RewardSelectWidgetClass = TSoftClassPtr<UVXRewardSelectWidget>(FSoftObjectPath(TEXT("/Game/Voxelcaster/UI/WBP_VX_RewardSelect.WBP_VX_RewardSelect_C")));
+	PauseWidgetClass = TSoftClassPtr<UVXPauseWidget>(FSoftObjectPath(TEXT("/Game/Voxelcaster/UI/WBP_VX_Pause.WBP_VX_Pause_C")));
+	ResultWidgetClass = TSoftClassPtr<UVXResultWidget>(FSoftObjectPath(TEXT("/Game/Voxelcaster/UI/WBP_VX_Result.WBP_VX_Result_C")));
 
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;

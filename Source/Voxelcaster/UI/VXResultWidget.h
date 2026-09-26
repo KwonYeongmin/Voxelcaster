@@ -22,10 +22,10 @@ struct FVXRunResult
 };
 
 /**
- * 결과 화면 (DES-UI-MENU-001). WBP_Result의 부모 클래스. CommonUI 활성화 위젯.
+ * 결과 화면 (DES-UI-MENU-001). WBP_VX_Result의 부모 클래스. CommonUI 활성화 위젯.
  * 승리/패배, 도달 웨이브, 처치 수, 플레이 시간, 최종 빌드, 재시작(기본 포커스)·종료. 닫을 수 없다.
  *
- * WBP_Result 만들기:
+ * WBP_VX_Result 만들기:
  * - CommonUI 버튼 2개를 이름 RestartButton, QuitButton으로 배치한다
  * - Viewmodels 패널에 VX_VM_Result(Manual)을 추가하고 TitleText·StatsText·BuildText 등을 바인딩한다
  * WBP가 없으면 C++ 기본 위젯 트리를 만든다.

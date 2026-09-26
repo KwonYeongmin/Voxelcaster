@@ -34,7 +34,7 @@ bool UVXHUDWidget::Initialize()
 		WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"), RF_Transient);
 	}
 
-	// WBP_HUD면 디자이너가 만든 트리가 이미 있다. 없을 때만 기본 트리를 만든다.
+	// WBP_VX_HUD면 디자이너가 만든 트리가 이미 있다. 없을 때만 기본 트리를 만든다.
 	if (nullptr == WidgetTree->RootWidget)
 	{
 		BuildDefaultTree();
