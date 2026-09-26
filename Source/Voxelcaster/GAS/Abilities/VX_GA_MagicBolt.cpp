@@ -1,24 +1,24 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GAS/Abilities/VoxelGA_MagicBolt.h"
+#include "GAS/Abilities/VX_GA_MagicBolt.h"
 #include "Character/VoxelCharacterBase.h"
 #include "Combat/VoxelProjectile.h"
 #include "Engine/World.h"
 #include "GAS/VoxelGameplayTags.h"
 #include "Modifier/VXModifierComponent.h"
 
-UVoxelGA_MagicBolt::UVoxelGA_MagicBolt()
+UVX_GA_MagicBolt::UVX_GA_MagicBolt()
 {
 	Damage = 20.f;
 	CooldownDuration = 0.4f;
 }
 
-FGameplayTag UVoxelGA_MagicBolt::GetCooldownTag() const
+FGameplayTag UVX_GA_MagicBolt::GetCooldownTag() const
 {
 	return VoxelTags::Cooldown_MagicBolt;
 }
 
-void UVoxelGA_MagicBolt::ExecuteSkill(AVXCharacterBase* Caster)
+void UVX_GA_MagicBolt::ExecuteSkill(AVXCharacterBase* Caster)
 {
 	UWorld* World = Caster->GetWorld();
 	const FVector Direction = Caster->GetAimDirection();

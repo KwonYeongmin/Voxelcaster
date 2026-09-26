@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GAS/Abilities/VoxelSkillAbility.h"
-#include "VoxelGA_BladeSweep.generated.h"
+#include "VX_GA_BladeSweep.generated.h"
 
 /** 블레이드 스윕: 조준 방향 전방 120° 부채꼴(반경 2.5m)에 피해 30, 쿨다운 1.5초. 근접 견제. (DES-SKILL-001) */
 UCLASS()
-class VOXELCASTER_API UVoxelGA_BladeSweep : public UVoxelSkillAbility
+class VOXELCASTER_API UVX_GA_BladeSweep : public UVoxelSkillAbility
 {
 	GENERATED_BODY()
 
 public:
-	UVoxelGA_BladeSweep();
+	UVX_GA_BladeSweep();
 
 protected:
 	virtual void ExecuteSkill(AVXCharacterBase* Caster) override;

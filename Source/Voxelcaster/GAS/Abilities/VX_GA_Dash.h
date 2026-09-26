@@ -4,19 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GAS/VoxelGameplayAbility.h"
-#include "VoxelGA_Dash.generated.h"
+#include "VX_GA_Dash.generated.h"
 
 /**
  * 대시. 스킬 시스템 밖의 이동 기능이며 모디파이어의 영향을 받지 않는다. (DES-CHAR-001)
  * 쿨다운 1초, 무적 0.2초, 이동 거리 4m / 0.2초.
  */
 UCLASS()
-class VOXELCASTER_API UVoxelGA_Dash : public UVoxelGameplayAbility
+class VOXELCASTER_API UVX_GA_Dash : public UVoxelGameplayAbility
 {
 	GENERATED_BODY()
 
 public:
-	UVoxelGA_Dash();
+	UVX_GA_Dash();
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;

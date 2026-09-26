@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GAS/Abilities/VoxelGA_Dash.h"
+#include "GAS/Abilities/VX_GA_Dash.h"
 #include "Abilities/Tasks/AbilityTask_ApplyRootMotionConstantForce.h"
 #include "AbilitySystemComponent.h"
 #include "GameplayEffect.h"
@@ -9,18 +9,18 @@
 #include "GAS/VoxelGameplayTags.h"
 #include "Voxelcaster.h"
 
-UVoxelGA_Dash::UVoxelGA_Dash()
+UVX_GA_Dash::UVX_GA_Dash()
 {
 	bBlockedWhileDashing = false;
 	CooldownDuration = 1.f;
 }
 
-FGameplayTag UVoxelGA_Dash::GetCooldownTag() const
+FGameplayTag UVX_GA_Dash::GetCooldownTag() const
 {
 	return VoxelTags::Cooldown_Dash;
 }
 
-void UVoxelGA_Dash::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+void UVX_GA_Dash::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	// 쿨다운 시작 (코스트는 없음)
@@ -61,11 +61,11 @@ void UVoxelGA_Dash::ActivateAbility(const FGameplayAbilitySpecHandle Handle, con
 		ERootMotionFinishVelocityMode::SetVelocity, FVector::ZeroVector, /*ClampVelocityOnFinish*/ 0.f,
 		/*bEnableGravity*/ true);
 
-	Task->OnFinish.AddDynamic(this, &UVoxelGA_Dash::OnDashFinished);
+	Task->OnFinish.AddDynamic(this, &UVX_GA_Dash::OnDashFinished);
 	Task->ReadyForActivation();
 }
 
-void UVoxelGA_Dash::OnDashFinished()
+void UVX_GA_Dash::OnDashFinished()
 {
 	EndAbility(CurrentHandle, CurrentActorInfo_Cached, CurrentActivationInfo_Cached, true, false);
 }

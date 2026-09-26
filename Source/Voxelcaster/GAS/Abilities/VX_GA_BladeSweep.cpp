@@ -1,22 +1,22 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GAS/Abilities/VoxelGA_BladeSweep.h"
+#include "GAS/Abilities/VX_GA_BladeSweep.h"
 #include "Character/VoxelCharacterBase.h"
 #include "DrawDebugHelpers.h"
 #include "GAS/VoxelGameplayTags.h"
 
-UVoxelGA_BladeSweep::UVoxelGA_BladeSweep()
+UVX_GA_BladeSweep::UVX_GA_BladeSweep()
 {
 	Damage = 30.f;
 	CooldownDuration = 1.5f;
 }
 
-FGameplayTag UVoxelGA_BladeSweep::GetCooldownTag() const
+FGameplayTag UVX_GA_BladeSweep::GetCooldownTag() const
 {
 	return VoxelTags::Cooldown_BladeSweep;
 }
 
-void UVoxelGA_BladeSweep::ExecuteSkill(AVXCharacterBase* Caster)
+void UVX_GA_BladeSweep::ExecuteSkill(AVXCharacterBase* Caster)
 {
 	const FVector Center = Caster->GetActorLocation();
 	const FVector Aim = Caster->GetAimDirection();

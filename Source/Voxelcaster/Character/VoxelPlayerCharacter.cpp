@@ -4,10 +4,10 @@
 #include "Camera/CameraComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "GAS/Abilities/VoxelGA_BladeSweep.h"
-#include "GAS/Abilities/VoxelGA_Dash.h"
-#include "GAS/Abilities/VoxelGA_MagicBolt.h"
-#include "GAS/Abilities/VoxelGA_Nova.h"
+#include "GAS/Abilities/VX_GA_BladeSweep.h"
+#include "GAS/Abilities/VX_GA_Dash.h"
+#include "GAS/Abilities/VX_GA_MagicBolt.h"
+#include "GAS/Abilities/VX_GA_Nova.h"
 #include "GAS/VoxelAbilitySystemComponent.h"
 #include "GAS/VoxelGameplayTags.h"
 #include "Modifier/VXModifierComponent.h"
@@ -48,10 +48,10 @@ AVXPlayerCharacter::AVXPlayerCharacter()
 void AVXPlayerCharacter::GrantStartupAbilities()
 {
 	UVoxelAbilitySystemComponent* ASC = GetVoxelAbilitySystemComponent();
-	ASC->GiveAbilityWithInput(UVoxelGA_Dash::StaticClass(), VoxelTags::Input_Dash);
+	ASC->GiveAbilityWithInput(UVX_GA_Dash::StaticClass(), VoxelTags::Input_Dash);
 
 	// 스킬 3종: 스킬 1 = 매직 볼트(좌클릭/RT), 스킬 2 = 노바(우클릭/LT), 스킬 3 = 블레이드 스윕(Q/RB)
-	ASC->GiveAbilityWithInput(UVoxelGA_MagicBolt::StaticClass(), VoxelTags::Input_Skill1);
-	ASC->GiveAbilityWithInput(UVoxelGA_Nova::StaticClass(), VoxelTags::Input_Skill2);
-	ASC->GiveAbilityWithInput(UVoxelGA_BladeSweep::StaticClass(), VoxelTags::Input_Skill3);
+	ASC->GiveAbilityWithInput(UVX_GA_MagicBolt::StaticClass(), VoxelTags::Input_Skill1);
+	ASC->GiveAbilityWithInput(UVX_GA_Nova::StaticClass(), VoxelTags::Input_Skill2);
+	ASC->GiveAbilityWithInput(UVX_GA_BladeSweep::StaticClass(), VoxelTags::Input_Skill3);
 }
