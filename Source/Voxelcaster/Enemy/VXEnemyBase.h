@@ -37,8 +37,22 @@ public:
 	/** AI 컨트롤러가 StateTree를 실행 중인지 */
 	bool IsDrivenByStateTree() const;
 
+	virtual void Tick(float DeltaSeconds) override;
+
 protected:
 	virtual void PostInitializeComponents() override;
+	virtual void HandleDamaged(float Amount) override;
+
+	/** 처치 히트스톱 (실제 시간 초). 엘리트는 더 길다 (DES-FEEL-001) */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Feel")
+	float KillHitStop = 0.05f;
+
+	/** 처치 시 게임패드 진동 (0이면 없음). 엘리트만 준다 */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Feel")
+	float KillVibrationIntensity = 0.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Feel")
+	float KillVibrationDuration = 0.3f;
 	virtual void BeginPlay() override;
 	virtual void HandleDeath() override;
 
@@ -95,4 +109,12 @@ private:
 	TObjectPtr<UWidgetComponent> HealthBarComponent;
 
 	void UpdateHealthBar(float Current, float Max);
+
+	/** 보이는 메시 (스켈레탈 메시가 있으면 그것, 없으면 임시 큐브) */
+	USceneComponent* GetVisualMesh() const;
+
+	/** 피격 플래시·펀치가 끝나는 실제 시간. 0이면 진행 중 아님 */
+	double FlashEndRealTime = 0.0;
+	FVector VisualBaseScale = FVector::OneVector;
+	float DeathWorldTime = -1.f;
 };

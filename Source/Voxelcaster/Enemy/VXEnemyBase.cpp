@@ -8,6 +8,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Data/VXEnemyData.h"
+#include "Feel/VXGameFeelSubsystem.h"
+#include "Kismet/GameplayStatics.h"
 #include "UI/VXHealthBarWidget.h"
 #include "Voxelcaster.h"
 #include "Kismet/GameplayStatics.h"
@@ -16,6 +18,9 @@
 
 AVXEnemyBase::AVXEnemyBase()
 {
+	// 피격 플래시·사망 연출 진행용
+	PrimaryActorTick.bCanEverTick = true;
+
 	Team = EVXTeam::Enemy;
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
@@ -104,6 +109,7 @@ void AVXEnemyBase::BeginPlay()
 	}
 
 	BodyMesh->SetRelativeScale3D(BodyScale);
+	VisualBaseScale = BodyScale;
 	BodyMaterial = BodyMesh->CreateAndSetMaterialInstanceDynamic(0);
 	SetBodyColor(BodyColor);
 }
@@ -111,6 +117,53 @@ void AVXEnemyBase::BeginPlay()
 bool AVXEnemyBase::HasSkeletalMesh() const
 {
 	return nullptr != GetMesh() && nullptr != GetMesh()->GetSkeletalMeshAsset();
+}
+
+USceneComponent* AVXEnemyBase::GetVisualMesh() const
+{
+	return HasSkeletalMesh() ? static_cast<USceneComponent*>(GetMesh()) : static_cast<USceneComponent*>(BodyMesh);
+}
+
+void AVXEnemyBase::HandleDamaged(float Amount)
+{
+	// 피격 플래시 0.1초: 흰색(임시 큐브) + 크기 펀치(모든 메시). 끝나는 시점은 실제 시간 (히트스톱 중에도 0.1초)
+	const bool bAlreadyFlashing = FlashEndRealTime > 0.0;
+	FlashEndRealTime = GetWorld()->GetRealTimeSeconds() + 0.1;
+
+	if (USceneComponent* Visual = GetVisualMesh())
+	{
+		if (false == bAlreadyFlashing)
+		{
+			VisualBaseScale = Visual->GetRelativeScale3D();
+		}
+		Visual->SetRelativeScale3D(VisualBaseScale * 1.15f);
+	}
+	SetBodyColor(FLinearColor::White);
+}
+
+void AVXEnemyBase::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	USceneComponent* Visual = GetVisualMesh();
+
+	// 피격 플래시 종료
+	if (FlashEndRealTime > 0.0 && GetWorld()->GetRealTimeSeconds() >= FlashEndRealTime)
+	{
+		FlashEndRealTime = 0.0;
+		if (Visual)
+		{
+			Visual->SetRelativeScale3D(VisualBaseScale);
+		}
+		SetBodyColor(BodyColor);
+	}
+
+	// 사망 연출: 사망 애니메이션이 없으면 수명 동안 작아지며 사라진다
+	if (DeathWorldTime >= 0.f && Visual && (nullptr == DeathMontage || false == HasSkeletalMesh()))
+	{
+		const float Alpha = FMath::Clamp((GetWorld()->GetTimeSeconds() - DeathWorldTime) / FMath::Max(DeathLifeSpan, 0.01f), 0.f, 1.f);
+		Visual->SetRelativeScale3D(VisualBaseScale * FMath::Max(1.f - Alpha, 0.05f));
+	}
 }
 
 void AVXEnemyBase::SetBodyColor(const FLinearColor& Color)
@@ -148,6 +201,18 @@ void AVXEnemyBase::HandleDeath()
 	// 죽은 적이 스킬·이동을 막지 않도록 충돌을 끄고 곧 제거한다. (연출은 game-feel spec에서)
 	SetActorEnableCollision(false);
 	HealthBarComponent->SetVisibility(false);
+
+	// 처치 타격감: 히트스톱, 엘리트는 진동 (DES-FEEL-001)
+	FlashEndRealTime = 0.0;
+	DeathWorldTime = GetWorld()->GetTimeSeconds();
+	if (UVXGameFeelSubsystem* Feel = UVXGameFeelSubsystem::Get(this))
+	{
+		Feel->RequestHitStop(KillHitStop);
+		if (KillVibrationIntensity > 0.f)
+		{
+			Feel->PlayVibration(UGameplayStatics::GetPlayerController(this, 0), KillVibrationIntensity, KillVibrationDuration);
+		}
+	}
 
 	float LifeSpan = DeathLifeSpan;
 	if (DeathMontage && HasSkeletalMesh())

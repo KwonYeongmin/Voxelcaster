@@ -11,10 +11,15 @@
 #include "GAS/VXAbilitySystemComponent.h"
 #include "GAS/VXGameplayTags.h"
 #include "Modifier/VXModifierComponent.h"
+#include "Feel/VXGameFeelSubsystem.h"
+#include "GameFramework/PlayerController.h"
 #include "UObject/ConstructorHelpers.h"
 
 AVXPlayerCharacter::AVXPlayerCharacter()
 {
+	// 화면 흔들림 진행용
+	PrimaryActorTick.bCanEverTick = true;
+
 	// 탑다운 카메라: 피치 -55도, 거리 14m, 회전 고정 (플레이어를 따라 이동만 한다)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -43,6 +48,44 @@ AVXPlayerCharacter::AVXPlayerCharacter()
 	{
 		BodyMesh->SetStaticMesh(CubeMesh.Object);
 	}
+}
+
+void AVXPlayerCharacter::HandleDamaged(float Amount)
+{
+	// 피격 타격감: 히트스톱, 진동(패드), 화면 흔들림 (DES-FEEL-001). 대시 무적 중에는 피해 자체가 없어 호출되지 않는다.
+	if (UVXGameFeelSubsystem* Feel = UVXGameFeelSubsystem::Get(this))
+	{
+		Feel->RequestHitStop(HitStopOnDamaged);
+		Feel->PlayVibration(Cast<APlayerController>(GetController()), DamagedVibrationIntensity, DamagedVibrationDuration);
+	}
+
+	if (ShakeEndRealTime <= 0.0)
+	{
+		BaseSocketOffset = CameraBoom->SocketOffset;
+	}
+	ShakeEndRealTime = GetWorld()->GetRealTimeSeconds() + ShakeDuration;
+}
+
+void AVXPlayerCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (ShakeEndRealTime <= 0.0)
+	{
+		return;
+	}
+
+	// 실제 시간 기준으로 줄어드는 무작위 카메라 흔들림 (히트스톱 중에도 흔들린다)
+	const double Remaining = ShakeEndRealTime - GetWorld()->GetRealTimeSeconds();
+	if (Remaining <= 0.0)
+	{
+		ShakeEndRealTime = 0.0;
+		CameraBoom->SocketOffset = BaseSocketOffset;
+		return;
+	}
+
+	const float Strength = ShakeAmplitude * static_cast<float>(Remaining / FMath::Max(ShakeDuration, 0.01f));
+	CameraBoom->SocketOffset = BaseSocketOffset + FVector(0.f, FMath::FRandRange(-1.f, 1.f), FMath::FRandRange(-1.f, 1.f)) * Strength;
 }
 
 void AVXPlayerCharacter::GrantStartupAbilities()

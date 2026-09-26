@@ -40,6 +40,13 @@ protected:
 	/** 대상 한 명에게 스킬 명중을 적용한다. Damage 배율을 곱한다. */
 	void ApplyHit(AVXCharacterBase* Caster, AVXCharacterBase* Target, const FVector& HitLocation, const FVector& Direction, float DamageScale = 1.f) const;
 
+	/** 시전 진동 (게임패드). 노바는 더 세다 (DES-FEEL-001) */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Feel")
+	float CastVibrationIntensity = 0.25f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Feel")
+	float CastVibrationDuration = 0.05f;
+
 	/** 원본 피해 (design 수치, 추후 데이터 테이블로 이동) */
 	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Skill")
 	float Damage = 0.f;

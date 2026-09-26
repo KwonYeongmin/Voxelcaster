@@ -7,6 +7,8 @@
 #include "GAS/VXAbilitySystemComponent.h"
 #include "GAS/VXHitContext.h"
 #include "Modifier/VXModifierComponent.h"
+#include "Feel/VXGameFeelSubsystem.h"
+#include "GameFramework/PlayerController.h"
 
 UVXSkillAbility::UVXSkillAbility()
 {
@@ -38,6 +40,11 @@ void UVXSkillAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, c
 	if (AVXCharacterBase* Caster = Cast<AVXCharacterBase>(ActorInfo->AvatarActor.Get()))
 	{
 		ExecuteSkill(Caster);
+
+		if (UVXGameFeelSubsystem* Feel = UVXGameFeelSubsystem::Get(Caster))
+		{
+			Feel->PlayVibration(Cast<APlayerController>(Caster->GetController()), CastVibrationIntensity, CastVibrationDuration);
+		}
 	}
 
 	// 스킬은 즉발이다. 쿨다운은 GE가 관리하므로 어빌리티는 바로 종료한다.

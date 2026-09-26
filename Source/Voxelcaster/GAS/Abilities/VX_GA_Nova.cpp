@@ -11,6 +11,8 @@ UVX_GA_Nova::UVX_GA_Nova()
 	// 틱당 피해. 즉시 1회 + 0.5초마다 → 2초 동안 5회, 총 50 (제안)
 	Damage = 10.f;
 	CooldownDuration = 4.f;
+	CastVibrationIntensity = 0.6f;
+	CastVibrationDuration = 0.1f;
 }
 
 FGameplayTag UVX_GA_Nova::GetCooldownTag() const

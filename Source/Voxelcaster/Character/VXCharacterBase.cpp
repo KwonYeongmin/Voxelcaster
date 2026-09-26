@@ -114,6 +114,13 @@ void AVXCharacterBase::OnHealthAttributeChanged(const FOnAttributeChangeData& Da
 {
 	OnHealthChanged.Broadcast(Data.NewValue, GetMaxHealth());
 
+	const float Damage = Data.OldValue - Data.NewValue;
+	if (Damage > 0.f && false == bIsDead)
+	{
+		HandleDamaged(Damage);
+		OnDamaged.Broadcast(Damage);
+	}
+
 	if (CVarShowHealth.GetValueOnGameThread() > 0)
 	{
 		const FString Text = FString::Printf(TEXT("%.0f / %.0f"), Data.NewValue, GetMaxHealth());

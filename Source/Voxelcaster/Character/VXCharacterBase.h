@@ -21,6 +21,7 @@ enum class EVXTeam : uint8
 };
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FVXHealthChangedSignature, float /*Current*/, float /*Max*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FVXDamagedSignature, float /*Amount*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FVXDeathSignature, class AVXCharacterBase* /*Character*/);
 
 /**
@@ -62,6 +63,8 @@ public:
 	FVXHealthChangedSignature OnHealthChanged;
 	/** 사망 시 한 번만 호출 */
 	FVXDeathSignature OnDeath;
+	/** 체력이 줄었을 때 (피격 연출용). 회복에는 호출되지 않는다 */
+	FVXDamagedSignature OnDamaged;
 
 protected:
 	virtual void PostInitializeComponents() override;
@@ -71,6 +74,9 @@ protected:
 	virtual void GrantStartupAbilities() {}
 
 	virtual void HandleDeath();
+
+	/** 피해를 받았을 때 (체력 감소량). 사망하는 피격에도 호출된다. 자식 클래스가 피격 연출을 넣는다 */
+	virtual void HandleDamaged(float Amount) {}
 
 	UPROPERTY(EditDefaultsOnly, Category = "Voxel")
 	EVXTeam Team = EVXTeam::Player;

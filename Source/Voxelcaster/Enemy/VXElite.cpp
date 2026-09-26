@@ -11,6 +11,9 @@
 AVXElite::AVXElite()
 {
 	StatRowName = TEXT("Elite");
+	KillHitStop = 0.15f;
+	KillVibrationIntensity = 1.f;
+	KillVibrationDuration = 0.3f;
 	DefaultMaxHealth = 400.f;
 	DefaultMoveSpeed = 200.f;
 	BodyColor = FLinearColor(0.9f, 0.1f, 0.45f);
