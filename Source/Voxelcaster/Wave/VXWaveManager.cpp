@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Wave/VXWaveManager.h"
+#include "Data/VXDataManager.h"
 #include "Character/VXCharacterBase.h"
 #include "Components/CapsuleComponent.h"
 #include "Enemy/VXEnemyBase.h"
@@ -41,8 +42,6 @@ UVXWaveManager::UVXWaveManager()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
-	WaveTable = TSoftObjectPtr<UDataTable>(FSoftObjectPath(TEXT("/Game/Voxelcaster/Data/DT_Waves.DT_Waves")));
-
 	// 테이블을 읽지 못했을 때의 기본값. 적 수는 design 문서(waves.md) 기준
 	// MakeSpawn(적, 시작 시각, 주기, 한 번에, 총 수)
 	// const TSubclassOf<AVXEnemyBase> Runner = AVXRunner::StaticClass();
@@ -76,16 +75,21 @@ void UVXWaveManager::BeginPlay()
 
 bool UVXWaveManager::LoadWavesFromTable()
 {
+	// 이 컴포넌트에 따로 지정한 테이블이 없으면 데이터 매니저의 웨이브 테이블 (프로젝트 세팅)
+	const UDataTable* Table = nullptr;
 	if (WaveTable.IsNull())
 	{
-		UE_LOG(LogVX, Log, TEXT("WaveTable not set: using default waves in code"));
-		return false;
+		UVXDataManager* Data = UVXDataManager::Get();
+		Table = nullptr != Data ? Data->GetTable(EVXDataTable::Waves) : nullptr;
+	}
+	else
+	{
+		Table = WaveTable.LoadSynchronous();
 	}
 
-	const UDataTable* Table = WaveTable.LoadSynchronous();
 	if (nullptr == Table)
 	{
-		UE_LOG(LogVX, Warning, TEXT("WaveTable '%s' could not be loaded: using default waves in code"), *WaveTable.ToString());
+		UE_LOG(LogVX, Warning, TEXT("Wave table could not be loaded: using default waves in code"));
 		return false;
 	}
 

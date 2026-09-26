@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Cheat/VXCheatManager.h"
+#include "Data/VXDataManager.h"
 #include "AbilitySystemComponent.h"
 #include "Character/VXCharacterBase.h"
 #include "Core/VXGameMode.h"
@@ -266,5 +267,14 @@ void UVXCheatManager::DebugStopWaves()
 	if (const AVXGameMode* GameMode = GetWorld()->GetAuthGameMode<AVXGameMode>())
 	{
 		GameMode->GetWaveManager()->StopWaves();
+	}
+}
+
+void UVXCheatManager::DataReload()
+{
+	if (UVXDataManager* Data = UVXDataManager::Get())
+	{
+		const bool bOk = Data->LoadAll();
+		UE_LOG(LogVX, Log, TEXT("DataReload: %s"), bOk ? TEXT("OK") : TEXT("problems found (see [Data] log)"));
 	}
 }

@@ -3,7 +3,7 @@
 #include "UI/VXText.h"
 #include "HAL/IConsoleManager.h"
 #include "UObject/SoftObjectPtr.h"
-#include "Voxelcaster.h"
+#include "Data/VXDataManager.h"
 
 namespace
 {
@@ -11,10 +11,7 @@ namespace
 		TEXT("Voxel.Language"), TEXT("ko"),
 		TEXT("화면 문구 언어: ko(한국어) / en(영어)"));
 
-	const TCHAR* KoreanTablePath = TEXT("/Game/Voxelcaster/Data/DS_UIText_Kor.DS_UIText_Kor");
-	const TCHAR* EnglishTablePath = TEXT("/Game/Voxelcaster/Data/DS_UIText_Eng.DS_UIText_Eng");
-
-	/** 테이블을 못 읽을 때 쓰는 기본 문구. Data/DS_UIText_Kor.csv, DS_UIText_Eng.csv와 같은 내용이다. */
+	/** 테이블을 못 읽을 때 쓰는 기본 문구. Data/DT_UIText_Kor.csv, DT_UIText_Eng.csv와 같은 내용이다. */
 	struct FDefaultText
 	{
 		const TCHAR* Key;
@@ -63,29 +60,10 @@ namespace
 		{ TEXT("UI.FinalBuild"),  TEXT("최종 빌드"),          TEXT("FINAL BUILD") },
 	};
 
-	/** 언어별 테이블을 한 번만 읽는다. 없으면 nullptr (기본 문구 사용) */
 	const UDataTable* LoadTable(bool bKorean)
 	{
-		static TWeakObjectPtr<const UDataTable> Cached[2];
-		static bool bTried[2] = { false, false };
-
-		const int32 Index = bKorean ? 0 : 1;
-		if (false == bTried[Index])
-		{
-			bTried[Index] = true;
-			const TSoftObjectPtr<UDataTable> Soft{ FSoftObjectPath(bKorean ? KoreanTablePath : EnglishTablePath) };
-			const UDataTable* Table = Soft.LoadSynchronous();
-			if (Table && Table->GetRowStruct() == FVXTextRow::StaticStruct())
-			{
-				Cached[Index] = Table;
-			}
-			else
-			{
-				UE_LOG(LogVX, Log, TEXT("%s not found or wrong row struct: using built-in texts"),
-					bKorean ? TEXT("DS_UIText_Kor") : TEXT("DS_UIText_Eng"));
-			}
-		}
-		return Cached[Index].Get();
+		UVXDataManager* Data = UVXDataManager::Get();
+		return nullptr != Data ? Data->GetTextTable(bKorean) : nullptr;
 	}
 }
 
@@ -120,6 +98,14 @@ namespace VXText
 			}
 		}
 		return Key.ToString();
+	}
+
+	void GetBuiltInKeys(TArray<FName>& OutKeys)
+	{
+		for (const FDefaultText& Default : DefaultTexts)
+		{
+			OutKeys.Add(Default.Key);
+		}
 	}
 
 	FString Format(const FName& Key, const FStringFormatOrderedArguments& Args)

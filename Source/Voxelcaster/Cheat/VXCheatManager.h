@@ -23,6 +23,10 @@ public:
 	UFUNCTION(Exec)
 	void EasyMode();
 
+	/** 데이터 테이블을 다시 읽고 검사한다. 프로젝트 세팅에서 테이블 경로를 바꾼 뒤에 쓴다 (이미 부여된 스킬 수치는 재시작 후 반영) */
+	UFUNCTION(Exec)
+	void DataReload();
+
 	UFUNCTION(Exec)
 	void DebugDamage(float Amount = 10.f);
 

@@ -17,6 +17,9 @@ class VOXELCASTER_API AVXGameMode : public AGameModeBase
 public:
 	AVXGameMode();
 
+	/** 게임 시작 시 데이터 테이블을 모두 읽고 검사한다 (UVXDataManager) */
+	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+
 	UVXWaveManager* GetWaveManager() const { return WaveManager; }
 
 private:

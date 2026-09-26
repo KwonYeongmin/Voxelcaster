@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Enemy/VXEnemyBase.h"
+#include "Data/VXDataManager.h"
 #include "AI/VXEnemyAIController.h"
 #include "Components/CapsuleComponent.h"
 #include "Animation/AnimMontage.h"
@@ -45,31 +46,6 @@ AVXEnemyBase::AVXEnemyBase()
 	}
 }
 
-namespace
-{
-	/** DT_Enemies를 한 번만 읽는다. 없으면 nullptr (코드 기본값 사용) */
-	const UDataTable* LoadEnemyTable()
-	{
-		static TWeakObjectPtr<const UDataTable> Cached;
-		static bool bTried = false;
-		if (false == bTried)
-		{
-			bTried = true;
-			const TSoftObjectPtr<UDataTable> Soft{ FSoftObjectPath(TEXT("/Game/Voxelcaster/Data/DT_Enemies.DT_Enemies")) };
-			const UDataTable* Table = Soft.LoadSynchronous();
-			if (Table && Table->GetRowStruct() == FVXEnemyRow::StaticStruct())
-			{
-				Cached = Table;
-			}
-			else
-			{
-				UE_LOG(LogVX, Log, TEXT("DT_Enemies not found or wrong row struct: using enemy defaults in code"));
-			}
-		}
-		return Cached.Get();
-	}
-}
-
 bool AVXEnemyBase::bEasyMode = false;
 TArray<TWeakObjectPtr<AVXEnemyBase>> AVXEnemyBase::AliveEnemies;
 
@@ -81,9 +57,9 @@ float AVXEnemyBase::GetAdjustedAttackDamage(float BaseDamage) const
 void AVXEnemyBase::PostInitializeComponents()
 {
 	// 부모(AVXCharacterBase)가 DefaultMaxHealth·DefaultMoveSpeed로 어트리뷰트를 초기화하므로 그 전에 적용한다.
-	if (const UDataTable* Table = LoadEnemyTable())
+	if (UVXDataManager* Data = UVXDataManager::Get())
 	{
-		if (const FVXEnemyRow* Row = Table->FindRow<FVXEnemyRow>(StatRowName, TEXT("VXEnemy"), false))
+		if (const FVXEnemyRow* Row = Data->FindEnemy(StatRowName))
 		{
 			ApplyEnemyStats(*Row);
 		}
