@@ -4,47 +4,27 @@
 
 void UVX_VM_RewardCard::SetSkillName(const FText& InValue)
 {
-	if (false == SkillName.EqualTo(InValue))
-	{
-		SkillName = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(SkillName);
-	}
+	VX_VM_SET_TEXT(SkillName, InValue);
 }
 
 void UVX_VM_RewardCard::SetModifierName(const FText& InValue)
 {
-	if (false == ModifierName.EqualTo(InValue))
-	{
-		ModifierName = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(ModifierName);
-	}
+	VX_VM_SET_TEXT(ModifierName, InValue);
 }
 
 void UVX_VM_RewardCard::SetLevelText(const FText& InValue)
 {
-	if (false == LevelText.EqualTo(InValue))
-	{
-		LevelText = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(LevelText);
-	}
+	VX_VM_SET_TEXT(LevelText, InValue);
 }
 
 void UVX_VM_RewardCard::SetDescription(const FText& InValue)
 {
-	if (false == Description.EqualTo(InValue))
-	{
-		Description = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(Description);
-	}
+	VX_VM_SET_TEXT(Description, InValue);
 }
 
 void UVX_VM_RewardCard::SetTagText(const FText& InValue)
 {
-	if (false == TagText.EqualTo(InValue))
-	{
-		TagText = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(TagText);
-	}
+	VX_VM_SET_TEXT(TagText, InValue);
 }
 
 void UVX_VM_RewardCard::SetbUpgrade(bool InValue)

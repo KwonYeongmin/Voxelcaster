@@ -4,38 +4,22 @@
 
 void UVX_VM_SkillSlot::SetSkillName(const FText& InValue)
 {
-	if (false == SkillName.EqualTo(InValue))
-	{
-		SkillName = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(SkillName);
-	}
+	VX_VM_SET_TEXT(SkillName, InValue);
 }
 
 void UVX_VM_SkillSlot::SetKeyText(const FText& InValue)
 {
-	if (false == KeyText.EqualTo(InValue))
-	{
-		KeyText = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(KeyText);
-	}
+	VX_VM_SET_TEXT(KeyText, InValue);
 }
 
 void UVX_VM_SkillSlot::SetCooldownPercent(float InValue)
 {
-	if (false == FMath::IsNearlyEqual(CooldownPercent, InValue, 0.001f))
-	{
-		CooldownPercent = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(CooldownPercent);
-	}
+	VX_VM_SET_FLOAT(CooldownPercent, InValue);
 }
 
 void UVX_VM_SkillSlot::SetCooldownText(const FText& InValue)
 {
-	if (false == CooldownText.EqualTo(InValue))
-	{
-		CooldownText = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(CooldownText);
-	}
+	VX_VM_SET_TEXT(CooldownText, InValue);
 }
 
 void UVX_VM_SkillSlot::SetbReady(bool InValue)
@@ -45,9 +29,5 @@ void UVX_VM_SkillSlot::SetbReady(bool InValue)
 
 void UVX_VM_SkillSlot::SetModifiersText(const FText& InValue)
 {
-	if (false == ModifiersText.EqualTo(InValue))
-	{
-		ModifiersText = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(ModifiersText);
-	}
+	VX_VM_SET_TEXT(ModifiersText, InValue);
 }

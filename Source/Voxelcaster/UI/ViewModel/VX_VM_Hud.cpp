@@ -12,20 +12,12 @@ UVX_VM_Hud::UVX_VM_Hud()
 
 void UVX_VM_Hud::SetHealthPercent(float InValue)
 {
-	if (false == FMath::IsNearlyEqual(HealthPercent, InValue, 0.001f))
-	{
-		HealthPercent = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(HealthPercent);
-	}
+	VX_VM_SET_FLOAT(HealthPercent, InValue);
 }
 
 void UVX_VM_Hud::SetHealthText(const FText& InValue)
 {
-	if (false == HealthText.EqualTo(InValue))
-	{
-		HealthText = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(HealthText);
-	}
+	VX_VM_SET_TEXT(HealthText, InValue);
 }
 
 void UVX_VM_Hud::SetbLowHealth(bool InValue)
@@ -35,18 +27,10 @@ void UVX_VM_Hud::SetbLowHealth(bool InValue)
 
 void UVX_VM_Hud::SetWaveText(const FText& InValue)
 {
-	if (false == WaveText.EqualTo(InValue))
-	{
-		WaveText = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(WaveText);
-	}
+	VX_VM_SET_TEXT(WaveText, InValue);
 }
 
 void UVX_VM_Hud::SetEnemiesText(const FText& InValue)
 {
-	if (false == EnemiesText.EqualTo(InValue))
-	{
-		EnemiesText = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(EnemiesText);
-	}
+	VX_VM_SET_TEXT(EnemiesText, InValue);
 }

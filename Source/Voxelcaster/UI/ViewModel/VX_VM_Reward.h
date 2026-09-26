@@ -3,16 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MVVMViewModelBase.h"
+#include "UI/ViewModel/VX_VM_Base.h"
 #include "UI/ViewModel/VX_VM_RewardCard.h"
 #include "VX_VM_Reward.generated.h"
 
 /**
- * 보상 선택 화면 (DES-UI-REWARD-001). MVVM 뷰모델: WBP의 View Bindings로 위젯에 연결한다.
+ * 보상 선택 화면 (DES-UI-REWARD-001). MVVM 뷰모델 (UVX_VM_Base 상속): WBP의 View Bindings로 위젯에 연결한다.
  * 값은 C++(플레이어 컨트롤러·화면 베이스 클래스)이 넣고, 바뀐 값만 알린다.
  */
 UCLASS(BlueprintType, meta = (MVVMAllowedContextCreationType = "Manual"))
-class VOXELCASTER_API UVX_VM_Reward : public UMVVMViewModelBase
+class VOXELCASTER_API UVX_VM_Reward : public UVX_VM_Base
 {
 	GENERATED_BODY()
 

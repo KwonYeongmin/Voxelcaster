@@ -11,29 +11,17 @@ UVX_VM_Reward::UVX_VM_Reward()
 
 void UVX_VM_Reward::SetTitleText(const FText& InValue)
 {
-	if (false == TitleText.EqualTo(InValue))
-	{
-		TitleText = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(TitleText);
-	}
+	VX_VM_SET_TEXT(TitleText, InValue);
 }
 
 void UVX_VM_Reward::SetHintText(const FText& InValue)
 {
-	if (false == HintText.EqualTo(InValue))
-	{
-		HintText = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(HintText);
-	}
+	VX_VM_SET_TEXT(HintText, InValue);
 }
 
 void UVX_VM_Reward::SetBuildText(const FText& InValue)
 {
-	if (false == BuildText.EqualTo(InValue))
-	{
-		BuildText = InValue;
-		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(BuildText);
-	}
+	VX_VM_SET_TEXT(BuildText, InValue);
 }
 
 void UVX_VM_Reward::SetCardCount(int32 InValue)

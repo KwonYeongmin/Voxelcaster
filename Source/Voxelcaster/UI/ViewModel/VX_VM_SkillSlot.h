@@ -3,15 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MVVMViewModelBase.h"
+#include "UI/ViewModel/VX_VM_Base.h"
 #include "VX_VM_SkillSlot.generated.h"
 
 /**
- * HUD 스킬 슬롯 하나 (스킬 3개 + 대시). MVVM 뷰모델: WBP의 View Bindings로 위젯에 연결한다.
+ * HUD 스킬 슬롯 하나 (스킬 3개 + 대시). MVVM 뷰모델 (UVX_VM_Base 상속): WBP의 View Bindings로 위젯에 연결한다.
  * 값은 C++(플레이어 컨트롤러·화면 베이스 클래스)이 넣고, 바뀐 값만 알린다.
  */
 UCLASS(BlueprintType, meta = (MVVMAllowedContextCreationType = "Manual"))
-class VOXELCASTER_API UVX_VM_SkillSlot : public UMVVMViewModelBase
+class VOXELCASTER_API UVX_VM_SkillSlot : public UVX_VM_Base
 {
 	GENERATED_BODY()
 
