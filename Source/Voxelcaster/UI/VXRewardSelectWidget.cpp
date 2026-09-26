@@ -15,7 +15,7 @@
 #include "UI/VXRewardCardButton.h"
 #include "UI/VXText.h"
 #include "UI/VXUIBuilder.h"
-#include "UI/ViewModel/VXRewardViewModel.h"
+#include "UI/ViewModel/VX_VM_Reward.h"
 
 bool UVXRewardSelectWidget::Initialize()
 {
@@ -66,7 +66,7 @@ void UVXRewardSelectWidget::BuildDefaultTree()
 
 void UVXRewardSelectWidget::SetChoices(const TArray<FVXUpgradeCard>& InChoices, int32 WaveIndex)
 {
-	ViewModel = NewObject<UVXRewardViewModel>(this);
+	ViewModel = NewObject<UVX_VM_Reward>(this);
 	ViewModel->SetTitleText(FText::FromString(VXText::Format(TEXT("UI.RewardTitle"), { WaveIndex })));
 	ViewModel->SetHintText(FText::FromString(VXText::Get(TEXT("UI.RewardHint"))));
 	ViewModel->SetCardCount(InChoices.Num());
@@ -110,7 +110,7 @@ void UVXRewardSelectWidget::SetChoices(const TArray<FVXUpgradeCard>& InChoices, 
 		}
 	}
 
-	UVXRewardCardViewModel* CardViewModels[] = { ViewModel->GetCard0(), ViewModel->GetCard1(), ViewModel->GetCard2() };
+	UVX_VM_RewardCard* CardViewModels[] = { ViewModel->GetCard0(), ViewModel->GetCard1(), ViewModel->GetCard2() };
 	for (int32 i = 0; i < Cards.Num() && i < InChoices.Num(); ++i)
 	{
 		UVXRewardCardButton* Card = Cards[i];

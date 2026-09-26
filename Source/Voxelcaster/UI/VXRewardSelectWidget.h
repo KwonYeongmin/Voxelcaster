@@ -11,7 +11,7 @@ class UCommonButtonBase;
 class UHorizontalBox;
 class UTextBlock;
 class UVXRewardCardButton;
-class UVXRewardViewModel;
+class UVX_VM_Reward;
 
 /**
  * 보상 선택 화면 (DES-UI-REWARD-001). WBP_RewardSelect의 부모 클래스. CommonUI 활성화 위젯.
@@ -21,7 +21,7 @@ class UVXRewardViewModel;
  *
  * WBP_RewardSelect 만들기:
  * - 카드 위젯(WBP_RewardCard, 부모 VXRewardCardButton) 3개를 이름 Card0, Card1, Card2로 배치한다
- * - Viewmodels 패널에 VXRewardViewModel(Manual)을 추가하고 TitleText·HintText·BuildText를 바인딩한다
+ * - Viewmodels 패널에 VX_VM_Reward(Manual)을 추가하고 TitleText·HintText·BuildText를 바인딩한다
  * WBP가 없으면 C++ 기본 위젯 트리를 만든다.
  */
 UCLASS()
@@ -61,7 +61,7 @@ private:
 	void FinishSelection();
 
 	UPROPERTY(Transient)
-	TObjectPtr<UVXRewardViewModel> ViewModel;
+	TObjectPtr<UVX_VM_Reward> ViewModel;
 
 	bool bBuiltInCode = false;
 

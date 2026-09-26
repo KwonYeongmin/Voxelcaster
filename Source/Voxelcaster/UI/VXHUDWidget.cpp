@@ -13,7 +13,7 @@
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "UI/VXUIBuilder.h"
-#include "UI/ViewModel/VXHudViewModel.h"
+#include "UI/ViewModel/VX_VM_Hud.h"
 
 namespace
 {
@@ -44,7 +44,7 @@ bool UVXHUDWidget::Initialize()
 	return Super::Initialize();
 }
 
-void UVXHUDWidget::SetViewModel(UVXHudViewModel* InViewModel)
+void UVXHUDWidget::SetViewModel(UVX_VM_Hud* InViewModel)
 {
 	ViewModel = InViewModel;
 	VXUI::SetViewModel(this, InViewModel);
@@ -74,14 +74,14 @@ void UVXHUDWidget::RefreshDefaultTree()
 	WaveText->SetText(ViewModel->GetWaveText());
 	EnemyText->SetText(ViewModel->GetEnemiesText());
 
-	const UVXSkillSlotViewModel* Slots[] = { ViewModel->GetSkillSlot0(), ViewModel->GetSkillSlot1(), ViewModel->GetSkillSlot2(), ViewModel->GetSkillSlot3() };
+	const UVX_VM_SkillSlot* Slots[] = { ViewModel->GetSkillSlot0(), ViewModel->GetSkillSlot1(), ViewModel->GetSkillSlot2(), ViewModel->GetSkillSlot3() };
 	for (int32 i = 0; i < SlotWidgets.Num() && i < UE_ARRAY_COUNT(Slots); ++i)
 	{
 		RefreshSlot(SlotWidgets[i], Slots[i]);
 	}
 }
 
-void UVXHUDWidget::RefreshSlot(FVXHUDSkillSlotWidgets& Widgets, const UVXSkillSlotViewModel* SlotViewModel) const
+void UVXHUDWidget::RefreshSlot(FVXHUDSkillSlotWidgets& Widgets, const UVX_VM_SkillSlot* SlotViewModel) const
 {
 	if (nullptr == SlotViewModel)
 	{

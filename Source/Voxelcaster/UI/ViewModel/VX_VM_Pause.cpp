@@ -1,8 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "UI/ViewModel/VXPauseViewModel.h"
+#include "UI/ViewModel/VX_VM_Pause.h"
 
-void UVXPauseViewModel::SetTitleText(const FText& InValue)
+void UVX_VM_Pause::SetTitleText(const FText& InValue)
 {
 	if (false == TitleText.EqualTo(InValue))
 	{
@@ -11,7 +11,7 @@ void UVXPauseViewModel::SetTitleText(const FText& InValue)
 	}
 }
 
-void UVXPauseViewModel::SetResumeText(const FText& InValue)
+void UVX_VM_Pause::SetResumeText(const FText& InValue)
 {
 	if (false == ResumeText.EqualTo(InValue))
 	{
@@ -20,7 +20,7 @@ void UVXPauseViewModel::SetResumeText(const FText& InValue)
 	}
 }
 
-void UVXPauseViewModel::SetRestartText(const FText& InValue)
+void UVX_VM_Pause::SetRestartText(const FText& InValue)
 {
 	if (false == RestartText.EqualTo(InValue))
 	{
@@ -29,7 +29,7 @@ void UVXPauseViewModel::SetRestartText(const FText& InValue)
 	}
 }
 
-void UVXPauseViewModel::SetQuitText(const FText& InValue)
+void UVX_VM_Pause::SetQuitText(const FText& InValue)
 {
 	if (false == QuitText.EqualTo(InValue))
 	{

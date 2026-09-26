@@ -1,8 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "UI/ViewModel/VXResultViewModel.h"
+#include "UI/ViewModel/VX_VM_Result.h"
 
-void UVXResultViewModel::SetTitleText(const FText& InValue)
+void UVX_VM_Result::SetTitleText(const FText& InValue)
 {
 	if (false == TitleText.EqualTo(InValue))
 	{
@@ -11,12 +11,12 @@ void UVXResultViewModel::SetTitleText(const FText& InValue)
 	}
 }
 
-void UVXResultViewModel::SetbVictory(bool InValue)
+void UVX_VM_Result::SetbVictory(bool InValue)
 {
 	UE_MVVM_SET_PROPERTY_VALUE(bVictory, InValue);
 }
 
-void UVXResultViewModel::SetStatsText(const FText& InValue)
+void UVX_VM_Result::SetStatsText(const FText& InValue)
 {
 	if (false == StatsText.EqualTo(InValue))
 	{
@@ -25,7 +25,7 @@ void UVXResultViewModel::SetStatsText(const FText& InValue)
 	}
 }
 
-void UVXResultViewModel::SetBuildText(const FText& InValue)
+void UVX_VM_Result::SetBuildText(const FText& InValue)
 {
 	if (false == BuildText.EqualTo(InValue))
 	{
@@ -34,7 +34,7 @@ void UVXResultViewModel::SetBuildText(const FText& InValue)
 	}
 }
 
-void UVXResultViewModel::SetRestartText(const FText& InValue)
+void UVX_VM_Result::SetRestartText(const FText& InValue)
 {
 	if (false == RestartText.EqualTo(InValue))
 	{
@@ -43,7 +43,7 @@ void UVXResultViewModel::SetRestartText(const FText& InValue)
 	}
 }
 
-void UVXResultViewModel::SetQuitText(const FText& InValue)
+void UVX_VM_Result::SetQuitText(const FText& InValue)
 {
 	if (false == QuitText.EqualTo(InValue))
 	{

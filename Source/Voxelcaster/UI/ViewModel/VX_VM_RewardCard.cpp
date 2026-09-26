@@ -1,8 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "UI/ViewModel/VXRewardCardViewModel.h"
+#include "UI/ViewModel/VX_VM_RewardCard.h"
 
-void UVXRewardCardViewModel::SetSkillName(const FText& InValue)
+void UVX_VM_RewardCard::SetSkillName(const FText& InValue)
 {
 	if (false == SkillName.EqualTo(InValue))
 	{
@@ -11,7 +11,7 @@ void UVXRewardCardViewModel::SetSkillName(const FText& InValue)
 	}
 }
 
-void UVXRewardCardViewModel::SetModifierName(const FText& InValue)
+void UVX_VM_RewardCard::SetModifierName(const FText& InValue)
 {
 	if (false == ModifierName.EqualTo(InValue))
 	{
@@ -20,7 +20,7 @@ void UVXRewardCardViewModel::SetModifierName(const FText& InValue)
 	}
 }
 
-void UVXRewardCardViewModel::SetLevelText(const FText& InValue)
+void UVX_VM_RewardCard::SetLevelText(const FText& InValue)
 {
 	if (false == LevelText.EqualTo(InValue))
 	{
@@ -29,7 +29,7 @@ void UVXRewardCardViewModel::SetLevelText(const FText& InValue)
 	}
 }
 
-void UVXRewardCardViewModel::SetDescription(const FText& InValue)
+void UVX_VM_RewardCard::SetDescription(const FText& InValue)
 {
 	if (false == Description.EqualTo(InValue))
 	{
@@ -38,7 +38,7 @@ void UVXRewardCardViewModel::SetDescription(const FText& InValue)
 	}
 }
 
-void UVXRewardCardViewModel::SetTagText(const FText& InValue)
+void UVX_VM_RewardCard::SetTagText(const FText& InValue)
 {
 	if (false == TagText.EqualTo(InValue))
 	{
@@ -47,12 +47,12 @@ void UVXRewardCardViewModel::SetTagText(const FText& InValue)
 	}
 }
 
-void UVXRewardCardViewModel::SetbUpgrade(bool InValue)
+void UVX_VM_RewardCard::SetbUpgrade(bool InValue)
 {
 	UE_MVVM_SET_PROPERTY_VALUE(bUpgrade, InValue);
 }
 
-void UVXRewardCardViewModel::SetbHighlighted(bool InValue)
+void UVX_VM_RewardCard::SetbHighlighted(bool InValue)
 {
 	UE_MVVM_SET_PROPERTY_VALUE(bHighlighted, InValue);
 }

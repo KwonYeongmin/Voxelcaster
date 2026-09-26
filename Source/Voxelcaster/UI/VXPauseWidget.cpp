@@ -11,7 +11,7 @@
 #include "UI/VXMenuButton.h"
 #include "UI/VXText.h"
 #include "UI/VXUIBuilder.h"
-#include "UI/ViewModel/VXPauseViewModel.h"
+#include "UI/ViewModel/VX_VM_Pause.h"
 
 bool UVXPauseWidget::Initialize()
 {
@@ -63,7 +63,7 @@ void UVXPauseWidget::NativeOnInitialized()
 	Super::NativeOnInitialized();
 
 	// 글자는 뷰모델로 WBP에 전달한다.
-	ViewModel = NewObject<UVXPauseViewModel>(this);
+	ViewModel = NewObject<UVX_VM_Pause>(this);
 	ViewModel->SetTitleText(FText::FromString(VXText::Get(TEXT("UI.Paused"))));
 	ViewModel->SetResumeText(FText::FromString(VXText::Get(TEXT("UI.Resume"))));
 	ViewModel->SetRestartText(FText::FromString(VXText::Get(TEXT("UI.Restart"))));

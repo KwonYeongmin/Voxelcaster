@@ -8,8 +8,8 @@
 
 class UProgressBar;
 class UTextBlock;
-class UVXHudViewModel;
-class UVXSkillSlotViewModel;
+class UVX_VM_Hud;
+class UVX_VM_SkillSlot;
 
 /** C++ 기본 위젯 트리의 스킬 슬롯 위젯 묶음 */
 USTRUCT()
@@ -35,8 +35,8 @@ struct FVXHUDSkillSlotWidgets
 
 /**
  * 전투 HUD (DES-UI-HUD-001). WBP_HUD의 부모 클래스.
- * - 값은 UVXHudViewModel에 있다. 플레이어 컨트롤러가 채운다.
- * - WBP_HUD: Viewmodels 패널에 VXHudViewModel(Manual)을 추가하고 View Bindings로 연결한다.
+ * - 값은 UVX_VM_Hud에 있다. 플레이어 컨트롤러가 채운다.
+ * - WBP_HUD: Viewmodels 패널에 VX_VM_Hud(Manual)을 추가하고 View Bindings로 연결한다.
  * - WBP가 없으면 C++ 기본 위젯 트리를 만들고 뷰모델 값을 직접 읽어 표시한다.
  */
 UCLASS()
@@ -47,7 +47,7 @@ class VOXELCASTER_API UVXHUDWidget : public UCommonUserWidget
 public:
 	virtual bool Initialize() override;
 
-	void SetViewModel(UVXHudViewModel* InViewModel);
+	void SetViewModel(UVX_VM_Hud* InViewModel);
 
 protected:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
@@ -55,10 +55,10 @@ protected:
 private:
 	void BuildDefaultTree();
 	void RefreshDefaultTree();
-	void RefreshSlot(FVXHUDSkillSlotWidgets& Widgets, const UVXSkillSlotViewModel* SlotViewModel) const;
+	void RefreshSlot(FVXHUDSkillSlotWidgets& Widgets, const UVX_VM_SkillSlot* SlotViewModel) const;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UVXHudViewModel> ViewModel;
+	TObjectPtr<UVX_VM_Hud> ViewModel;
 
 	/** WBP 없이 C++로 위젯 트리를 만들었는지 */
 	bool bBuiltInCode = false;

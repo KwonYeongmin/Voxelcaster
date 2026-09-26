@@ -13,7 +13,7 @@
 #include "UI/VXMenuButton.h"
 #include "UI/VXText.h"
 #include "UI/VXUIBuilder.h"
-#include "UI/ViewModel/VXResultViewModel.h"
+#include "UI/ViewModel/VX_VM_Result.h"
 
 bool UVXResultWidget::Initialize()
 {
@@ -72,7 +72,7 @@ void UVXResultWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	ViewModel = NewObject<UVXResultViewModel>(this);
+	ViewModel = NewObject<UVX_VM_Result>(this);
 	ViewModel->SetRestartText(FText::FromString(VXText::Get(TEXT("UI.Restart"))));
 	ViewModel->SetQuitText(FText::FromString(VXText::Get(TEXT("UI.Quit"))));
 	VXUI::SetViewModel(this, ViewModel);

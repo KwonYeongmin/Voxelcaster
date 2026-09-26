@@ -25,7 +25,7 @@
 #include "Modifier/VXUpgradeSubsystem.h"
 #include "UI/VXHUDWidget.h"
 #include "UI/VXText.h"
-#include "UI/ViewModel/VXHudViewModel.h"
+#include "UI/ViewModel/VX_VM_Hud.h"
 #include "GameplayEffect.h"
 #include "UI/VXPauseWidget.h"
 #include "UI/VXResultWidget.h"
@@ -157,7 +157,7 @@ void AVXPlayerController::BeginPlay()
 	// 전투 HUD (CommonUI)
 	if (IsLocalController())
 	{
-		HudViewModel = NewObject<UVXHudViewModel>(this);
+		HudViewModel = NewObject<UVX_VM_Hud>(this);
 		HUDWidget = CreateWidget<UVXHUDWidget>(this, ResolveWidgetClass(HUDWidgetClass));
 		if (HUDWidget)
 		{
@@ -558,7 +558,7 @@ void AVXPlayerController::UpdateHudViewModel()
 		return;
 	}
 
-	struct FSlotDef { UVXSkillSlotViewModel* ViewModel; FGameplayTag Tag; const TCHAR* NameKey; const TCHAR* Kbm; const TCHAR* Pad; };
+	struct FSlotDef { UVX_VM_SkillSlot* ViewModel; FGameplayTag Tag; const TCHAR* NameKey; const TCHAR* Kbm; const TCHAR* Pad; };
 	const FSlotDef Defs[] =
 	{
 		{ HudViewModel->GetSkillSlot0(), VoxelTags::Cooldown_MagicBolt,  TEXT("Skill.MagicBolt"),  TEXT("LMB"),   TEXT("RT") },
@@ -572,7 +572,7 @@ void AVXPlayerController::UpdateHudViewModel()
 
 	for (const FSlotDef& Def : Defs)
 	{
-		UVXSkillSlotViewModel* Slot = Def.ViewModel;
+		UVX_VM_SkillSlot* Slot = Def.ViewModel;
 		if (nullptr == Slot)
 		{
 			continue;

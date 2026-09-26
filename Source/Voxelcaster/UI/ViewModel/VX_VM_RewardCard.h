@@ -4,14 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "MVVMViewModelBase.h"
-#include "VXRewardCardViewModel.generated.h"
+#include "VX_VM_RewardCard.generated.h"
 
 /**
  * 보상 카드 한 장. MVVM 뷰모델: WBP의 View Bindings로 위젯에 연결한다.
  * 값은 C++(플레이어 컨트롤러·화면 베이스 클래스)이 넣고, 바뀐 값만 알린다.
  */
 UCLASS(BlueprintType, meta = (MVVMAllowedContextCreationType = "Manual"))
-class VOXELCASTER_API UVXRewardCardViewModel : public UMVVMViewModelBase
+class VOXELCASTER_API UVX_VM_RewardCard : public UMVVMViewModelBase
 {
 	GENERATED_BODY()
 

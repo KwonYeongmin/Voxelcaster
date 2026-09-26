@@ -11,7 +11,7 @@ class UInputAction;
 class UInputMappingContext;
 class UCommonActivatableWidget;
 class UVXHUDWidget;
-class UVXHudViewModel;
+class UVX_VM_Hud;
 class UVXPauseWidget;
 class UVXResultWidget;
 class UVXRewardSelectWidget;
@@ -126,7 +126,7 @@ private:
 
 	/** HUD 뷰모델. 매 프레임 게임 상태로 채운다 (바뀐 값만 WBP에 알려진다) */
 	UPROPERTY(Transient)
-	TObjectPtr<UVXHudViewModel> HudViewModel;
+	TObjectPtr<UVX_VM_Hud> HudViewModel;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UCommonActivatableWidget> CurrentMenu;

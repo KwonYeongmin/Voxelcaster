@@ -9,7 +9,7 @@
 #include "Components/VerticalBoxSlot.h"
 #include "UI/VXText.h"
 #include "UI/VXUIBuilder.h"
-#include "UI/ViewModel/VXRewardCardViewModel.h"
+#include "UI/ViewModel/VX_VM_RewardCard.h"
 
 bool UVXRewardCardButton::Initialize()
 {
@@ -63,7 +63,7 @@ void UVXRewardCardButton::BuildDefaultTree()
 	TagText = Add(14, FLinearColor(0.4f, 1.f, 0.6f), true, FMargin(0, 16, 0, 0));
 }
 
-void UVXRewardCardButton::SetCard(const FVXUpgradeCard& InCard, int32 InIndex, UVXRewardCardViewModel* InViewModel)
+void UVXRewardCardButton::SetCard(const FVXUpgradeCard& InCard, int32 InIndex, UVX_VM_RewardCard* InViewModel)
 {
 	Card = InCard;
 	CardIndex = InIndex;

@@ -4,20 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "MVVMViewModelBase.h"
-#include "UI/ViewModel/VXRewardCardViewModel.h"
-#include "VXRewardViewModel.generated.h"
+#include "UI/ViewModel/VX_VM_RewardCard.h"
+#include "VX_VM_Reward.generated.h"
 
 /**
  * 보상 선택 화면 (DES-UI-REWARD-001). MVVM 뷰모델: WBP의 View Bindings로 위젯에 연결한다.
  * 값은 C++(플레이어 컨트롤러·화면 베이스 클래스)이 넣고, 바뀐 값만 알린다.
  */
 UCLASS(BlueprintType, meta = (MVVMAllowedContextCreationType = "Manual"))
-class VOXELCASTER_API UVXRewardViewModel : public UMVVMViewModelBase
+class VOXELCASTER_API UVX_VM_Reward : public UMVVMViewModelBase
 {
 	GENERATED_BODY()
 
 public:
-	UVXRewardViewModel();
+	UVX_VM_Reward();
 
 	const FText& GetTitleText() const { return TitleText; }
 	void SetTitleText(const FText& InValue);
@@ -27,9 +27,9 @@ public:
 	void SetBuildText(const FText& InValue);
 	int32 GetCardCount() const { return CardCount; }
 	void SetCardCount(int32 InValue);
-	UVXRewardCardViewModel* GetCard0() const { return Card0; }
-	UVXRewardCardViewModel* GetCard1() const { return Card1; }
-	UVXRewardCardViewModel* GetCard2() const { return Card2; }
+	UVX_VM_RewardCard* GetCard0() const { return Card0; }
+	UVX_VM_RewardCard* GetCard1() const { return Card1; }
+	UVX_VM_RewardCard* GetCard2() const { return Card2; }
 
 private:
 	/** 웨이브 2 클리어 - 강화를 선택하세요 */
@@ -50,14 +50,14 @@ private:
 
 	/** 왼쪽 카드 */
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Getter, Category = "Voxel", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UVXRewardCardViewModel> Card0;
+	TObjectPtr<UVX_VM_RewardCard> Card0;
 
 	/** 가운데 카드 */
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Getter, Category = "Voxel", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UVXRewardCardViewModel> Card1;
+	TObjectPtr<UVX_VM_RewardCard> Card1;
 
 	/** 오른쪽 카드 */
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Getter, Category = "Voxel", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UVXRewardCardViewModel> Card2;
+	TObjectPtr<UVX_VM_RewardCard> Card2;
 
 };

@@ -7,7 +7,7 @@
 #include "VXPauseWidget.generated.h"
 
 class UCommonButtonBase;
-class UVXPauseViewModel;
+class UVX_VM_Pause;
 
 /**
  * 일시정지 화면 (DES-UI-MENU-001). WBP_Pause의 부모 클래스. CommonUI 활성화 위젯.
@@ -15,7 +15,7 @@ class UVXPauseViewModel;
  *
  * WBP_Pause 만들기:
  * - CommonUI 버튼 3개를 이름 ResumeButton, RestartButton, QuitButton으로 배치한다 (WBP_MenuButton 권장)
- * - Viewmodels 패널에 VXPauseViewModel(Manual)을 추가하고 제목·버튼 글자를 바인딩한다
+ * - Viewmodels 패널에 VX_VM_Pause(Manual)을 추가하고 제목·버튼 글자를 바인딩한다
  * WBP가 없으면 C++ 기본 위젯 트리를 만든다.
  */
 UCLASS()
@@ -48,5 +48,5 @@ private:
 	void HandleQuit();
 
 	UPROPERTY(Transient)
-	TObjectPtr<UVXPauseViewModel> ViewModel;
+	TObjectPtr<UVX_VM_Pause> ViewModel;
 };

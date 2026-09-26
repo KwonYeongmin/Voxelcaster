@@ -9,7 +9,7 @@
 class UCommonButtonBase;
 class UTextBlock;
 class UVXModifierComponent;
-class UVXResultViewModel;
+class UVX_VM_Result;
 
 /** 결과 화면에 보여줄 한 판의 기록 */
 struct FVXRunResult
@@ -27,7 +27,7 @@ struct FVXRunResult
  *
  * WBP_Result 만들기:
  * - CommonUI 버튼 2개를 이름 RestartButton, QuitButton으로 배치한다
- * - Viewmodels 패널에 VXResultViewModel(Manual)을 추가하고 TitleText·StatsText·BuildText 등을 바인딩한다
+ * - Viewmodels 패널에 VX_VM_Result(Manual)을 추가하고 TitleText·StatsText·BuildText 등을 바인딩한다
  * WBP가 없으면 C++ 기본 위젯 트리를 만든다.
  */
 UCLASS()
@@ -57,7 +57,7 @@ private:
 	void HandleQuit();
 
 	UPROPERTY(Transient)
-	TObjectPtr<UVXResultViewModel> ViewModel;
+	TObjectPtr<UVX_VM_Result> ViewModel;
 
 	bool bBuiltInCode = false;
 

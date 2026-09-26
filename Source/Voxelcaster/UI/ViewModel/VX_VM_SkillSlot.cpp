@@ -1,8 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "UI/ViewModel/VXSkillSlotViewModel.h"
+#include "UI/ViewModel/VX_VM_SkillSlot.h"
 
-void UVXSkillSlotViewModel::SetSkillName(const FText& InValue)
+void UVX_VM_SkillSlot::SetSkillName(const FText& InValue)
 {
 	if (false == SkillName.EqualTo(InValue))
 	{
@@ -11,7 +11,7 @@ void UVXSkillSlotViewModel::SetSkillName(const FText& InValue)
 	}
 }
 
-void UVXSkillSlotViewModel::SetKeyText(const FText& InValue)
+void UVX_VM_SkillSlot::SetKeyText(const FText& InValue)
 {
 	if (false == KeyText.EqualTo(InValue))
 	{
@@ -20,7 +20,7 @@ void UVXSkillSlotViewModel::SetKeyText(const FText& InValue)
 	}
 }
 
-void UVXSkillSlotViewModel::SetCooldownPercent(float InValue)
+void UVX_VM_SkillSlot::SetCooldownPercent(float InValue)
 {
 	if (false == FMath::IsNearlyEqual(CooldownPercent, InValue, 0.001f))
 	{
@@ -29,7 +29,7 @@ void UVXSkillSlotViewModel::SetCooldownPercent(float InValue)
 	}
 }
 
-void UVXSkillSlotViewModel::SetCooldownText(const FText& InValue)
+void UVX_VM_SkillSlot::SetCooldownText(const FText& InValue)
 {
 	if (false == CooldownText.EqualTo(InValue))
 	{
@@ -38,12 +38,12 @@ void UVXSkillSlotViewModel::SetCooldownText(const FText& InValue)
 	}
 }
 
-void UVXSkillSlotViewModel::SetbReady(bool InValue)
+void UVX_VM_SkillSlot::SetbReady(bool InValue)
 {
 	UE_MVVM_SET_PROPERTY_VALUE(bReady, InValue);
 }
 
-void UVXSkillSlotViewModel::SetModifiersText(const FText& InValue)
+void UVX_VM_SkillSlot::SetModifiersText(const FText& InValue)
 {
 	if (false == ModifiersText.EqualTo(InValue))
 	{
