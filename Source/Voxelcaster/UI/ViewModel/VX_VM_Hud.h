@@ -29,6 +29,12 @@ public:
 	void SetWaveText(const FText& InValue);
 	const FText& GetEnemiesText() const { return EnemiesText; }
 	void SetEnemiesText(const FText& InValue);
+	const FText& GetBannerText() const { return BannerText; }
+	void SetBannerText(const FText& InValue);
+	const FText& GetBannerSubText() const { return BannerSubText; }
+	void SetBannerSubText(const FText& InValue);
+	float GetBannerOpacity() const { return BannerOpacity; }
+	void SetBannerOpacity(float InValue);
 	UVX_VM_SkillSlot* GetSkillSlot0() const { return SkillSlot0; }
 	UVX_VM_SkillSlot* GetSkillSlot1() const { return SkillSlot1; }
 	UVX_VM_SkillSlot* GetSkillSlot2() const { return SkillSlot2; }
@@ -54,6 +60,18 @@ private:
 	/** 남은 적 · 처치 수 */
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Getter, Setter, Category = "Voxel", meta = (AllowPrivateAccess = "true"))
 	FText EnemiesText;
+
+	/** 웨이브 시작 배너 (웨이브 3) */
+	UPROPERTY(BlueprintReadOnly, FieldNotify, Getter, Setter, Category = "Voxel", meta = (AllowPrivateAccess = "true"))
+	FText BannerText;
+
+	/** 배너 아래 줄 (마지막 웨이브, 엘리트 출현). 없으면 빈 문자열 */
+	UPROPERTY(BlueprintReadOnly, FieldNotify, Getter, Setter, Category = "Voxel", meta = (AllowPrivateAccess = "true"))
+	FText BannerSubText;
+
+	/** 배너 불투명도 0~1. 0이면 숨긴다 (Render Opacity에 바인딩) */
+	UPROPERTY(BlueprintReadOnly, FieldNotify, Getter, Setter, Category = "Voxel", meta = (AllowPrivateAccess = "true"))
+	float BannerOpacity = 0.f;
 
 	/** 매직 볼트 */
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Getter, Category = "Voxel", meta = (AllowPrivateAccess = "true"))

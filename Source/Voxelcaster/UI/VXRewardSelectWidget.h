@@ -59,6 +59,8 @@ private:
 	void HandleCardClicked(UCommonButtonBase* Button);
 	void UpdateBuildText(const FVXUpgradeCard& Card);
 	void FinishSelection();
+	/** 조작 안내를 현재 입력 장치에 맞춘다 */
+	void UpdateHint();
 
 	UPROPERTY(Transient)
 	TObjectPtr<UVX_VM_Reward> ViewModel;

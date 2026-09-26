@@ -7,6 +7,7 @@
 #include "VXHUDWidget.generated.h"
 
 class UProgressBar;
+class UWidget;
 class UTextBlock;
 class UVX_VM_Hud;
 class UVX_VM_SkillSlot;
@@ -77,4 +78,13 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<FVXHUDSkillSlotWidgets> SlotWidgets;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UWidget> BannerBox;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> BannerText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> BannerSubText;
 };

@@ -16,6 +16,7 @@ class UVXPauseWidget;
 class UVXResultWidget;
 class UVXRewardSelectWidget;
 struct FInputActionValue;
+enum class ECommonInputType : uint8;
 
 /** 마지막으로 입력이 들어온 장치. 게임패드는 Xbox·PlayStation 등 콘솔 컨트롤러를 모두 포함한다. */
 UENUM(BlueprintType)
@@ -82,6 +83,10 @@ private:
 	void UpdateHudViewModel();
 
 	void SetInputDevice(EVXInputDevice NewDevice);
+	/** CommonUI가 감지한 입력 방식 (메뉴처럼 UI 전용 입력일 때도 알려 준다) */
+	void HandleInputMethodChanged(ECommonInputType InputType);
+	void HandleWaveStarted(int32 WaveIndex);
+	void UpdateWaveBanner();
 	void HandleChoicesReady(const TArray<struct FVXUpgradeCard>& Choices);
 	/** 화면 좌측 상단에 플레이어 HP를 표시한다 (HUD가 생기면 끈다) */
 	void ShowDebugInfo() const;
@@ -132,6 +137,19 @@ private:
 	TObjectPtr<UCommonActivatableWidget> CurrentMenu;
 
 	FTimerHandle ResultTimer;
+
+	/** 웨이브 배너 시작 시각 (월드 실제 시간). 음수면 표시 안 함 */
+	double BannerStartTime = -1.0;
+
+	/** 배너: 나타나기 · 전체 표시 시간 · 사라지기 (초) */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|UI")
+	float BannerFadeInTime = 0.25f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|UI")
+	float BannerDuration = 2.2f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|UI")
+	float BannerFadeOutTime = 0.6f;
 
 	/** 화면 좌측 상단에 플레이어 HP를 표시한다 (HUD가 생기면 끈다) */
 	UPROPERTY(EditAnywhere, Category = "Voxel|Debug")

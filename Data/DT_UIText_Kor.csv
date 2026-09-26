@@ -32,3 +32,8 @@
 "UI.ReachedWave","도달 웨이브 {0} / {1}"
 "UI.PlayTime","플레이 시간 {0}"
 "UI.FinalBuild","최종 빌드"
+"UI.RewardHintFmt","{0} 선택   ·   {1} 확정"
+"UI.WaveBanner","웨이브 {0}"
+"UI.FinalWave","마지막 웨이브"
+"UI.EliteIncoming","엘리트 출현"
+"Key.Click","클릭"

@@ -10,11 +10,11 @@
 namespace
 {
 	TAutoConsoleVariable<int32> CVarHitStop(
-		TEXT("Voxel.GameFeel.HitStop"), 1,
+		TEXT("VX.GameFeel.HitStop"), 1,
 		TEXT("1: 처치·피격 시 히트스톱을 쓴다"));
 
 	TAutoConsoleVariable<int32> CVarVibration(
-		TEXT("Voxel.GameFeel.Vibration"), 1,
+		TEXT("VX.GameFeel.Vibration"), 1,
 		TEXT("1: 게임패드 진동을 쓴다"));
 }
 

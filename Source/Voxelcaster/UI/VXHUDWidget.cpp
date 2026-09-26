@@ -74,6 +74,12 @@ void UVXHUDWidget::RefreshDefaultTree()
 	WaveText->SetText(ViewModel->GetWaveText());
 	EnemyText->SetText(ViewModel->GetEnemiesText());
 
+	const float BannerOpacity = ViewModel->GetBannerOpacity();
+	BannerBox->SetVisibility(BannerOpacity > 0.f ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	BannerBox->SetRenderOpacity(BannerOpacity);
+	BannerText->SetText(ViewModel->GetBannerText());
+	BannerSubText->SetText(ViewModel->GetBannerSubText());
+
 	const UVX_VM_SkillSlot* Slots[] = { ViewModel->GetSkillSlot0(), ViewModel->GetSkillSlot1(), ViewModel->GetSkillSlot2(), ViewModel->GetSkillSlot3() };
 	for (int32 i = 0; i < SlotWidgets.Num() && i < UE_ARRAY_COUNT(Slots); ++i)
 	{
@@ -111,6 +117,24 @@ void UVXHUDWidget::BuildDefaultTree()
 
 		WaveText = AddToVBox(WidgetTree, Top, 30, VXUI::Title);
 		EnemyText = AddToVBox(WidgetTree, Top, 18, VXUI::Body, false);
+	}
+
+	// ---- 화면 위쪽 가운데: 웨이브 시작 배너
+	{
+		UVerticalBox* Banner = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass());
+		UOverlaySlot* BannerSlot = Root->AddChildToOverlay(Banner);
+		BannerSlot->SetHorizontalAlignment(HAlign_Center);
+		BannerSlot->SetVerticalAlignment(VAlign_Center);
+		BannerSlot->SetPadding(FMargin(0, 0, 0, 280));
+		Banner->SetVisibility(ESlateVisibility::Collapsed);
+
+		BannerText = AddToVBox(WidgetTree, Banner, 64, VXUI::Title);
+		BannerText->SetShadowOffset(FVector2D(3.f, 3.f));
+		BannerText->SetShadowColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.8f));
+		BannerSubText = AddToVBox(WidgetTree, Banner, 24, VXUI::Accent);
+		BannerSubText->SetShadowOffset(FVector2D(2.f, 2.f));
+		BannerSubText->SetShadowColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.8f));
+		BannerBox = Banner;
 	}
 
 	// ---- 좌측 하단: 체력

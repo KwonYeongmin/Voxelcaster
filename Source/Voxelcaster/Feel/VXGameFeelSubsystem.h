@@ -13,7 +13,7 @@ class APlayerController;
  * - 히트스톱: 전역 시간 배율을 잠깐 낮춘다. 겹치면 가장 긴 것 하나만 적용한다 (누적하지 않음).
  *   끝나는 시점은 실제 시간으로 잰다. (느려진 게임 시간으로 재면 끝나지 않는다)
  * - 진동: 현재 입력 장치가 게임패드일 때만 준다.
- * 콘솔 변수 Voxel.GameFeel.HitStop / Voxel.GameFeel.Vibration (0 = 끔)
+ * 콘솔 변수 VX.GameFeel.HitStop / VX.GameFeel.Vibration (0 = 끔)
  */
 UCLASS()
 class VOXELCASTER_API UVXGameFeelSubsystem : public UTickableWorldSubsystem

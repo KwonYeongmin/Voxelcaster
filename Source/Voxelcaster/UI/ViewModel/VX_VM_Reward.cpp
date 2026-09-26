@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "UI/ViewModel/VX_VM_Reward.h"
+#include "Engine/Texture2D.h"
 
 UVX_VM_Reward::UVX_VM_Reward()
 {
@@ -27,4 +28,14 @@ void UVX_VM_Reward::SetBuildText(const FText& InValue)
 void UVX_VM_Reward::SetCardCount(int32 InValue)
 {
 	UE_MVVM_SET_PROPERTY_VALUE(CardCount, InValue);
+}
+
+void UVX_VM_Reward::SetConfirmKeyIcon(UTexture2D* InValue)
+{
+	UE_MVVM_SET_PROPERTY_VALUE(ConfirmKeyIcon, InValue);
+}
+
+void UVX_VM_Reward::SetbHasConfirmKeyIcon(bool InValue)
+{
+	UE_MVVM_SET_PROPERTY_VALUE(bHasConfirmKeyIcon, InValue);
 }

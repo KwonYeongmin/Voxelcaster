@@ -21,6 +21,8 @@ enum class EVXDataTable : uint8
 	Modifiers,
 	TextKor,
 	TextEng,
+	/** 입력 아이콘 (선택). 없으면 글자로 표시 */
+	InputIcons,
 	Count UMETA(Hidden)
 };
 
@@ -53,6 +55,9 @@ public:
 	const UDataTable* GetTextTable(bool bKorean);
 
 	static const TCHAR* GetTableLabel(EVXDataTable Type);
+
+	/** 없어도 되는 테이블 (없을 때 경고하지 않는다) */
+	static bool IsOptional(EVXDataTable Type) { return EVXDataTable::InputIcons == Type; }
 
 private:
 	const UDataTable* LoadTable(EVXDataTable Type);

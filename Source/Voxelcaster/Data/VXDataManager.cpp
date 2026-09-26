@@ -9,6 +9,7 @@
 #include "Enemy/VXEnemyBase.h"
 #include "Engine/DataTable.h"
 #include "Engine/Engine.h"
+#include "UI/VXInputPrompt.h"
 #include "UI/VXText.h"
 #include "Voxelcaster.h"
 
@@ -24,6 +25,7 @@ namespace
 		case EVXDataTable::Modifiers: return FVXModifierRow::StaticStruct();
 		case EVXDataTable::TextKor:
 		case EVXDataTable::TextEng:   return FVXTextRow::StaticStruct();
+		case EVXDataTable::InputIcons: return FVXInputIconRow::StaticStruct();
 		default:                      return nullptr;
 		}
 	}
@@ -37,6 +39,7 @@ namespace
 		case EVXDataTable::Skills:    return Settings.SkillTable;
 		case EVXDataTable::Modifiers: return Settings.ModifierTable;
 		case EVXDataTable::TextKor:   return Settings.TextTableKor;
+		case EVXDataTable::InputIcons: return Settings.InputIconTable;
 		default:                      return Settings.TextTableEng;
 		}
 	}
@@ -85,6 +88,7 @@ const TCHAR* UVXDataManager::GetTableLabel(EVXDataTable Type)
 	case EVXDataTable::Modifiers: return TEXT("Modifiers");
 	case EVXDataTable::TextKor:   return TEXT("TextKor");
 	case EVXDataTable::TextEng:   return TEXT("TextEng");
+	case EVXDataTable::InputIcons: return TEXT("InputIcons");
 	default:                      return TEXT("?");
 	}
 }
@@ -100,6 +104,10 @@ const UDataTable* UVXDataManager::LoadTable(EVXDataTable Type)
 	Tables[Index] = nullptr;
 
 	const TSoftObjectPtr<UDataTable>& Path = GetTablePath(*GetDefault<UVXDataSettings>(), Type);
+	if (Path.IsNull() && IsOptional(Type))
+	{
+		return nullptr;
+	}
 	if (Path.IsNull())
 	{
 		UE_LOG(LogVX, Warning, TEXT("[Data] %s: not set in Project Settings > Voxelcaster Data (using defaults in code)"), GetTableLabel(Type));
@@ -107,6 +115,11 @@ const UDataTable* UVXDataManager::LoadTable(EVXDataTable Type)
 	}
 
 	UDataTable* Table = Path.LoadSynchronous();
+	if (nullptr == Table && IsOptional(Type))
+	{
+		UE_LOG(LogVX, Log, TEXT("[Data] %s: '%s' not found (optional, skipped)"), GetTableLabel(Type), *Path.ToString());
+		return nullptr;
+	}
 	if (nullptr == Table)
 	{
 		UE_LOG(LogVX, Warning, TEXT("[Data] %s: '%s' could not be loaded (using defaults in code)"), GetTableLabel(Type), *Path.ToString());
@@ -148,7 +161,7 @@ bool UVXDataManager::LoadAll()
 		const EVXDataTable Type = static_cast<EVXDataTable>(Index);
 		if (nullptr == LoadTable(Type))
 		{
-			++Problems;
+			Problems += IsOptional(Type) ? 0 : 1;
 			continue;
 		}
 		++Loaded;

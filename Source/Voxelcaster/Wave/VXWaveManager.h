@@ -61,6 +61,8 @@ public:
 
 	int32 GetCurrentWave() const { return CurrentWave; }
 	int32 GetTotalWaves() const { return Waves.Num(); }
+	/** 웨이브 정의 (1부터). 없으면 nullptr */
+	const FVXWaveDef* GetWaveDef(int32 WaveIndex) const { return Waves.IsValidIndex(WaveIndex - 1) ? &Waves[WaveIndex - 1] : nullptr; }
 	EVXWaveState GetState() const { return State; }
 	/** 필드의 적 + 아직 스폰 안 된 적 */
 	int32 GetRemainingEnemies() const;

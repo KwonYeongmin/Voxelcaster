@@ -45,4 +45,8 @@ public:
 	/** 화면 문구 영어 (VXTextRow) */
 	UPROPERTY(Config, EditAnywhere, Category = "Tables", meta = (RequiredAssetDataTags = "RowStructure=/Script/Voxelcaster.VXTextRow"))
 	TSoftObjectPtr<UDataTable> TextTableEng;
+
+	/** 입력 아이콘 (VXInputIconRow, 선택). 없으면 키 글자로 표시한다. 행: MagicBolt, Nova, BladeSweep, Dash, Confirm, Navigate, Back, Pause */
+	UPROPERTY(Config, EditAnywhere, Category = "Tables", meta = (RequiredAssetDataTags = "RowStructure=/Script/Voxelcaster.VXInputIconRow"))
+	TSoftObjectPtr<UDataTable> InputIconTable;
 };

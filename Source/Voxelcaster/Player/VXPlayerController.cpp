@@ -36,6 +36,8 @@
 #include "TimerManager.h"
 #include "Wave/VXWaveManager.h"
 #include "Voxelcaster.h"
+#include "CommonInputSubsystem.h"
+#include "UI/VXInputPrompt.h"
 
 AVXPlayerController::AVXPlayerController()
 {
@@ -153,6 +155,13 @@ void AVXPlayerController::BeginPlay()
 	{
 		GameMode->GetWaveManager()->OnGameWon.AddUObject(this, &AVXPlayerController::HandleGameEnded, true);
 		GameMode->GetWaveManager()->OnGameLost.AddUObject(this, &AVXPlayerController::HandleGameEnded, false);
+		GameMode->GetWaveManager()->OnWaveStarted.AddUObject(this, &AVXPlayerController::HandleWaveStarted);
+	}
+
+	// 메뉴·보상 선택처럼 UI 전용 입력일 때는 InputKey가 오지 않으므로 CommonUI의 감지도 받는다.
+	if (UCommonInputSubsystem* CommonInput = UCommonInputSubsystem::Get(GetLocalPlayer()))
+	{
+		CommonInput->OnInputMethodChangedNative.AddUObject(this, &AVXPlayerController::HandleInputMethodChanged);
 	}
 
 	// 전투 HUD (CommonUI)
@@ -438,6 +447,75 @@ void AVXPlayerController::SetInputDevice(EVXInputDevice NewDevice)
 	OnInputDeviceChanged.Broadcast(NewDevice);
 }
 
+void AVXPlayerController::HandleInputMethodChanged(ECommonInputType InputType)
+{
+	SetInputDevice(ECommonInputType::Gamepad == InputType ? EVXInputDevice::Gamepad : EVXInputDevice::KeyboardMouse);
+}
+
+// ---------------------------------------------------------------------------
+// 웨이브 배너
+// ---------------------------------------------------------------------------
+
+void AVXPlayerController::HandleWaveStarted(int32 WaveIndex)
+{
+	if (nullptr == HudViewModel)
+	{
+		return;
+	}
+
+	const AVXGameMode* GameMode = GetWorld()->GetAuthGameMode<AVXGameMode>();
+	const UVXWaveManager* Waves = nullptr != GameMode ? GameMode->GetWaveManager() : nullptr;
+
+	// 아래 줄: 엘리트가 나오는 웨이브 > 마지막 웨이브 > 없음
+	FString SubText;
+	if (const FVXWaveDef* Wave = nullptr != Waves ? Waves->GetWaveDef(WaveIndex) : nullptr)
+	{
+		for (const FVXWaveSpawn& Spawn : Wave->Spawns)
+		{
+			if (Spawn.EnemyClass && Spawn.EnemyClass->IsChildOf(AVXElite::StaticClass()))
+			{
+				SubText = VXText::Get(TEXT("UI.EliteIncoming"));
+				break;
+			}
+		}
+	}
+	if (SubText.IsEmpty() && nullptr != Waves && WaveIndex == Waves->GetTotalWaves())
+	{
+		SubText = VXText::Get(TEXT("UI.FinalWave"));
+	}
+
+	HudViewModel->SetBannerText(FText::FromString(VXText::Format(TEXT("UI.WaveBanner"), { WaveIndex })));
+	HudViewModel->SetBannerSubText(FText::FromString(SubText));
+	BannerStartTime = GetWorld()->GetRealTimeSeconds();
+	UpdateWaveBanner();
+}
+
+void AVXPlayerController::UpdateWaveBanner()
+{
+	if (nullptr == HudViewModel || BannerStartTime < 0.0)
+	{
+		return;
+	}
+
+	// 히트스톱(시간 배율)에 영향받지 않게 실제 시간으로 잰다.
+	const float Elapsed = static_cast<float>(GetWorld()->GetRealTimeSeconds() - BannerStartTime);
+	float Opacity = 1.f;
+	if (Elapsed >= BannerDuration)
+	{
+		Opacity = 0.f;
+		BannerStartTime = -1.0;
+	}
+	else if (Elapsed < BannerFadeInTime)
+	{
+		Opacity = Elapsed / FMath::Max(BannerFadeInTime, KINDA_SMALL_NUMBER);
+	}
+	else if (Elapsed > BannerDuration - BannerFadeOutTime)
+	{
+		Opacity = (BannerDuration - Elapsed) / FMath::Max(BannerFadeOutTime, KINDA_SMALL_NUMBER);
+	}
+	HudViewModel->SetBannerOpacity(FMath::Clamp(Opacity, 0.f, 1.f));
+}
+
 // ---------------------------------------------------------------------------
 // 조준
 // ---------------------------------------------------------------------------
@@ -522,6 +600,8 @@ void AVXPlayerController::PlayerTick(float DeltaTime)
 
 void AVXPlayerController::UpdateHudViewModel()
 {
+	UpdateWaveBanner();
+
 	const AVXCharacterBase* VoxelPlayer = Cast<AVXCharacterBase>(GetPawn());
 	if (nullptr == HudViewModel || nullptr == VoxelPlayer)
 	{
@@ -563,16 +643,15 @@ void AVXPlayerController::UpdateHudViewModel()
 		return;
 	}
 
-	struct FSlotDef { UVX_VM_SkillSlot* ViewModel; FGameplayTag Tag; const TCHAR* NameKey; const TCHAR* Kbm; const TCHAR* Pad; };
+	struct FSlotDef { UVX_VM_SkillSlot* ViewModel; FGameplayTag Tag; const TCHAR* NameKey; EVXPromptAction Prompt; };
 	const FSlotDef Defs[] =
 	{
-		{ HudViewModel->GetSkillSlot0(), VXTags::Cooldown_MagicBolt,  TEXT("Skill.MagicBolt"),  TEXT("LMB"),   TEXT("RT") },
-		{ HudViewModel->GetSkillSlot1(), VXTags::Cooldown_Nova,       TEXT("Skill.Nova"),       TEXT("RMB"),   TEXT("LT") },
-		{ HudViewModel->GetSkillSlot2(), VXTags::Cooldown_BladeSweep, TEXT("Skill.BladeSweep"), TEXT("Q"),     TEXT("RB") },
-		{ HudViewModel->GetSkillSlot3(), VXTags::Cooldown_Dash,       TEXT("UI.Dash"),          TEXT("Space"), TEXT("A") },
+		{ HudViewModel->GetSkillSlot0(), VXTags::Cooldown_MagicBolt,  TEXT("Skill.MagicBolt"),  EVXPromptAction::MagicBolt },
+		{ HudViewModel->GetSkillSlot1(), VXTags::Cooldown_Nova,       TEXT("Skill.Nova"),       EVXPromptAction::Nova },
+		{ HudViewModel->GetSkillSlot2(), VXTags::Cooldown_BladeSweep, TEXT("Skill.BladeSweep"), EVXPromptAction::BladeSweep },
+		{ HudViewModel->GetSkillSlot3(), VXTags::Cooldown_Dash,       TEXT("UI.Dash"),          EVXPromptAction::Dash },
 	};
 
-	const bool bGamepad = EVXInputDevice::Gamepad == InputDevice;
 	const UVXModifierComponent* Modifiers = VoxelPlayer->FindComponentByClass<UVXModifierComponent>();
 
 	for (const FSlotDef& Def : Defs)
@@ -583,8 +662,11 @@ void AVXPlayerController::UpdateHudViewModel()
 			continue;
 		}
 
-		// 입력 키는 마지막으로 쓴 장치에 맞춘다 (DES-CTRL-001)
-		Slot->SetKeyText(FText::FromString(bGamepad ? Def.Pad : Def.Kbm));
+		// 입력 키는 마지막으로 쓴 장치에 맞춘다 (DES-CTRL-001). 아이콘은 DT_InputIcons가 있을 때만
+		UTexture2D* KeyIcon = VXInputPrompt::GetIcon(Def.Prompt, this);
+		Slot->SetKeyText(FText::FromString(VXInputPrompt::GetLabel(Def.Prompt, this)));
+		Slot->SetKeyIcon(KeyIcon);
+		Slot->SetbHasKeyIcon(nullptr != KeyIcon);
 		Slot->SetSkillName(FText::FromString(VXText::Get(Def.NameKey)));
 
 		// 쿨다운: 이 태그를 부여하는 활성 GE의 남은 시간

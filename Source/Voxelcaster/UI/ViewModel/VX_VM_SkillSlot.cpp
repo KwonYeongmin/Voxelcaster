@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "UI/ViewModel/VX_VM_SkillSlot.h"
+#include "Engine/Texture2D.h"
 
 void UVX_VM_SkillSlot::SetSkillName(const FText& InValue)
 {
@@ -10,6 +11,16 @@ void UVX_VM_SkillSlot::SetSkillName(const FText& InValue)
 void UVX_VM_SkillSlot::SetKeyText(const FText& InValue)
 {
 	VX_VM_SET_TEXT(KeyText, InValue);
+}
+
+void UVX_VM_SkillSlot::SetKeyIcon(UTexture2D* InValue)
+{
+	UE_MVVM_SET_PROPERTY_VALUE(KeyIcon, InValue);
+}
+
+void UVX_VM_SkillSlot::SetbHasKeyIcon(bool InValue)
+{
+	UE_MVVM_SET_PROPERTY_VALUE(bHasKeyIcon, InValue);
 }
 
 void UVX_VM_SkillSlot::SetCooldownPercent(float InValue)

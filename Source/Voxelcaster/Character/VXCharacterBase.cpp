@@ -14,7 +14,7 @@ namespace
 {
 	/** 1이면 체력이 바뀔 때 캐릭터 머리 위에 HP를 표시하고 로그로 남긴다 */
 	TAutoConsoleVariable<int32> CVarShowHealth(
-		TEXT("Voxel.Debug.ShowHealth"), 0,
+		TEXT("VX.Debug.ShowHealth"), 0,
 		TEXT("1: 체력이 바뀔 때 머리 위에 HP를 표시하고 로그로 남긴다"));
 }
 

@@ -13,6 +13,7 @@
 #include "Input/UIActionBindingHandle.h"
 #include "Modifier/VXModifierComponent.h"
 #include "UI/VXRewardCardButton.h"
+#include "UI/VXInputPrompt.h"
 #include "UI/VXText.h"
 #include "UI/VXUIBuilder.h"
 #include "UI/ViewModel/VX_VM_Reward.h"
@@ -68,14 +69,13 @@ void UVXRewardSelectWidget::SetChoices(const TArray<FVXUpgradeCard>& InChoices, 
 {
 	ViewModel = NewObject<UVX_VM_Reward>(this);
 	ViewModel->SetTitleText(FText::FromString(VXText::Format(TEXT("UI.RewardTitle"), { WaveIndex })));
-	ViewModel->SetHintText(FText::FromString(VXText::Get(TEXT("UI.RewardHint"))));
 	ViewModel->SetCardCount(InChoices.Num());
+	UpdateHint();
 	VXUI::SetViewModel(this, ViewModel);
 
 	if (bBuiltInCode)
 	{
 		VXUI::SetText(TitleText, ViewModel->GetTitleText());
-		VXUI::SetText(HintText, ViewModel->GetHintText());
 	}
 
 	// 카드 위젯 준비: WBP면 Card0~2, 기본 트리면 새로 만든다.
@@ -228,6 +228,8 @@ void UVXRewardSelectWidget::NativeTick(const FGeometry& MyGeometry, float InDelt
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
+	UpdateHint();
+
 	// 위젯 틱은 게임이 일시정지되어도 돌기 때문에 연출 타이머를 여기서 센다.
 	if (ConfirmTimer >= 0.f)
 	{
@@ -259,5 +261,28 @@ void UVXRewardSelectWidget::FinishSelection()
 	if (UVXUpgradeSubsystem* Upgrades = nullptr != World ? World->GetSubsystem<UVXUpgradeSubsystem>() : nullptr)
 	{
 		Upgrades->ApplyChoice(Index);
+	}
+}
+
+void UVXRewardSelectWidget::UpdateHint()
+{
+	if (nullptr == ViewModel)
+	{
+		return;
+	}
+
+	// 입력 장치가 바뀌면 바로 바뀐다 (값이 같으면 알림이 가지 않는다)
+	const APlayerController* PlayerController = GetOwningPlayer();
+	ViewModel->SetHintText(FText::FromString(VXText::Format(TEXT("UI.RewardHintFmt"), {
+		VXInputPrompt::GetLabel(EVXPromptAction::Navigate, PlayerController),
+		VXInputPrompt::GetLabel(EVXPromptAction::Confirm, PlayerController) })));
+
+	UTexture2D* ConfirmIcon = VXInputPrompt::GetIcon(EVXPromptAction::Confirm, PlayerController);
+	ViewModel->SetConfirmKeyIcon(ConfirmIcon);
+	ViewModel->SetbHasConfirmKeyIcon(nullptr != ConfirmIcon);
+
+	if (bBuiltInCode)
+	{
+		VXUI::SetText(HintText, ViewModel->GetHintText());
 	}
 }

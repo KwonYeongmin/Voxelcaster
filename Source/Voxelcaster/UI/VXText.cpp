@@ -8,7 +8,7 @@
 namespace
 {
 	TAutoConsoleVariable<FString> CVarLanguage(
-		TEXT("Voxel.Language"), TEXT("ko"),
+		TEXT("VX.Language"), TEXT("ko"),
 		TEXT("화면 문구 언어: ko(한국어) / en(영어)"));
 
 	/** 테이블을 못 읽을 때 쓰는 기본 문구. Data/DT_UIText_Kor.csv, DT_UIText_Eng.csv와 같은 내용이다. */
@@ -57,6 +57,11 @@ namespace
 		{ TEXT("UI.Defeat"),      TEXT("패배"),               TEXT("DEFEAT") },
 		{ TEXT("UI.ReachedWave"), TEXT("도달 웨이브 {0} / {1}"), TEXT("Reached wave {0} / {1}") },
 		{ TEXT("UI.PlayTime"),    TEXT("플레이 시간 {0}"),    TEXT("Play time {0}") },
+		{ TEXT("UI.RewardHintFmt"), TEXT("{0} 선택   ·   {1} 확정"), TEXT("{0} Choose   ·   {1} Confirm") },
+		{ TEXT("UI.WaveBanner"), TEXT("웨이브 {0}"), TEXT("WAVE {0}") },
+		{ TEXT("UI.FinalWave"), TEXT("마지막 웨이브"), TEXT("FINAL WAVE") },
+		{ TEXT("UI.EliteIncoming"), TEXT("엘리트 출현"), TEXT("ELITE INCOMING") },
+		{ TEXT("Key.Click"), TEXT("클릭"), TEXT("Click") },
 		{ TEXT("UI.FinalBuild"),  TEXT("최종 빌드"),          TEXT("FINAL BUILD") },
 	};
 

@@ -34,3 +34,18 @@ void UVX_VM_Hud::SetEnemiesText(const FText& InValue)
 {
 	VX_VM_SET_TEXT(EnemiesText, InValue);
 }
+
+void UVX_VM_Hud::SetBannerText(const FText& InValue)
+{
+	VX_VM_SET_TEXT(BannerText, InValue);
+}
+
+void UVX_VM_Hud::SetBannerSubText(const FText& InValue)
+{
+	VX_VM_SET_TEXT(BannerSubText, InValue);
+}
+
+void UVX_VM_Hud::SetBannerOpacity(float InValue)
+{
+	VX_VM_SET_FLOAT(BannerOpacity, InValue);
+}

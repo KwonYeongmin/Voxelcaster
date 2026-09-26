@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "VX Data Tools",
+	"Description": "Reimport all DataTables in a folder from their CSV/JSON sources with one click.",
+	"Category": "Voxelcaster",
+	"CreatedBy": "",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"EnabledByDefault": true,
+	"Modules": [
+		{
+			"Name": "VXDataTools",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
+	]
+}

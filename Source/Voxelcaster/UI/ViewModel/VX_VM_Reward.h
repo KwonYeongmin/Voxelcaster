@@ -7,6 +7,8 @@
 #include "UI/ViewModel/VX_VM_RewardCard.h"
 #include "VX_VM_Reward.generated.h"
 
+class UTexture2D;
+
 /**
  * 보상 선택 화면 (DES-UI-REWARD-001). MVVM 뷰모델 (UVX_VM_Base 상속): WBP의 View Bindings로 위젯에 연결한다.
  * 값은 C++(플레이어 컨트롤러·화면 베이스 클래스)이 넣고, 바뀐 값만 알린다.
@@ -25,6 +27,10 @@ public:
 	void SetHintText(const FText& InValue);
 	const FText& GetBuildText() const { return BuildText; }
 	void SetBuildText(const FText& InValue);
+	UTexture2D* GetConfirmKeyIcon() const { return ConfirmKeyIcon; }
+	void SetConfirmKeyIcon(UTexture2D* InValue);
+	bool GetbHasConfirmKeyIcon() const { return bHasConfirmKeyIcon; }
+	void SetbHasConfirmKeyIcon(bool InValue);
 	int32 GetCardCount() const { return CardCount; }
 	void SetCardCount(int32 InValue);
 	UVX_VM_RewardCard* GetCard0() const { return Card0; }
@@ -36,7 +42,14 @@ private:
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Getter, Setter, Category = "Voxel", meta = (AllowPrivateAccess = "true"))
 	FText TitleText;
 
-	/** 조작 안내 */
+	/** 확인 키 아이콘 (선택). DT_InputIcons의 Confirm 행 */
+	UPROPERTY(BlueprintReadOnly, FieldNotify, Getter, Setter, Category = "Voxel", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UTexture2D> ConfirmKeyIcon;
+
+	UPROPERTY(BlueprintReadOnly, FieldNotify, Getter, Setter, Category = "Voxel", meta = (AllowPrivateAccess = "true"))
+	bool bHasConfirmKeyIcon = false;
+
+	/** 조작 안내 (입력 장치가 바뀌면 바로 바뀐다) */
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Getter, Setter, Category = "Voxel", meta = (AllowPrivateAccess = "true"))
 	FText HintText;
 

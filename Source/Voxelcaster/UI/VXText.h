@@ -23,7 +23,7 @@ struct FVXTextRow : public FTableRowBase
  * 화면 문구 조회. 현재 언어의 테이블에서 문구를 찾는다.
  * 테이블 위치는 프로젝트 세팅 → Voxelcaster Data (TextTableKor, TextTableEng)
  * 테이블이 없거나 키가 없으면 코드에 넣어 둔 기본 문구를 쓴다.
- * 언어는 콘솔 변수 Voxel.Language (ko / en)로 바꾼다. 기본 ko.
+ * 언어는 콘솔 변수 VX.Language (ko / en)로 바꾼다. 기본 ko.
  */
 namespace VXText
 {
