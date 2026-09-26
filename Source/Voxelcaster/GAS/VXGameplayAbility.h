@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
-#include "VoxelGameplayAbility.generated.h"
+#include "VXGameplayAbility.generated.h"
 
 /**
  * 프로젝트 공용 어빌리티 베이스.
@@ -14,12 +14,12 @@
  * - 태그는 CDO 생성자에서 설정하지 않고 런타임 검사로 처리한다. (네이티브 태그 초기화 순서 문제 방지)
  */
 UCLASS(Abstract)
-class VOXELCASTER_API UVoxelGameplayAbility : public UGameplayAbility
+class VOXELCASTER_API UVXGameplayAbility : public UGameplayAbility
 {
 	GENERATED_BODY()
 
 public:
-	UVoxelGameplayAbility();
+	UVXGameplayAbility();
 
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr,

@@ -1,9 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Enemy/VoxelElite.h"
+#include "Enemy/VXElite.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/World.h"
-#include "Enemy/VoxelRunner.h"
+#include "Enemy/VXRunner.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "StateTree.h"
 #include "TimerManager.h"

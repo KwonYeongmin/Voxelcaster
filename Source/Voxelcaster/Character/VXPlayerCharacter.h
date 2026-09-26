@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/VoxelCharacterBase.h"
-#include "VoxelPlayerCharacter.generated.h"
+#include "Character/VXCharacterBase.h"
+#include "VXPlayerCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;

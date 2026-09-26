@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Data/VXWaveData.h"
-#include "VoxelWaveManager.generated.h"
+#include "VXWaveManager.generated.h"
 
 class AVXEnemyBase;
 class AVXCharacterBase;
@@ -13,7 +13,7 @@ class UDataTable;
 
 /** 웨이브 정의 (DES-WAVE-001). 런타임에 DT_Waves(FVXWaveRow)에서 채운다. */
 USTRUCT(BlueprintType)
-struct FVoxelWaveDef
+struct FVXWaveDef
 {
 	GENERATED_BODY()
 
@@ -22,7 +22,7 @@ struct FVoxelWaveDef
 };
 
 UENUM(BlueprintType)
-enum class EVoxelWaveState : uint8
+enum class EVXWaveState : uint8
 {
 	Idle,
 	/** 웨이브 시작 연출 (스폰 전) */
@@ -61,7 +61,7 @@ public:
 
 	int32 GetCurrentWave() const { return CurrentWave; }
 	int32 GetTotalWaves() const { return Waves.Num(); }
-	EVoxelWaveState GetState() const { return State; }
+	EVXWaveState GetState() const { return State; }
 	/** 필드의 적 + 아직 스폰 안 된 적 */
 	int32 GetRemainingEnemies() const;
 	int32 GetKillCount() const { return KillCount; }
@@ -86,7 +86,7 @@ protected:
 
 	/** 웨이브 목록. WaveTable을 읽으면 그 내용으로 바뀐다. (테이블이 없을 때의 기본값) */
 	UPROPERTY(EditAnywhere, Category = "Voxel|Wave")
-	TArray<FVoxelWaveDef> Waves;
+	TArray<FVXWaveDef> Waves;
 
 	/** 게임 시작 시 자동으로 웨이브 1을 시작한다 */
 	UPROPERTY(EditAnywhere, Category = "Voxel|Wave")
@@ -140,7 +140,7 @@ private:
 	/** 적을 추적 목록에 넣고 사망·소환 이벤트를 구독한다. (웨이브 스폰과 소환된 적 공통) */
 	void RegisterEnemy(AVXEnemyBase* Enemy);
 	bool FindSpawnLocation(const AVXCharacterBase* Player, float CapsuleHalfHeight, FVector& OutLocation) const;
-	void BuildSpawnQueue(const FVoxelWaveDef& Wave);
+	void BuildSpawnQueue(const FVXWaveDef& Wave);
 	AVXCharacterBase* FindLivePlayer() const;
 	void BindPlayerIfNeeded();
 	void CompactAliveList();
@@ -150,7 +150,7 @@ private:
 	void HandleEnemyDeath(AVXCharacterBase* Enemy);
 	void HandlePlayerDeath(AVXCharacterBase* Player);
 
-	EVoxelWaveState State = EVoxelWaveState::Idle;
+	EVXWaveState State = EVXWaveState::Idle;
 	int32 CurrentWave = 0;
 	int32 KillCount = 0;
 	float StateTime = 0.f;

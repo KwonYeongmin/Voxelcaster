@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Modifier/VXUpgradeSubsystem.h"
-#include "GAS/VoxelGameplayTags.h"
+#include "GAS/VXGameplayTags.h"
 #include "UI/VXText.h"
 #include "Voxelcaster.h"
 

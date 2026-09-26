@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GAS/VoxelGameplayTags.h"
+#include "GAS/VXGameplayTags.h"
 
 namespace VoxelTags
 {

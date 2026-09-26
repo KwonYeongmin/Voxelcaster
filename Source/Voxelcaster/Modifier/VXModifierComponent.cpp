@@ -1,14 +1,14 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Modifier/VXModifierComponent.h"
-#include "Character/VoxelCharacterBase.h"
-#include "Combat/VoxelProjectile.h"
+#include "Character/VXCharacterBase.h"
+#include "Combat/VXProjectile.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/Engine.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/World.h"
-#include "GAS/VoxelAbilitySystemComponent.h"
-#include "GAS/VoxelGameplayTags.h"
+#include "GAS/VXAbilitySystemComponent.h"
+#include "GAS/VXGameplayTags.h"
 #include "UI/VXText.h"
 
 int32 FVXModifierSlots::GetStack(EVXModifierType Type) const
@@ -35,7 +35,7 @@ void UVXModifierComponent::BeginPlay()
 
 	if (const AVXCharacterBase* Owner = GetOwnerCharacter())
 	{
-		if (UVoxelAbilitySystemComponent* ASC = Owner->GetVoxelAbilitySystemComponent())
+		if (UVXAbilitySystemComponent* ASC = Owner->GetVoxelAbilitySystemComponent())
 		{
 			ASC->OnSkillHit.AddUObject(this, &UVXModifierComponent::HandleSkillHit);
 			bBoundToHits = true;
@@ -161,7 +161,7 @@ FString UVXModifierComponent::GetSkillDisplayName(const FGameplayTag& SkillTag)
 // 명중 처리
 // ---------------------------------------------------------------------------
 
-void UVXModifierComponent::HandleSkillHit(const FVoxelHitContext& Context)
+void UVXModifierComponent::HandleSkillHit(const FVXHitContext& Context)
 {
 	// 파생 효과는 다른 모디파이어를 다시 발동하지 않는다. (무한 연쇄 방지)
 	if (Context.bIsDerived)
@@ -190,16 +190,16 @@ void UVXModifierComponent::HandleSkillHit(const FVoxelHitContext& Context)
 	}
 }
 
-void UVXModifierComponent::ApplyDerivedHit(const FVoxelHitContext& Source, AVXCharacterBase* Target, const FVector& Location, float Damage) const
+void UVXModifierComponent::ApplyDerivedHit(const FVXHitContext& Source, AVXCharacterBase* Target, const FVector& Location, float Damage) const
 {
 	const AVXCharacterBase* Owner = GetOwnerCharacter();
-	UVoxelAbilitySystemComponent* ASC = nullptr != Owner ? Owner->GetVoxelAbilitySystemComponent() : nullptr;
+	UVXAbilitySystemComponent* ASC = nullptr != Owner ? Owner->GetVoxelAbilitySystemComponent() : nullptr;
 	if (nullptr == ASC || nullptr == Target)
 	{
 		return;
 	}
 
-	FVoxelHitContext Derived = Source;
+	FVXHitContext Derived = Source;
 	Derived.Target = Target;
 	Derived.Location = Location;
 	Derived.Damage = Damage;
@@ -231,7 +231,7 @@ void UVXModifierComponent::GatherHostiles(const FVector& Center, float Radius, T
 	}
 }
 
-void UVXModifierComponent::ApplyExplode(const FVoxelHitContext& Context, int32 Stack)
+void UVXModifierComponent::ApplyExplode(const FVXHitContext& Context, int32 Stack)
 {
 	const float Radius = ExplodeBaseRadius + ExplodeRadiusPerStack * (Stack - 1);
 	const float Damage = Context.Damage * ExplodeDamageRatio;
@@ -251,7 +251,7 @@ void UVXModifierComponent::ApplyExplode(const FVoxelHitContext& Context, int32 S
 #endif
 }
 
-void UVXModifierComponent::ApplyChain(const FVoxelHitContext& Context, int32 Stack)
+void UVXModifierComponent::ApplyChain(const FVXHitContext& Context, int32 Stack)
 {
 	const float Damage = Context.Damage * ChainDamageRatio;
 
@@ -301,7 +301,7 @@ void UVXModifierComponent::ApplyChain(const FVoxelHitContext& Context, int32 Sta
 	}
 }
 
-void UVXModifierComponent::ApplySplit(const FVoxelHitContext& Context, int32 Stack)
+void UVXModifierComponent::ApplySplit(const FVXHitContext& Context, int32 Stack)
 {
 	AVXCharacterBase* Owner = GetOwnerCharacter();
 	UWorld* World = GetWorld();
@@ -310,7 +310,7 @@ void UVXModifierComponent::ApplySplit(const FVoxelHitContext& Context, int32 Sta
 		return;
 	}
 
-	LiveSplitProjectiles.RemoveAll([](const TWeakObjectPtr<AVoxelProjectile>& Projectile) { return false == Projectile.IsValid(); });
+	LiveSplitProjectiles.RemoveAll([](const TWeakObjectPtr<AVXProjectile>& Projectile) { return false == Projectile.IsValid(); });
 
 	const int32 Count = Stack + 1;
 	const FVector Base = Context.Direction.IsNearlyZero() ? Owner->GetActorForwardVector() : Context.Direction.GetSafeNormal2D();
@@ -328,8 +328,8 @@ void UVXModifierComponent::ApplySplit(const FVoxelHitContext& Context, int32 Sta
 		const FVector Location = Context.Location + Direction * 40.f;
 		const FTransform SpawnTransform(Direction.Rotation(), Location);
 
-		AVoxelProjectile* Projectile = World->SpawnActorDeferred<AVoxelProjectile>(
-			AVoxelProjectile::StaticClass(), SpawnTransform, Owner, Owner, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+		AVXProjectile* Projectile = World->SpawnActorDeferred<AVXProjectile>(
+			AVXProjectile::StaticClass(), SpawnTransform, Owner, Owner, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 		if (nullptr == Projectile)
 		{
 			continue;

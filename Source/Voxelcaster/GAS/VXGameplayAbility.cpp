@@ -1,18 +1,18 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GAS/VoxelGameplayAbility.h"
+#include "GAS/VXGameplayAbility.h"
 #include "AbilitySystemComponent.h"
 #include "GameplayEffect.h"
-#include "GAS/VoxelGameplayEffects.h"
-#include "GAS/VoxelGameplayTags.h"
+#include "GAS/VXGameplayEffects.h"
+#include "GAS/VXGameplayTags.h"
 
-UVoxelGameplayAbility::UVoxelGameplayAbility()
+UVXGameplayAbility::UVXGameplayAbility()
 {
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalOnly;
 }
 
-bool UVoxelGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+bool UVXGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags,
 	FGameplayTagContainer* OptionalRelevantTags) const
 {
@@ -38,7 +38,7 @@ bool UVoxelGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle 
 	return true;
 }
 
-UGameplayEffect* UVoxelGameplayAbility::GetCooldownGameplayEffect() const
+UGameplayEffect* UVXGameplayAbility::GetCooldownGameplayEffect() const
 {
 	const FGameplayTag CooldownTag = GetCooldownTag();
 	const float Duration = GetEffectiveCooldown();
@@ -52,19 +52,19 @@ UGameplayEffect* UVoxelGameplayAbility::GetCooldownGameplayEffect() const
 	{
 		FGameplayTagContainer Tags;
 		Tags.AddTag(CooldownTag);
-		CooldownEffect = VoxelEffects::MakeTagDurationEffect(const_cast<UVoxelGameplayAbility*>(this), TEXT("GE_Cooldown"), Tags, Duration);
+		CooldownEffect = VoxelEffects::MakeTagDurationEffect(const_cast<UVXGameplayAbility*>(this), TEXT("GE_Cooldown"), Tags, Duration);
 		CachedCooldownDuration = Duration;
 	}
 	return CooldownEffect;
 }
 
-void UVoxelGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+void UVXGameplayAbility::ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo) const
 {
 	ApplyRuntimeEffectToOwner(Handle, ActorInfo, GetCooldownGameplayEffect());
 }
 
-void UVoxelGameplayAbility::ApplyRuntimeEffectToOwner(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const UGameplayEffect* Effect) const
+void UVXGameplayAbility::ApplyRuntimeEffectToOwner(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const UGameplayEffect* Effect) const
 {
 	UAbilitySystemComponent* ASC = ActorInfo ? ActorInfo->AbilitySystemComponent.Get() : nullptr;
 	if (nullptr == ASC || nullptr == Effect)
@@ -75,7 +75,7 @@ void UVoxelGameplayAbility::ApplyRuntimeEffectToOwner(const FGameplayAbilitySpec
 	ASC->ApplyGameplayEffectToSelf(Effect, GetAbilityLevel(Handle, ActorInfo), MakeEffectContext(Handle, ActorInfo));
 }
 
-const FGameplayTagContainer* UVoxelGameplayAbility::GetCooldownTags() const
+const FGameplayTagContainer* UVXGameplayAbility::GetCooldownTags() const
 {
 	const FGameplayTag CooldownTag = GetCooldownTag();
 	if (CooldownTagContainer.IsEmpty() && CooldownTag.IsValid())

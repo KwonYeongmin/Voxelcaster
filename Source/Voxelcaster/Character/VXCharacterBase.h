@@ -6,10 +6,10 @@
 #include "GameFramework/Character.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayEffectTypes.h"
-#include "VoxelCharacterBase.generated.h"
+#include "VXCharacterBase.generated.h"
 
-class UVoxelAbilitySystemComponent;
-class UVoxelAttributeSet;
+class UVXAbilitySystemComponent;
+class UVXAttributeSet;
 class UGameplayAbility;
 
 // 팀 구분
@@ -37,8 +37,8 @@ public:
 
 	// IAbilitySystemInterface
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	UVoxelAbilitySystemComponent* GetVoxelAbilitySystemComponent() const { return AbilitySystemComponent; }
-	const UVoxelAttributeSet* GetAttributeSet() const { return AttributeSet; }
+	UVXAbilitySystemComponent* GetVoxelAbilitySystemComponent() const { return AbilitySystemComponent; }
+	const UVXAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
 	float GetHealth() const;
 	float GetMaxHealth() const;
@@ -88,10 +88,10 @@ private:
 	void OnMoveSpeedAttributeChanged(const FOnAttributeChangeData& Data);
 
 	UPROPERTY(VisibleAnywhere, Category = "Voxel|GAS")
-	TObjectPtr<UVoxelAbilitySystemComponent> AbilitySystemComponent;
+	TObjectPtr<UVXAbilitySystemComponent> AbilitySystemComponent;
 
 	UPROPERTY()
-	TObjectPtr<UVoxelAttributeSet> AttributeSet;
+	TObjectPtr<UVXAttributeSet> AttributeSet;
 
 	FVector AimDirection = FVector::ForwardVector;
 	FVector MoveInputDirection = FVector::ZeroVector;

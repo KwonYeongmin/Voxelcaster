@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Enemy/VoxelEnemyBase.h"
-#include "VoxelShooter.generated.h"
+#include "Enemy/VXEnemyBase.h"
+#include "VXShooter.generated.h"
 
 UENUM()
 enum class EVXShooterState : uint8

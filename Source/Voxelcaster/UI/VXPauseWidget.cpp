@@ -7,7 +7,7 @@
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "Input/UIActionBindingHandle.h"
-#include "Player/VoxelPlayerController.h"
+#include "Player/VXPlayerController.h"
 #include "UI/VXMenuButton.h"
 #include "UI/VXText.h"
 #include "UI/VXUIBuilder.h"

@@ -2,7 +2,7 @@
 
 #include "AI/VXEnemyAIController.h"
 #include "Components/StateTreeAIComponent.h"
-#include "Enemy/VoxelEnemyBase.h"
+#include "Enemy/VXEnemyBase.h"
 #include "StateTree.h"
 #include "Voxelcaster.h"
 

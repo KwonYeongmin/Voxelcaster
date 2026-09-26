@@ -2,7 +2,7 @@
 
 #include "AI/VXShooterStateTree.h"
 #include "AIController.h"
-#include "Enemy/VoxelShooter.h"
+#include "Enemy/VXShooter.h"
 #include "StateTreeExecutionContext.h"
 
 namespace

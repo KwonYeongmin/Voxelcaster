@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GAS/VoxelGameplayAbility.h"
+#include "GAS/VXGameplayAbility.h"
 #include "VX_GA_Dash.generated.h"
 
 /**
@@ -11,7 +11,7 @@
  * 쿨다운 1초, 무적 0.2초, 이동 거리 4m / 0.2초.
  */
 UCLASS()
-class VOXELCASTER_API UVX_GA_Dash : public UVoxelGameplayAbility
+class VOXELCASTER_API UVX_GA_Dash : public UVXGameplayAbility
 {
 	GENERATED_BODY()
 

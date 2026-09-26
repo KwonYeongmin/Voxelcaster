@@ -5,10 +5,10 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "GameplayTagContainer.h"
-#include "GAS/VoxelHitContext.h"
+#include "GAS/VXHitContext.h"
 #include "VXModifierComponent.generated.h"
 
-class AVoxelProjectile;
+class AVXProjectile;
 class AVXCharacterBase;
 
 /** 모디파이어 종류 (DES-MOD-001) */
@@ -38,7 +38,7 @@ DECLARE_MULTICAST_DELEGATE(FVXModifiersChangedSignature);
 
 /**
  * 플레이어의 스킬별 모디파이어 장착 상태와 효과 실행을 담당한다. (SPC-MOD-001)
- * - 스킬은 쿨다운 태그(Cooldown.MagicBolt 등)로 식별한다. 명중 정보(FVoxelHitContext::SkillTag)와 같다.
+ * - 스킬은 쿨다운 태그(Cooldown.MagicBolt 등)로 식별한다. 명중 정보(FVXHitContext::SkillTag)와 같다.
  * - 스킬 명중(OnSkillHit)을 구독해 분열·폭발·연쇄를 실행한다. 파생 명중(bIsDerived)에는 반응하지 않는다.
  * - 관통은 투사체가, 가속은 스킬 어빌리티가 이 컴포넌트의 스택을 읽어 적용한다.
  * 확정 규칙: 슬롯 3칸, 슬롯 1칸 = 스택 1, 최대 스택 3, 분열 피해 40%.
@@ -138,14 +138,14 @@ protected:
 	bool bShowDebugInfo = false;
 
 private:
-	void HandleSkillHit(const FVoxelHitContext& Context);
+	void HandleSkillHit(const FVXHitContext& Context);
 
-	void ApplySplit(const FVoxelHitContext& Context, int32 Stack);
-	void ApplyExplode(const FVoxelHitContext& Context, int32 Stack);
-	void ApplyChain(const FVoxelHitContext& Context, int32 Stack);
+	void ApplySplit(const FVXHitContext& Context, int32 Stack);
+	void ApplyExplode(const FVXHitContext& Context, int32 Stack);
+	void ApplyChain(const FVXHitContext& Context, int32 Stack);
 
 	/** 파생 피해를 준다 (bIsDerived = true, 모디파이어 재발동 없음) */
-	void ApplyDerivedHit(const FVoxelHitContext& Source, AVXCharacterBase* Target, const FVector& Location, float Damage) const;
+	void ApplyDerivedHit(const FVXHitContext& Source, AVXCharacterBase* Target, const FVector& Location, float Damage) const;
 
 	void GatherHostiles(const FVector& Center, float Radius, TArray<AVXCharacterBase*>& OutTargets) const;
 	AVXCharacterBase* GetOwnerCharacter() const;
@@ -153,6 +153,6 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Voxel|Modifier")
 	TMap<FGameplayTag, FVXModifierSlots> Equipped;
 
-	TArray<TWeakObjectPtr<AVoxelProjectile>> LiveSplitProjectiles;
+	TArray<TWeakObjectPtr<AVXProjectile>> LiveSplitProjectiles;
 	bool bBoundToHits = false;
 };

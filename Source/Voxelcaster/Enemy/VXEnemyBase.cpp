@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Enemy/VoxelEnemyBase.h"
+#include "Enemy/VXEnemyBase.h"
 #include "AI/VXEnemyAIController.h"
 #include "Components/CapsuleComponent.h"
 #include "Animation/AnimMontage.h"

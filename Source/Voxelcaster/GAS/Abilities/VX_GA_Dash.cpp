@@ -4,9 +4,9 @@
 #include "Abilities/Tasks/AbilityTask_ApplyRootMotionConstantForce.h"
 #include "AbilitySystemComponent.h"
 #include "GameplayEffect.h"
-#include "Character/VoxelCharacterBase.h"
-#include "GAS/VoxelGameplayEffects.h"
-#include "GAS/VoxelGameplayTags.h"
+#include "Character/VXCharacterBase.h"
+#include "GAS/VXGameplayEffects.h"
+#include "GAS/VXGameplayTags.h"
 #include "Voxelcaster.h"
 
 UVX_GA_Dash::UVX_GA_Dash()

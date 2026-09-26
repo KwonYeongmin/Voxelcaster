@@ -1,16 +1,16 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Wave/VoxelWaveManager.h"
-#include "Character/VoxelCharacterBase.h"
+#include "Wave/VXWaveManager.h"
+#include "Character/VXCharacterBase.h"
 #include "Components/CapsuleComponent.h"
-#include "Enemy/VoxelEnemyBase.h"
-#include "Enemy/VoxelElite.h"
-#include "Enemy/VoxelRunner.h"
-#include "Enemy/VoxelShooter.h"
+#include "Enemy/VXEnemyBase.h"
+#include "Enemy/VXElite.h"
+#include "Enemy/VXRunner.h"
+#include "Enemy/VXShooter.h"
 #include "Engine/DataTable.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
-#include "GAS/VoxelGameplayEffects.h"
+#include "GAS/VXGameplayEffects.h"
 #include "Kismet/GameplayStatics.h"
 #include "Modifier/VXModifierComponent.h"
 #include "Modifier/VXUpgradeSubsystem.h"
@@ -29,9 +29,9 @@ namespace
 		return Spawn;
 	}
 
-	FVoxelWaveDef MakeWave(std::initializer_list<FVXWaveSpawn> Spawns)
+	FVXWaveDef MakeWave(std::initializer_list<FVXWaveSpawn> Spawns)
 	{
-		FVoxelWaveDef Wave;
+		FVXWaveDef Wave;
 		Wave.Spawns = Spawns;
 		return Wave;
 	}
@@ -109,7 +109,7 @@ bool UVXWaveManager::LoadWavesFromTable()
 	Waves.Reset();
 	for (const FVXWaveRow* Row : Rows)
 	{
-		FVoxelWaveDef Wave;
+		FVXWaveDef Wave;
 		Wave.Spawns = Row->Spawns;
 		Waves.Add(Wave);
 	}
@@ -131,7 +131,7 @@ void UVXWaveManager::StartWave(int32 WaveIndex)
 	}
 
 	CurrentWave = WaveIndex;
-	State = EVoxelWaveState::Intro;
+	State = EVXWaveState::Intro;
 	StateTime = 0.f;
 	CombatTime = 0.f;
 	AutoStartTimer = -1.f;
@@ -149,7 +149,7 @@ void UVXWaveManager::StartNextWave()
 
 void UVXWaveManager::StopWaves()
 {
-	State = EVoxelWaveState::Idle;
+	State = EVXWaveState::Idle;
 	AutoStartTimer = -1.f;
 	SpawnQueue.Reset();
 	SpawnTimes.Reset();
@@ -169,7 +169,7 @@ int32 UVXWaveManager::GetRemainingEnemies() const
 	return Alive + FMath::Max(0, SpawnQueue.Num() - NextSpawnIndex);
 }
 
-void UVXWaveManager::BuildSpawnQueue(const FVoxelWaveDef& Wave)
+void UVXWaveManager::BuildSpawnQueue(const FVXWaveDef& Wave)
 {
 	SpawnQueue.Reset();
 	SpawnTimes.Reset();
@@ -216,7 +216,7 @@ void UVXWaveManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	BindPlayerIfNeeded();
 	CompactAliveList();
 
-	if (CurrentWave > 0 && EVoxelWaveState::Finished != State && EVoxelWaveState::Idle != State)
+	if (CurrentWave > 0 && EVXWaveState::Finished != State && EVXWaveState::Idle != State)
 	{
 		PlayTime += DeltaTime;
 	}
@@ -224,7 +224,7 @@ void UVXWaveManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	if (AutoStartTimer >= 0.f)
 	{
 		AutoStartTimer -= DeltaTime;
-		if (AutoStartTimer < 0.f && State == EVoxelWaveState::Idle)
+		if (AutoStartTimer < 0.f && State == EVXWaveState::Idle)
 		{
 			StartWave(1);
 		}
@@ -232,7 +232,7 @@ void UVXWaveManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 
 	switch (State)
 	{
-	case EVoxelWaveState::Intro:
+	case EVXWaveState::Intro:
 		StateTime += DeltaTime;
 		if (StateTime >= IntroDuration)
 		{
@@ -240,13 +240,13 @@ void UVXWaveManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 		}
 		break;
 
-	case EVoxelWaveState::Combat:
+	case EVXWaveState::Combat:
 		CombatTime += DeltaTime;
 		UpdateSpawning();
 		UpdateClearCondition();
 		break;
 
-	case EVoxelWaveState::Cleared:
+	case EVXWaveState::Cleared:
 		if (bAutoAdvance && false == bWaitingForReward)
 		{
 			StateTime += DeltaTime;
@@ -269,7 +269,7 @@ void UVXWaveManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 
 void UVXWaveManager::BeginCombat()
 {
-	State = EVoxelWaveState::Combat;
+	State = EVXWaveState::Combat;
 	CombatTime = 0.f;
 }
 
@@ -297,14 +297,14 @@ void UVXWaveManager::UpdateClearCondition()
 		return;
 	}
 
-	State = EVoxelWaveState::Cleared;
+	State = EVXWaveState::Cleared;
 	StateTime = 0.f;
 	UE_LOG(LogVoxel, Log, TEXT("Wave %d cleared (kills: %d)"), CurrentWave, KillCount);
 	OnWaveCleared.Broadcast(CurrentWave);
 
 	if (CurrentWave >= Waves.Num())
 	{
-		State = EVoxelWaveState::Finished;
+		State = EVXWaveState::Finished;
 		UE_LOG(LogVoxel, Log, TEXT("All waves cleared: victory"));
 		OnGameWon.Broadcast();
 		return;
@@ -332,7 +332,7 @@ void UVXWaveManager::UpdateClearCondition()
 
 void UVXWaveManager::HandleChoiceApplied(const FVXUpgradeCard& Card)
 {
-	if (bWaitingForReward && EVoxelWaveState::Cleared == State)
+	if (bWaitingForReward && EVXWaveState::Cleared == State)
 	{
 		bWaitingForReward = false;
 		StartNextWave();
@@ -453,12 +453,12 @@ void UVXWaveManager::HandleEnemyDeath(AVXCharacterBase* Enemy)
 
 void UVXWaveManager::HandlePlayerDeath(AVXCharacterBase* Player)
 {
-	if (State == EVoxelWaveState::Finished)
+	if (State == EVXWaveState::Finished)
 	{
 		return;
 	}
 
-	State = EVoxelWaveState::Finished;
+	State = EVXWaveState::Finished;
 	UE_LOG(LogVoxel, Log, TEXT("Player died at wave %d: defeat (kills: %d)"), CurrentWave, KillCount);
 	OnGameLost.Broadcast();
 }

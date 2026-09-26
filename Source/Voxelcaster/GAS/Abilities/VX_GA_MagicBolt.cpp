@@ -1,10 +1,10 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GAS/Abilities/VX_GA_MagicBolt.h"
-#include "Character/VoxelCharacterBase.h"
-#include "Combat/VoxelProjectile.h"
+#include "Character/VXCharacterBase.h"
+#include "Combat/VXProjectile.h"
 #include "Engine/World.h"
-#include "GAS/VoxelGameplayTags.h"
+#include "GAS/VXGameplayTags.h"
 #include "Modifier/VXModifierComponent.h"
 
 UVX_GA_MagicBolt::UVX_GA_MagicBolt()
@@ -24,8 +24,8 @@ void UVX_GA_MagicBolt::ExecuteSkill(AVXCharacterBase* Caster)
 	const FVector Direction = Caster->GetAimDirection();
 	const FVector SpawnLocation = Caster->GetActorLocation() + Direction * 60.f;
 
-	AVoxelProjectile* Projectile = World->SpawnActorDeferred<AVoxelProjectile>(
-		AVoxelProjectile::StaticClass(), FTransform(Direction.Rotation(), SpawnLocation), Caster, Caster,
+	AVXProjectile* Projectile = World->SpawnActorDeferred<AVXProjectile>(
+		AVXProjectile::StaticClass(), FTransform(Direction.Rotation(), SpawnLocation), Caster, Caster,
 		ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (Projectile)
 	{

@@ -1,12 +1,12 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Combat/VXNovaField.h"
-#include "Character/VoxelCharacterBase.h"
+#include "Character/VXCharacterBase.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/World.h"
-#include "GAS/VoxelAbilitySystemComponent.h"
-#include "GAS/VoxelHitContext.h"
+#include "GAS/VXAbilitySystemComponent.h"
+#include "GAS/VXHitContext.h"
 #include "TimerManager.h"
 
 AVXNovaField::AVXNovaField()
@@ -67,10 +67,10 @@ void AVXNovaField::ApplyTick()
 		}
 	}
 
-	UVoxelAbilitySystemComponent* ASC = SourceCharacter->GetVoxelAbilitySystemComponent();
+	UVXAbilitySystemComponent* ASC = SourceCharacter->GetVoxelAbilitySystemComponent();
 	for (AVXCharacterBase* Target : Targets)
 	{
-		FVoxelHitContext Context;
+		FVXHitContext Context;
 		Context.SkillTag = SkillTag;
 		Context.Source = SourceCharacter;
 		Context.Target = Target;

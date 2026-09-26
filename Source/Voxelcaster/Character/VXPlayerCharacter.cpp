@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Character/VoxelPlayerCharacter.h"
+#include "Character/VXPlayerCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -8,8 +8,8 @@
 #include "GAS/Abilities/VX_GA_Dash.h"
 #include "GAS/Abilities/VX_GA_MagicBolt.h"
 #include "GAS/Abilities/VX_GA_Nova.h"
-#include "GAS/VoxelAbilitySystemComponent.h"
-#include "GAS/VoxelGameplayTags.h"
+#include "GAS/VXAbilitySystemComponent.h"
+#include "GAS/VXGameplayTags.h"
 #include "Modifier/VXModifierComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -47,7 +47,7 @@ AVXPlayerCharacter::AVXPlayerCharacter()
 
 void AVXPlayerCharacter::GrantStartupAbilities()
 {
-	UVoxelAbilitySystemComponent* ASC = GetVoxelAbilitySystemComponent();
+	UVXAbilitySystemComponent* ASC = GetVoxelAbilitySystemComponent();
 	ASC->GiveAbilityWithInput(UVX_GA_Dash::StaticClass(), VoxelTags::Input_Dash);
 
 	// 스킬 3종: 스킬 1 = 매직 볼트(좌클릭/RT), 스킬 2 = 노바(우클릭/LT), 스킬 3 = 블레이드 스윕(Q/RB)

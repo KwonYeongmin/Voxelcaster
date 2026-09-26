@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GAS/Abilities/VoxelSkillAbility.h"
+#include "GAS/Abilities/VXSkillAbility.h"
 #include "VX_GA_MagicBolt.generated.h"
 
-class AVoxelProjectile;
+class AVXProjectile;
 
 /** 매직 볼트: 조준 방향 직선 투사체 1발, 피해 20, 쿨다운 0.4초. 주력 평타. (DES-SKILL-001) */
 UCLASS()
-class VOXELCASTER_API UVX_GA_MagicBolt : public UVoxelSkillAbility
+class VOXELCASTER_API UVX_GA_MagicBolt : public UVXSkillAbility
 {
 	GENERATED_BODY()
 

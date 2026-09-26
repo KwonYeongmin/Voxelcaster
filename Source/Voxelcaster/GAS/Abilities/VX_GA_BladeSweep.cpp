@@ -1,9 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GAS/Abilities/VX_GA_BladeSweep.h"
-#include "Character/VoxelCharacterBase.h"
+#include "Character/VXCharacterBase.h"
 #include "DrawDebugHelpers.h"
-#include "GAS/VoxelGameplayTags.h"
+#include "GAS/VXGameplayTags.h"
 
 UVX_GA_BladeSweep::UVX_GA_BladeSweep()
 {

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "GameplayTagContainer.h"
-#include "VoxelProjectile.generated.h"
+#include "VXProjectile.generated.h"
 
 class USphereComponent;
 class UProjectileMovementComponent;
@@ -17,12 +17,12 @@ class AVXCharacterBase;
  * 벽에 막히거나 사거리를 넘으면 사라진다. 관통·분열 같은 모디파이어는 명중 이벤트로 붙는다.
  */
 UCLASS()
-class VOXELCASTER_API AVoxelProjectile : public AActor
+class VOXELCASTER_API AVXProjectile : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	AVoxelProjectile();
+	AVXProjectile();
 
 	/** 스폰 직후(BeginPlay 전) 호출한다. */
 	void Init(AVXCharacterBase* InCaster, const FGameplayTag& InSkillTag, float InDamage, float InSpeed, float InMaxRange,

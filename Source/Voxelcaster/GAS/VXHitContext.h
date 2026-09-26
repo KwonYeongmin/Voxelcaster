@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "VoxelHitContext.generated.h"
+#include "VXHitContext.generated.h"
 
 /** 스킬이 적 한 명을 명중했을 때의 정보. 모디파이어 훅(OnHit)이 이 정보를 받는다. (DES-MOD-001) */
 USTRUCT(BlueprintType)
-struct VOXELCASTER_API FVoxelHitContext
+struct VOXELCASTER_API FVXHitContext
 {
 	GENERATED_BODY()
 
@@ -39,4 +39,4 @@ struct VOXELCASTER_API FVoxelHitContext
 	bool bIsDerived = false;
 };
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FVoxelSkillHitSignature, const FVoxelHitContext& /*Context*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FVXSkillHitSignature, const FVXHitContext& /*Context*/);

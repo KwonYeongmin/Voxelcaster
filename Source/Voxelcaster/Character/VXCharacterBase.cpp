@@ -1,11 +1,11 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Character/VoxelCharacterBase.h"
+#include "Character/VXCharacterBase.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GAS/VoxelAbilitySystemComponent.h"
-#include "GAS/VoxelAttributeSet.h"
-#include "GAS/VoxelGameplayTags.h"
+#include "GAS/VXAbilitySystemComponent.h"
+#include "GAS/VXAttributeSet.h"
+#include "GAS/VXGameplayTags.h"
 #include "DrawDebugHelpers.h"
 #include "HAL/IConsoleManager.h"
 #include "Voxelcaster.h"
@@ -22,8 +22,8 @@ AVXCharacterBase::AVXCharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	AbilitySystemComponent = CreateDefaultSubobject<UVoxelAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
-	AttributeSet = CreateDefaultSubobject<UVoxelAttributeSet>(TEXT("AttributeSet"));
+	AbilitySystemComponent = CreateDefaultSubobject<UVXAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+	AttributeSet = CreateDefaultSubobject<UVXAttributeSet>(TEXT("AttributeSet"));
 	AbilitySystemComponent->AddAttributeSetSubobject(AttributeSet.Get());
 
 	// 탑다운: 조준 방향을 컨트롤러가 직접 지정하므로 컨트롤러 회전을 따르지 않는다.
@@ -94,9 +94,9 @@ void AVXCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UVoxelAttributeSet::GetHealthAttribute())
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UVXAttributeSet::GetHealthAttribute())
 		.AddUObject(this, &AVXCharacterBase::OnHealthAttributeChanged);
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UVoxelAttributeSet::GetMoveSpeedAttribute())
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UVXAttributeSet::GetMoveSpeedAttribute())
 		.AddUObject(this, &AVXCharacterBase::OnMoveSpeedAttributeChanged);
 
 	AbilitySystemComponent->AbilityFailedCallbacks.AddLambda([](const UGameplayAbility* Ability, const FGameplayTagContainer& FailureTags)

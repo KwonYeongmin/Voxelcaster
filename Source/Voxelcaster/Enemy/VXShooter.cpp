@@ -1,8 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Enemy/VoxelShooter.h"
+#include "Enemy/VXShooter.h"
 #include "Animation/AnimMontage.h"
-#include "Combat/VoxelProjectile.h"
+#include "Combat/VXProjectile.h"
 #include "Data/VXEnemyData.h"
 #include "Engine/World.h"
 #include "GameplayTagContainer.h"
@@ -243,8 +243,8 @@ void AVXShooter::SpawnProjectile(const FVector& BaseDirection, float AngleOffset
 	const FVector SpawnLocation = GetActorLocation() + Direction * 60.f;
 	const FTransform SpawnTransform(Direction.Rotation(), SpawnLocation);
 
-	AVoxelProjectile* Projectile = GetWorld()->SpawnActorDeferred<AVoxelProjectile>(
-		AVoxelProjectile::StaticClass(), SpawnTransform, this, this, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+	AVXProjectile* Projectile = GetWorld()->SpawnActorDeferred<AVXProjectile>(
+		AVXProjectile::StaticClass(), SpawnTransform, this, this, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (Projectile)
 	{
 		Projectile->Init(this, FGameplayTag(), ProjectileDamage, ProjectileSpeed, ProjectileMaxRange, FLinearColor(1.f, 0.35f, 0.1f));

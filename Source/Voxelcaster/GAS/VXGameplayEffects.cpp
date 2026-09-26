@@ -1,10 +1,10 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GAS/VoxelGameplayEffects.h"
+#include "GAS/VXGameplayEffects.h"
 #include "AbilitySystemComponent.h"
 #include "GameplayEffect.h"
 #include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
-#include "GAS/VoxelAttributeSet.h"
+#include "GAS/VXAttributeSet.h"
 
 namespace VoxelEffects
 {
@@ -27,7 +27,7 @@ namespace VoxelEffects
 		GE->DurationPolicy = EGameplayEffectDurationType::Instant;
 
 		FGameplayModifierInfo Modifier;
-		Modifier.Attribute = UVoxelAttributeSet::GetIncomingDamageAttribute();
+		Modifier.Attribute = UVXAttributeSet::GetIncomingDamageAttribute();
 		Modifier.ModifierOp = EGameplayModOp::Additive;
 		Modifier.ModifierMagnitude = FGameplayEffectModifierMagnitude(FScalableFloat(Damage));
 		GE->Modifiers.Add(Modifier);
@@ -57,7 +57,7 @@ namespace VoxelEffects
 		GE->DurationPolicy = EGameplayEffectDurationType::Instant;
 
 		FGameplayModifierInfo Modifier;
-		Modifier.Attribute = UVoxelAttributeSet::GetHealthAttribute();
+		Modifier.Attribute = UVXAttributeSet::GetHealthAttribute();
 		Modifier.ModifierOp = EGameplayModOp::Additive;
 		Modifier.ModifierMagnitude = FGameplayEffectModifierMagnitude(FScalableFloat(Amount));
 		GE->Modifiers.Add(Modifier);

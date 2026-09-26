@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "GameplayTagContainer.h"
-#include "VoxelPlayerController.generated.h"
+#include "VXPlayerController.generated.h"
 
 class UInputAction;
 class UInputMappingContext;
@@ -19,13 +19,13 @@ struct FInputActionValue;
 
 /** 마지막으로 입력이 들어온 장치. 게임패드는 Xbox·PlayStation 등 콘솔 컨트롤러를 모두 포함한다. */
 UENUM(BlueprintType)
-enum class EVoxelInputDevice : uint8
+enum class EVXInputDevice : uint8
 {
 	KeyboardMouse,
 	Gamepad
 };
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FVXInputDeviceChangedSignature, EVoxelInputDevice /*NewDevice*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FVXInputDeviceChangedSignature, EVXInputDevice /*NewDevice*/);
 
 /**
  * 게임플레이 입력 담당 (DES-CTRL-001).
@@ -55,7 +55,7 @@ public:
 	void RestartGame();
 	void QuitGame();
 
-	EVoxelInputDevice GetInputDevice() const { return InputDevice; }
+	EVXInputDevice GetInputDevice() const { return InputDevice; }
 
 	/** 입력 장치가 바뀔 때 (HUD 버튼 아이콘, 커서 표시 갱신용) */
 	FVXInputDeviceChangedSignature OnInputDeviceChanged;
@@ -81,7 +81,7 @@ private:
 	void ShowResult(bool bVictory);
 	void UpdateHudViewModel();
 
-	void SetInputDevice(EVoxelInputDevice NewDevice);
+	void SetInputDevice(EVXInputDevice NewDevice);
 	void HandleChoicesReady(const TArray<struct FVXUpgradeCard>& Choices);
 	/** 화면 좌측 상단에 플레이어 HP를 표시한다 (HUD가 생기면 끈다) */
 	void ShowDebugInfo() const;
@@ -137,7 +137,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Voxel|Debug")
 	bool bShowDebugInfo = false;
 
-	EVoxelInputDevice InputDevice = EVoxelInputDevice::KeyboardMouse;
+	EVXInputDevice InputDevice = EVXInputDevice::KeyboardMouse;
 
 	/** 오른쪽 스틱 조준 값 (월드 방향, 입력 없으면 Zero) */
 	FVector StickAimDirection = FVector::ZeroVector;

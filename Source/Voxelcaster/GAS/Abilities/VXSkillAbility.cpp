@@ -1,31 +1,31 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GAS/Abilities/VoxelSkillAbility.h"
-#include "Character/VoxelCharacterBase.h"
+#include "GAS/Abilities/VXSkillAbility.h"
+#include "Character/VXCharacterBase.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/World.h"
-#include "GAS/VoxelAbilitySystemComponent.h"
-#include "GAS/VoxelHitContext.h"
+#include "GAS/VXAbilitySystemComponent.h"
+#include "GAS/VXHitContext.h"
 #include "Modifier/VXModifierComponent.h"
 
-UVoxelSkillAbility::UVoxelSkillAbility()
+UVXSkillAbility::UVXSkillAbility()
 {
 	bBlockedWhileDashing = true;
 }
 
-UVXModifierComponent* UVoxelSkillAbility::GetModifierComponent() const
+UVXModifierComponent* UVXSkillAbility::GetModifierComponent() const
 {
 	const AActor* Avatar = GetAvatarActorFromActorInfo();
 	return nullptr != Avatar ? Avatar->FindComponentByClass<UVXModifierComponent>() : nullptr;
 }
 
-float UVoxelSkillAbility::GetEffectiveCooldown() const
+float UVXSkillAbility::GetEffectiveCooldown() const
 {
 	const UVXModifierComponent* Modifiers = GetModifierComponent();
 	return nullptr != Modifiers ? Modifiers->GetModifiedCooldown(GetCooldownTag(), CooldownDuration) : CooldownDuration;
 }
 
-void UVoxelSkillAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+void UVXSkillAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	// 쿨다운 시작
@@ -44,7 +44,7 @@ void UVoxelSkillAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle
 	EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 }
 
-void UVoxelSkillAbility::GatherHostilesInRadius(const AVXCharacterBase* Caster, const FVector& Center, float Radius, TArray<AVXCharacterBase*>& OutTargets) const
+void UVXSkillAbility::GatherHostilesInRadius(const AVXCharacterBase* Caster, const FVector& Center, float Radius, TArray<AVXCharacterBase*>& OutTargets) const
 {
 	UWorld* World = Caster ? Caster->GetWorld() : nullptr;
 	if (nullptr == World)
@@ -67,14 +67,14 @@ void UVoxelSkillAbility::GatherHostilesInRadius(const AVXCharacterBase* Caster, 
 	}
 }
 
-void UVoxelSkillAbility::ApplyHit(AVXCharacterBase* Caster, AVXCharacterBase* Target, const FVector& HitLocation, const FVector& Direction, float DamageScale) const
+void UVXSkillAbility::ApplyHit(AVXCharacterBase* Caster, AVXCharacterBase* Target, const FVector& HitLocation, const FVector& Direction, float DamageScale) const
 {
 	if (nullptr == Caster || nullptr == Target)
 	{
 		return;
 	}
 
-	FVoxelHitContext Context;
+	FVXHitContext Context;
 	Context.SkillTag = GetCooldownTag();
 	Context.Source = Caster;
 	Context.Target = Target;
@@ -83,7 +83,7 @@ void UVoxelSkillAbility::ApplyHit(AVXCharacterBase* Caster, AVXCharacterBase* Ta
 	Context.Damage = Damage * DamageScale;
 	Context.bIsDerived = false;
 
-	if (UVoxelAbilitySystemComponent* ASC = Caster->GetVoxelAbilitySystemComponent())
+	if (UVXAbilitySystemComponent* ASC = Caster->GetVoxelAbilitySystemComponent())
 	{
 		ASC->ApplySkillHit(Context);
 	}

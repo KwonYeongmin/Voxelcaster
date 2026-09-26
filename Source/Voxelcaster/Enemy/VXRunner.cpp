@@ -1,11 +1,11 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Enemy/VoxelRunner.h"
+#include "Enemy/VXRunner.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
-#include "GAS/VoxelAbilitySystemComponent.h"
+#include "GAS/VXAbilitySystemComponent.h"
 #include "Data/VXEnemyData.h"
-#include "GAS/VoxelGameplayEffects.h"
+#include "GAS/VXGameplayEffects.h"
 
 AVXRunner::AVXRunner()
 {

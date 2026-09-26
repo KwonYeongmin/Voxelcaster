@@ -1,11 +1,11 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Core/VoxelGameMode.h"
-#include "Character/VoxelPlayerCharacter.h"
-#include "Player/VoxelPlayerController.h"
-#include "Wave/VoxelWaveManager.h"
+#include "Core/VXGameMode.h"
+#include "Character/VXPlayerCharacter.h"
+#include "Player/VXPlayerController.h"
+#include "Wave/VXWaveManager.h"
 
-AVoxelGameMode::AVoxelGameMode()
+AVXGameMode::AVXGameMode()
 {
 	DefaultPawnClass = AVXPlayerCharacter::StaticClass();
 	PlayerControllerClass = AVXPlayerController::StaticClass();

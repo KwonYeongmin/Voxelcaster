@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/VoxelCharacterBase.h"
-#include "VoxelEnemyBase.generated.h"
+#include "Character/VXCharacterBase.h"
+#include "VXEnemyBase.generated.h"
 
 class UStaticMeshComponent;
 class UMaterialInstanceDynamic;

@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Enemy/VoxelShooter.h"
-#include "VoxelElite.generated.h"
+#include "Enemy/VXShooter.h"
+#include "VXElite.generated.h"
 
 /**
  * 엘리트 (슈터 강화): 웨이브 5에 1마리. (DES-ENEMY-001, DES-AI-001)

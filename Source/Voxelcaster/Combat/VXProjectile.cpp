@@ -1,16 +1,16 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Combat/VoxelProjectile.h"
-#include "Character/VoxelCharacterBase.h"
+#include "Combat/VXProjectile.h"
+#include "Character/VXCharacterBase.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "GAS/VoxelAbilitySystemComponent.h"
-#include "GAS/VoxelHitContext.h"
+#include "GAS/VXAbilitySystemComponent.h"
+#include "GAS/VXHitContext.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/ConstructorHelpers.h"
 
-AVoxelProjectile::AVoxelProjectile()
+AVXProjectile::AVXProjectile()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -41,7 +41,7 @@ AVoxelProjectile::AVoxelProjectile()
 	ProjectileMovement->bShouldBounce = false;
 }
 
-void AVoxelProjectile::Init(AVXCharacterBase* InCaster, const FGameplayTag& InSkillTag, float InDamage, float InSpeed, float InMaxRange,
+void AVXProjectile::Init(AVXCharacterBase* InCaster, const FGameplayTag& InSkillTag, float InDamage, float InSpeed, float InMaxRange,
 	const FLinearColor& InColor)
 {
 	Caster = InCaster;
@@ -64,18 +64,18 @@ void AVoxelProjectile::Init(AVXCharacterBase* InCaster, const FGameplayTag& InSk
 	ProjectileMovement->MaxSpeed = Speed;
 }
 
-void AVoxelProjectile::BeginPlay()
+void AVXProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AVoxelProjectile::OnSphereBeginOverlap);
-	ProjectileMovement->OnProjectileStop.AddDynamic(this, &AVoxelProjectile::OnProjectileStopped);
+	Sphere->OnComponentBeginOverlap.AddDynamic(this, &AVXProjectile::OnSphereBeginOverlap);
+	ProjectileMovement->OnProjectileStop.AddDynamic(this, &AVXProjectile::OnProjectileStopped);
 
 	// 사거리를 수명으로 환산한다.
 	SetLifeSpan(MaxRange / FMath::Max(Speed, 1.f));
 }
 
-void AVoxelProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+void AVXProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AVXCharacterBase* SourceCharacter = Caster.Get();
@@ -91,7 +91,7 @@ void AVoxelProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompo
 	}
 	HitActors.Add(Target);
 
-	FVoxelHitContext Context;
+	FVXHitContext Context;
 	Context.SkillTag = SkillTag;
 	Context.Source = SourceCharacter;
 	Context.Target = Target;
@@ -100,7 +100,7 @@ void AVoxelProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompo
 	Context.Damage = Damage;
 	Context.bIsDerived = bIsDerived;
 
-	if (UVoxelAbilitySystemComponent* ASC = SourceCharacter->GetVoxelAbilitySystemComponent())
+	if (UVXAbilitySystemComponent* ASC = SourceCharacter->GetVoxelAbilitySystemComponent())
 	{
 		ASC->ApplySkillHit(Context);
 	}
@@ -115,7 +115,7 @@ void AVoxelProjectile::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedCompo
 	Destroy();
 }
 
-void AVoxelProjectile::OnProjectileStopped(const FHitResult& ImpactResult)
+void AVXProjectile::OnProjectileStopped(const FHitResult& ImpactResult)
 {
 	Destroy();
 }

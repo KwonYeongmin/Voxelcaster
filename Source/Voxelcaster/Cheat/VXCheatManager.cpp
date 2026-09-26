@@ -2,19 +2,19 @@
 
 #include "Cheat/VXCheatManager.h"
 #include "AbilitySystemComponent.h"
-#include "Character/VoxelCharacterBase.h"
-#include "Core/VoxelGameMode.h"
-#include "Enemy/VoxelElite.h"
-#include "Enemy/VoxelRunner.h"
-#include "Enemy/VoxelShooter.h"
+#include "Character/VXCharacterBase.h"
+#include "Core/VXGameMode.h"
+#include "Enemy/VXElite.h"
+#include "Enemy/VXRunner.h"
+#include "Enemy/VXShooter.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
-#include "GAS/VoxelGameplayEffects.h"
-#include "GAS/VoxelGameplayTags.h"
+#include "GAS/VXGameplayEffects.h"
+#include "GAS/VXGameplayTags.h"
 #include "Modifier/VXModifierComponent.h"
 #include "Modifier/VXUpgradeSubsystem.h"
-#include "Wave/VoxelWaveManager.h"
+#include "Wave/VXWaveManager.h"
 #include "Voxelcaster.h"
 
 APawn* UVXCheatManager::GetPlayerPawn() const
@@ -240,7 +240,7 @@ void UVXCheatManager::DebugStartWave(int32 WaveIndex)
 		WaveIndex = 1;
 	}
 
-	if (const AVoxelGameMode* GameMode = GetWorld()->GetAuthGameMode<AVoxelGameMode>())
+	if (const AVXGameMode* GameMode = GetWorld()->GetAuthGameMode<AVXGameMode>())
 	{
 		GameMode->GetWaveManager()->StartWave(WaveIndex);
 	}
@@ -248,7 +248,7 @@ void UVXCheatManager::DebugStartWave(int32 WaveIndex)
 
 void UVXCheatManager::DebugStopWaves()
 {
-	if (const AVoxelGameMode* GameMode = GetWorld()->GetAuthGameMode<AVoxelGameMode>())
+	if (const AVXGameMode* GameMode = GetWorld()->GetAuthGameMode<AVXGameMode>())
 	{
 		GameMode->GetWaveManager()->StopWaves();
 	}

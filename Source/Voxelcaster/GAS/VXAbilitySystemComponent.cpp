@@ -1,12 +1,12 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GAS/VoxelAbilitySystemComponent.h"
+#include "GAS/VXAbilitySystemComponent.h"
 #include "Abilities/GameplayAbility.h"
 #include "Voxelcaster.h"
 #include "AbilitySystemInterface.h"
-#include "GAS/VoxelGameplayEffects.h"
+#include "GAS/VXGameplayEffects.h"
 
-FGameplayAbilitySpecHandle UVoxelAbilitySystemComponent::GiveAbilityWithInput(TSubclassOf<UGameplayAbility> AbilityClass, const FGameplayTag& InputTag, int32 Level)
+FGameplayAbilitySpecHandle UVXAbilitySystemComponent::GiveAbilityWithInput(TSubclassOf<UGameplayAbility> AbilityClass, const FGameplayTag& InputTag, int32 Level)
 {
 	if (nullptr == AbilityClass)
 	{
@@ -21,7 +21,7 @@ FGameplayAbilitySpecHandle UVoxelAbilitySystemComponent::GiveAbilityWithInput(TS
 	return GiveAbility(Spec);
 }
 
-void UVoxelAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& InputTag)
+void UVXAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& InputTag)
 {
 	if (false == InputTag.IsValid())
 	{
@@ -51,7 +51,7 @@ void UVoxelAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& In
 	}
 }
 
-void UVoxelAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& InputTag)
+void UVXAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& InputTag)
 {
 	if (false == InputTag.IsValid())
 	{
@@ -69,7 +69,7 @@ void UVoxelAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& I
 	}
 }
 
-void UVoxelAbilitySystemComponent::ProcessHeldInputs()
+void UVXAbilitySystemComponent::ProcessHeldInputs()
 {
 	if (HeldInputTags.IsEmpty())
 	{
@@ -85,7 +85,7 @@ void UVoxelAbilitySystemComponent::ProcessHeldInputs()
 	}
 }
 
-void UVoxelAbilitySystemComponent::ApplySkillHit(const FVoxelHitContext& Context)
+void UVXAbilitySystemComponent::ApplySkillHit(const FVXHitContext& Context)
 {
 	AActor* TargetActor = Context.Target.Get();
 	if (nullptr == TargetActor)

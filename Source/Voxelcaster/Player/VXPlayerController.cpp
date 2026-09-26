@@ -1,21 +1,21 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Player/VoxelPlayerController.h"
+#include "Player/VXPlayerController.h"
 #include "AbilitySystemComponent.h"
-#include "Character/VoxelCharacterBase.h"
-#include "Core/VoxelGameMode.h"
-#include "Enemy/VoxelElite.h"
-#include "Enemy/VoxelRunner.h"
-#include "Enemy/VoxelShooter.h"
+#include "Character/VXCharacterBase.h"
+#include "Core/VXGameMode.h"
+#include "Enemy/VXElite.h"
+#include "Enemy/VXRunner.h"
+#include "Enemy/VXShooter.h"
 #include "Engine/Engine.h"
 #include "EngineUtils.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
-#include "GAS/VoxelAbilitySystemComponent.h"
-#include "GAS/VoxelAttributeSet.h"
-#include "GAS/VoxelGameplayEffects.h"
-#include "GAS/VoxelGameplayTags.h"
+#include "GAS/VXAbilitySystemComponent.h"
+#include "GAS/VXAttributeSet.h"
+#include "GAS/VXGameplayEffects.h"
+#include "GAS/VXGameplayTags.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "InputMappingContext.h"
@@ -33,7 +33,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "TimerManager.h"
-#include "Wave/VoxelWaveManager.h"
+#include "Wave/VXWaveManager.h"
 #include "Voxelcaster.h"
 
 AVXPlayerController::AVXPlayerController()
@@ -148,7 +148,7 @@ void AVXPlayerController::BeginPlay()
 		Upgrades->OnChoicesReady.AddUObject(this, &AVXPlayerController::HandleChoicesReady);
 	}
 
-	if (AVoxelGameMode* GameMode = GetWorld()->GetAuthGameMode<AVoxelGameMode>())
+	if (AVXGameMode* GameMode = GetWorld()->GetAuthGameMode<AVXGameMode>())
 	{
 		GameMode->GetWaveManager()->OnGameWon.AddUObject(this, &AVXPlayerController::HandleGameEnded, true);
 		GameMode->GetWaveManager()->OnGameLost.AddUObject(this, &AVXPlayerController::HandleGameEnded, false);
@@ -174,8 +174,8 @@ void AVXPlayerController::BeginPlay()
 void AVXPlayerController::HandlePause(const FInputActionValue& Value)
 {
 	// 메뉴가 열려 있을 때는 메뉴가 입력을 받으므로 여기로 오지 않는다. (UI 전용 입력 모드)
-	const AVoxelGameMode* GameMode = GetWorld()->GetAuthGameMode<AVoxelGameMode>();
-	if (IsMenuOpen() || (GameMode && EVoxelWaveState::Finished == GameMode->GetWaveManager()->GetState()))
+	const AVXGameMode* GameMode = GetWorld()->GetAuthGameMode<AVXGameMode>();
+	if (IsMenuOpen() || (GameMode && EVXWaveState::Finished == GameMode->GetWaveManager()->GetState()))
 	{
 		return;
 	}
@@ -248,7 +248,7 @@ void AVXPlayerController::ShowResult(bool bVictory)
 
 	FVXRunResult Run;
 	Run.bVictory = bVictory;
-	if (const AVoxelGameMode* GameMode = GetWorld()->GetAuthGameMode<AVoxelGameMode>())
+	if (const AVXGameMode* GameMode = GetWorld()->GetAuthGameMode<AVXGameMode>())
 	{
 		const UVXWaveManager* Waves = GameMode->GetWaveManager();
 		Run.ReachedWave = Waves->GetCurrentWave();
@@ -276,7 +276,7 @@ void AVXPlayerController::OpenRewardSelect(const TArray<FVXUpgradeCard>& Choices
 	}
 
 	int32 WaveIndex = 0;
-	if (const AVoxelGameMode* GameMode = GetWorld()->GetAuthGameMode<AVoxelGameMode>())
+	if (const AVXGameMode* GameMode = GetWorld()->GetAuthGameMode<AVXGameMode>())
 	{
 		WaveIndex = GameMode->GetWaveManager()->GetCurrentWave();
 	}
@@ -385,7 +385,7 @@ void AVXPlayerController::HandleAbilityPressed(FGameplayTag InputTag)
 {
 	if (const AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPawn()))
 	{
-		if (UVoxelAbilitySystemComponent* ASC = VoxelChar->GetVoxelAbilitySystemComponent())
+		if (UVXAbilitySystemComponent* ASC = VoxelChar->GetVoxelAbilitySystemComponent())
 		{
 			ASC->AbilityInputTagPressed(InputTag);
 		}
@@ -396,7 +396,7 @@ void AVXPlayerController::HandleAbilityReleased(FGameplayTag InputTag)
 {
 	if (const AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPawn()))
 	{
-		if (UVoxelAbilitySystemComponent* ASC = VoxelChar->GetVoxelAbilitySystemComponent())
+		if (UVXAbilitySystemComponent* ASC = VoxelChar->GetVoxelAbilitySystemComponent())
 		{
 			ASC->AbilityInputTagReleased(InputTag);
 		}
@@ -414,18 +414,18 @@ bool AVXPlayerController::InputKey(const FInputKeyEventArgs& Params)
 		const bool bIsAxis = Params.Event == IE_Axis;
 		if (false == bIsAxis || FMath::Abs(Params.AmountDepressed) >= GamepadSwitchThreshold)
 		{
-			SetInputDevice(EVoxelInputDevice::Gamepad);
+			SetInputDevice(EVXInputDevice::Gamepad);
 		}
 	}
 	else if (Params.Event == IE_Pressed && (Params.Key.IsMouseButton() || false == Params.Key.IsAnalog()))
 	{
-		SetInputDevice(EVoxelInputDevice::KeyboardMouse);
+		SetInputDevice(EVXInputDevice::KeyboardMouse);
 	}
 
 	return Super::InputKey(Params);
 }
 
-void AVXPlayerController::SetInputDevice(EVoxelInputDevice NewDevice)
+void AVXPlayerController::SetInputDevice(EVXInputDevice NewDevice)
 {
 	if (InputDevice == NewDevice)
 	{
@@ -433,7 +433,7 @@ void AVXPlayerController::SetInputDevice(EVoxelInputDevice NewDevice)
 	}
 
 	InputDevice = NewDevice;
-	bShowMouseCursor = (NewDevice == EVoxelInputDevice::KeyboardMouse);
+	bShowMouseCursor = (NewDevice == EVXInputDevice::KeyboardMouse);
 	OnInputDeviceChanged.Broadcast(NewDevice);
 }
 
@@ -449,7 +449,7 @@ FVector AVXPlayerController::ResolveAimDirection() const
 		return FVector::ZeroVector;
 	}
 
-	if (InputDevice == EVoxelInputDevice::Gamepad)
+	if (InputDevice == EVXInputDevice::Gamepad)
 	{
 		// 오른쪽 스틱 > 이동 방향 > (없으면 마지막 조준 방향 유지)
 		if (false == StickAimDirection.IsNearlyZero())
@@ -488,7 +488,7 @@ void AVXPlayerController::PlayerTick(float DeltaTime)
 		const FVector2D Current(MouseX, MouseY);
 		if (bHasLastMousePosition && FVector2D::Distance(Current, LastMousePosition) >= MouseSwitchThreshold)
 		{
-			SetInputDevice(EVoxelInputDevice::KeyboardMouse);
+			SetInputDevice(EVXInputDevice::KeyboardMouse);
 		}
 		LastMousePosition = Current;
 		bHasLastMousePosition = true;
@@ -513,7 +513,7 @@ void AVXPlayerController::PlayerTick(float DeltaTime)
 		VoxelChar->SetAimDirection(Aim);
 	}
 
-	if (UVoxelAbilitySystemComponent* ASC = VoxelChar->GetVoxelAbilitySystemComponent())
+	if (UVXAbilitySystemComponent* ASC = VoxelChar->GetVoxelAbilitySystemComponent())
 	{
 		ASC->ProcessHeldInputs();
 	}
@@ -543,7 +543,7 @@ void AVXPlayerController::UpdateHudViewModel()
 	HudViewModel->SetHealthText(FText::FromString(HealthString));
 
 	// ---- 웨이브
-	if (const AVoxelGameMode* GameMode = GetWorld()->GetAuthGameMode<AVoxelGameMode>())
+	if (const AVXGameMode* GameMode = GetWorld()->GetAuthGameMode<AVXGameMode>())
 	{
 		const UVXWaveManager* Waves = GameMode->GetWaveManager();
 		HudViewModel->SetWaveText(FText::FromString(VXText::Format(TEXT("UI.Wave"), { Waves->GetCurrentWave(), Waves->GetTotalWaves() })));
@@ -567,7 +567,7 @@ void AVXPlayerController::UpdateHudViewModel()
 		{ HudViewModel->GetSkillSlot3(), VoxelTags::Cooldown_Dash,       TEXT("UI.Dash"),          TEXT("Space"), TEXT("A") },
 	};
 
-	const bool bGamepad = EVoxelInputDevice::Gamepad == InputDevice;
+	const bool bGamepad = EVXInputDevice::Gamepad == InputDevice;
 	const UVXModifierComponent* Modifiers = VoxelPlayer->FindComponentByClass<UVXModifierComponent>();
 
 	for (const FSlotDef& Def : Defs)

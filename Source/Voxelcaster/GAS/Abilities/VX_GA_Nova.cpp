@@ -1,10 +1,10 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "GAS/Abilities/VX_GA_Nova.h"
-#include "Character/VoxelCharacterBase.h"
+#include "Character/VXCharacterBase.h"
 #include "Combat/VXNovaField.h"
 #include "Engine/World.h"
-#include "GAS/VoxelGameplayTags.h"
+#include "GAS/VXGameplayTags.h"
 
 UVX_GA_Nova::UVX_GA_Nova()
 {

@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Enemy/VoxelEnemyBase.h"
-#include "VoxelRunner.generated.h"
+#include "Enemy/VXEnemyBase.h"
+#include "VXRunner.generated.h"
 
 /**
  * 러너: 플레이어에게 곧장 돌진하고 접촉하면 피해 10. 체력 40, 이동 속도 5 m/s.

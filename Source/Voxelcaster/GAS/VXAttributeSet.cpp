@@ -1,10 +1,10 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "GAS/VoxelAttributeSet.h"
+#include "GAS/VXAttributeSet.h"
 #include "GameplayEffectExtension.h"
-#include "GAS/VoxelGameplayTags.h"
+#include "GAS/VXGameplayTags.h"
 
-void UVoxelAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
+void UVXAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
 	Super::PreAttributeChange(Attribute, NewValue);
 
@@ -18,7 +18,7 @@ void UVoxelAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute,
 	}
 }
 
-bool UVoxelAttributeSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData& Data)
+bool UVXAttributeSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData& Data)
 {
 	if (false == Super::PreGameplayEffectExecute(Data))
 	{
@@ -37,7 +37,7 @@ bool UVoxelAttributeSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData
 	return true;
 }
 
-void UVoxelAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
+void UVXAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
 {
 	Super::PostGameplayEffectExecute(Data);
 

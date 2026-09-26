@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GAS/Abilities/VoxelSkillAbility.h"
+#include "GAS/Abilities/VXSkillAbility.h"
 #include "VX_GA_Nova.generated.h"
 
 /**
@@ -11,7 +11,7 @@
  * 장판은 시전자를 따라다니며 Duration 동안 TickInterval마다 Damage(틱당 피해)를 준다. 시전 즉시 1회 포함.
  */
 UCLASS()
-class VOXELCASTER_API UVX_GA_Nova : public UVoxelSkillAbility
+class VOXELCASTER_API UVX_GA_Nova : public UVXSkillAbility
 {
 	GENERATED_BODY()
 
