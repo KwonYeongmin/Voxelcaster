@@ -4,11 +4,26 @@
 #include "Character/VXCharacterBase.h"
 #include "DrawDebugHelpers.h"
 #include "GAS/VXGameplayTags.h"
+#include "Data/VXSkillData.h"
 
 UVX_GA_BladeSweep::UVX_GA_BladeSweep()
 {
 	Damage = 30.f;
 	CooldownDuration = 1.5f;
+	SkillRowName = TEXT("BladeSweep");
+}
+
+void UVX_GA_BladeSweep::ApplySkillRow(const FVXSkillRow& Row)
+{
+	Super::ApplySkillRow(Row);
+	if (Row.Radius > 0.f)
+	{
+		Radius = Row.Radius;
+	}
+	if (Row.ArcAngle > 0.f)
+	{
+		ArcAngle = Row.ArcAngle;
+	}
 }
 
 FGameplayTag UVX_GA_BladeSweep::GetCooldownTag() const

@@ -90,44 +90,19 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	// ---- 수치 (design 문서 기준, 플레이하며 조정) ----
+	// ---- 수치는 DT_Modifiers (VXModifierData). 여기에는 성능 제한만 둔다 ----
 
-	/** 분열 투사체 피해 비율 */
-	UPROPERTY(EditAnywhere, Category = "Voxel|Modifier|Split")
-	float SplitDamageRatio = 0.4f;
-
-	/** 분열 투사체 속도 (cm/s). 15 m/s */
-	UPROPERTY(EditAnywhere, Category = "Voxel|Modifier|Split")
-	float SplitSpeed = 1500.f;
-
-	/** 분열 투사체 사거리 (cm). 6 m */
-	UPROPERTY(EditAnywhere, Category = "Voxel|Modifier|Split")
-	float SplitRange = 600.f;
-
-	/** 동시에 존재할 수 있는 분열 투사체 수 (성능 제한) */
-	UPROPERTY(EditAnywhere, Category = "Voxel|Modifier|Split")
+	/** 성능 제한: 동시에 존재하는 분열 투사체 수 */
+	UPROPERTY(EditAnywhere, Category = "Voxel|Modifier|Limit")
 	int32 MaxSplitProjectiles = 60;
 
-	/** 폭발 반경 (cm): 1스택 150, 스택당 +50 */
-	UPROPERTY(EditAnywhere, Category = "Voxel|Modifier|Explode")
-	float ExplodeBaseRadius = 150.f;
+	/** 성능 제한: 폭발 한 번이 맞히는 적 수 (가까운 순) */
+	UPROPERTY(EditAnywhere, Category = "Voxel|Modifier|Limit")
+	int32 MaxExplodeTargets = 30;
 
-	UPROPERTY(EditAnywhere, Category = "Voxel|Modifier|Explode")
-	float ExplodeRadiusPerStack = 50.f;
-
-	UPROPERTY(EditAnywhere, Category = "Voxel|Modifier|Explode")
-	float ExplodeDamageRatio = 0.5f;
-
-	/** 연쇄 전이 최대 거리 (cm). 5 m */
-	UPROPERTY(EditAnywhere, Category = "Voxel|Modifier|Chain")
-	float ChainRange = 500.f;
-
-	UPROPERTY(EditAnywhere, Category = "Voxel|Modifier|Chain")
-	float ChainDamageRatio = 0.7f;
-
-	/** 가속: 스택당 쿨다운 감소 비율 */
-	UPROPERTY(EditAnywhere, Category = "Voxel|Modifier|Haste")
-	float HasteReductionPerStack = 0.15f;
+	/** 성능 제한: 한 프레임에 일어나는 연쇄 번개 전이 수. 초과분은 생략한다 */
+	UPROPERTY(EditAnywhere, Category = "Voxel|Modifier|Limit")
+	int32 MaxChainJumpsPerFrame = 40;
 
 	/** 쿨다운 하한 (초) */
 	UPROPERTY(EditAnywhere, Category = "Voxel|Modifier|Haste")
@@ -148,6 +123,11 @@ private:
 	void ApplyDerivedHit(const FVXHitContext& Source, AVXCharacterBase* Target, const FVector& Location, float Damage) const;
 
 	void GatherHostiles(const FVector& Center, float Radius, TArray<AVXCharacterBase*>& OutTargets) const;
+
+	/** 이번 프레임의 연쇄 전이 수 (성능 제한) */
+	int32 ChainJumpsThisFrame = 0;
+	uint64 ChainFrameNumber = 0;
+
 	AVXCharacterBase* GetOwnerCharacter() const;
 
 	UPROPERTY(VisibleAnywhere, Category = "Voxel|Modifier")

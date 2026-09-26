@@ -61,7 +61,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Feel")
 	float KillVibrationDuration = 0.3f;
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void HandleDeath() override;
+
+	/** 적끼리 밀어내는 반경 (cm). 이 거리 안의 다른 적에게서 멀어지는 방향을 이동에 섞는다 */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Enemy")
+	float SeparationRadius = 140.f;
+
+	/** 밀어내는 힘 (이동 입력 비중, 0이면 끔) */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Enemy")
+	float SeparationWeight = 0.8f;
 
 	/**
 	 * DT_Enemies의 행을 능력치에 적용한다. 자식 클래스는 공격 관련 값을 덧붙여 적용한다.
@@ -128,5 +137,10 @@ private:
 	FVector VisualBaseScale = FVector::OneVector;
 
 	static bool bEasyMode;
+
+	/** 살아 있는 적 목록 (겹침 방지 계산용). 월드가 여러 개(PIE)여도 같은 월드끼리만 계산한다 */
+	static TArray<TWeakObjectPtr<AVXEnemyBase>> AliveEnemies;
+
+	void ApplySeparation();
 	float DeathWorldTime = -1.f;
 };

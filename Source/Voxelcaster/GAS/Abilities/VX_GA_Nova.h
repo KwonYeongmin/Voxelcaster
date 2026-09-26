@@ -21,6 +21,7 @@ public:
 protected:
 	virtual void ExecuteSkill(AVXCharacterBase* Caster) override;
 	virtual FGameplayTag GetCooldownTag() const override;
+	virtual void ApplySkillRow(const FVXSkillRow& Row) override;
 
 	/** 반경 (cm) */
 	UPROPERTY(EditDefaultsOnly, Category = "Nova")

@@ -7,12 +7,31 @@
 #include "Character/VXCharacterBase.h"
 #include "GAS/VXGameplayEffects.h"
 #include "GAS/VXGameplayTags.h"
+#include "Data/VXSkillData.h"
 #include "Voxelcaster.h"
 
 UVX_GA_Dash::UVX_GA_Dash()
 {
 	bBlockedWhileDashing = false;
 	CooldownDuration = 1.f;
+	SkillRowName = TEXT("Dash");
+}
+
+void UVX_GA_Dash::ApplySkillRow(const FVXSkillRow& Row)
+{
+	Super::ApplySkillRow(Row);
+	if (Row.DashDistance > 0.f)
+	{
+		Distance = Row.DashDistance;
+	}
+	if (Row.Duration > 0.f)
+	{
+		Duration = Row.Duration;
+	}
+	if (Row.InvincibleTime > 0.f)
+	{
+		InvincibleTime = Row.InvincibleTime;
+	}
 }
 
 FGameplayTag UVX_GA_Dash::GetCooldownTag() const

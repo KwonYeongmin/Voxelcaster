@@ -23,6 +23,7 @@ public:
 
 protected:
 	virtual FGameplayTag GetCooldownTag() const override;
+	virtual void ApplySkillRow(const FVXSkillRow& Row) override;
 
 	/** 이동 거리 (cm) */
 	UPROPERTY(EditDefaultsOnly, Category = "Dash")

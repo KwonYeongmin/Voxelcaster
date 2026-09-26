@@ -6,6 +6,8 @@
 #include "Abilities/GameplayAbility.h"
 #include "VXGameplayAbility.generated.h"
 
+struct FVXSkillRow;
+
 /**
  * 프로젝트 공용 어빌리티 베이스.
  * - 사망 후에는 활성화되지 않는다.
@@ -35,6 +37,9 @@ public:
 	virtual void ApplyCooldown(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo) const override;
 
+	/** 부여될 때 DT_Skills의 SkillRowName 행으로 수치를 덮어쓴다 */
+	virtual void OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec) override;
+
 	/** 현재 적용되는 쿨다운(초). 가속 모디파이어 등이 재정의한다. */
 	virtual float GetEffectiveCooldown() const { return CooldownDuration; }
 
@@ -45,7 +50,14 @@ protected:
 	/** 이 어빌리티의 쿨다운 태그. 없으면 쿨다운을 쓰지 않는다. */
 	virtual FGameplayTag GetCooldownTag() const { return FGameplayTag(); }
 
-	/** 기본 쿨다운 (초). 수치 원본은 design 문서, 추후 데이터 테이블로 이동 */
+	/** DT_Skills 행 수치를 적용한다. 하위 클래스는 자기 수치를 추가로 적용한다 (0 이하 값은 무시) */
+	virtual void ApplySkillRow(const FVXSkillRow& Row);
+
+	/** DT_Skills 행 이름. 비어 있으면 테이블을 쓰지 않는다 */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Data")
+	FName SkillRowName;
+
+	/** 기본 쿨다운 (초). DT_Skills의 Cooldown이 있으면 그 값을 쓴다 */
 	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Cooldown")
 	float CooldownDuration = 0.f;
 

@@ -20,6 +20,7 @@ public:
 protected:
 	virtual void ExecuteSkill(AVXCharacterBase* Caster) override;
 	virtual FGameplayTag GetCooldownTag() const override;
+	virtual void ApplySkillRow(const FVXSkillRow& Row) override;
 
 	/** 투사체 속도 (cm/s). 20 m/s = 2000 */
 	UPROPERTY(EditDefaultsOnly, Category = "MagicBolt")

@@ -5,11 +5,34 @@
 #include "GameplayEffect.h"
 #include "GAS/VXGameplayEffects.h"
 #include "GAS/VXGameplayTags.h"
+#include "Data/VXSkillData.h"
 
 UVXGameplayAbility::UVXGameplayAbility()
 {
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalOnly;
+}
+
+void UVXGameplayAbility::OnGiveAbility(const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilitySpec& Spec)
+{
+	Super::OnGiveAbility(ActorInfo, Spec);
+
+	// 액터별 인스턴스라 여기서 바꾼 값은 이 캐릭터에게만 적용된다.
+	if (false == SkillRowName.IsNone())
+	{
+		if (const FVXSkillRow* Row = VXSkillData::Find(SkillRowName))
+		{
+			ApplySkillRow(*Row);
+		}
+	}
+}
+
+void UVXGameplayAbility::ApplySkillRow(const FVXSkillRow& Row)
+{
+	if (Row.Cooldown > 0.f)
+	{
+		CooldownDuration = Row.Cooldown;
+	}
 }
 
 bool UVXGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

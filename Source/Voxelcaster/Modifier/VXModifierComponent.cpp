@@ -10,6 +10,7 @@
 #include "GAS/VXAbilitySystemComponent.h"
 #include "GAS/VXGameplayTags.h"
 #include "UI/VXText.h"
+#include "Data/VXModifierData.h"
 
 int32 FVXModifierSlots::GetStack(EVXModifierType Type) const
 {
@@ -113,8 +114,9 @@ float UVXModifierComponent::GetModifiedCooldown(const FGameplayTag& SkillTag, fl
 	{
 		return BaseCooldown;
 	}
-	// 덧셈 감소: 1스택 -15%, 2스택 -30%, 3스택 -45%
-	return FMath::Max(BaseCooldown * (1.f - HasteReductionPerStack * Stack), MinCooldown);
+	// 덧셈 감소 (기본값): 1스택 -15%, 2스택 -30%, 3스택 -45%
+	const float Reduction = VXModifierData::Get(EVXModifierType::Haste).GetValue(Stack);
+	return FMath::Max(BaseCooldown * (1.f - Reduction), MinCooldown);
 }
 
 FString UVXModifierComponent::GetModifierName(EVXModifierType Type)
@@ -233,11 +235,23 @@ void UVXModifierComponent::GatherHostiles(const FVector& Center, float Radius, T
 
 void UVXModifierComponent::ApplyExplode(const FVXHitContext& Context, int32 Stack)
 {
-	const float Radius = ExplodeBaseRadius + ExplodeRadiusPerStack * (Stack - 1);
-	const float Damage = Context.Damage * ExplodeDamageRatio;
+	const FVXModifierRow& Data = VXModifierData::Get(EVXModifierType::Explode);
+	const float Radius = Data.GetValue(Stack);
+	const float Damage = Context.Damage * Data.DamageRatio;
 
 	TArray<AVXCharacterBase*> Targets;
 	GatherHostiles(Context.Location, Radius, Targets);
+
+	// 성능 제한: 가까운 적부터 MaxExplodeTargets명까지만
+	if (Targets.Num() > MaxExplodeTargets)
+	{
+		const FVector Center = Context.Location;
+		Targets.Sort([Center](const AVXCharacterBase& A, const AVXCharacterBase& B)
+		{
+			return FVector::DistSquared(Center, A.GetActorLocation()) < FVector::DistSquared(Center, B.GetActorLocation());
+		});
+		Targets.SetNum(MaxExplodeTargets);
+	}
 
 	// 원본에 맞은 적도 폭발 범위 안이면 폭발 피해를 추가로 받는다.
 	for (AVXCharacterBase* Target : Targets)
@@ -253,7 +267,16 @@ void UVXModifierComponent::ApplyExplode(const FVXHitContext& Context, int32 Stac
 
 void UVXModifierComponent::ApplyChain(const FVXHitContext& Context, int32 Stack)
 {
-	const float Damage = Context.Damage * ChainDamageRatio;
+	const FVXModifierRow& Data = VXModifierData::Get(EVXModifierType::Chain);
+	const float Damage = Context.Damage * Data.DamageRatio;
+	const int32 JumpCount = Data.GetCount(Stack);
+
+	// 프레임이 바뀌면 전이 수를 다시 센다.
+	if (ChainFrameNumber != GFrameCounter)
+	{
+		ChainFrameNumber = GFrameCounter;
+		ChainJumpsThisFrame = 0;
+	}
 
 	TSet<const AVXCharacterBase*> Visited;
 	const AVXCharacterBase* Current = Cast<AVXCharacterBase>(Context.Target.Get());
@@ -264,10 +287,16 @@ void UVXModifierComponent::ApplyChain(const FVXHitContext& Context, int32 Stack)
 	}
 
 	// 직전에 맞은 적에서 가장 가까운 적으로 스택 수만큼 전이한다. 이미 맞은 적은 고르지 않는다.
-	for (int32 Jump = 0; Jump < Stack; ++Jump)
+	for (int32 Jump = 0; Jump < JumpCount; ++Jump)
 	{
+		// 성능 제한: 한 프레임의 전이 수가 넘치면 생략한다.
+		if (ChainJumpsThisFrame >= MaxChainJumpsPerFrame)
+		{
+			break;
+		}
+
 		TArray<AVXCharacterBase*> Candidates;
-		GatherHostiles(From, ChainRange, Candidates);
+		GatherHostiles(From, Data.Range, Candidates);
 
 		AVXCharacterBase* Nearest = nullptr;
 		float NearestDistSq = TNumericLimits<float>::Max();
@@ -296,6 +325,7 @@ void UVXModifierComponent::ApplyChain(const FVXHitContext& Context, int32 Stack)
 		DrawDebugLine(GetWorld(), From, To, FColor(80, 200, 255), false, 0.2f, 0, 4.f);
 #endif
 		Visited.Add(Nearest);
+		++ChainJumpsThisFrame;
 		ApplyDerivedHit(Context, Nearest, To, Damage);
 		From = To;
 	}
@@ -312,9 +342,10 @@ void UVXModifierComponent::ApplySplit(const FVXHitContext& Context, int32 Stack)
 
 	LiveSplitProjectiles.RemoveAll([](const TWeakObjectPtr<AVXProjectile>& Projectile) { return false == Projectile.IsValid(); });
 
-	const int32 Count = Stack + 1;
+	const FVXModifierRow& Data = VXModifierData::Get(EVXModifierType::Split);
+	const int32 Count = Data.GetCount(Stack);
 	const FVector Base = Context.Direction.IsNearlyZero() ? Owner->GetActorForwardVector() : Context.Direction.GetSafeNormal2D();
-	const float Step = 360.f / Count;
+	const float Step = 360.f / FMath::Max(Count, 1);
 
 	for (int32 i = 0; i < Count; ++i)
 	{
@@ -336,7 +367,7 @@ void UVXModifierComponent::ApplySplit(const FVXHitContext& Context, int32 Stack)
 		}
 
 		// 분열 투사체는 작은 노란 투사체. 원본 명중 대상은 다시 맞히지 않는다.
-		Projectile->Init(Owner, Context.SkillTag, Context.Damage * SplitDamageRatio, SplitSpeed, SplitRange, FLinearColor(1.f, 0.9f, 0.2f));
+		Projectile->Init(Owner, Context.SkillTag, Context.Damage * Data.DamageRatio, Data.Speed, Data.Range, FLinearColor(1.f, 0.9f, 0.2f));
 		Projectile->SetDerived(true);
 		Projectile->IgnoreTarget(Context.Target.Get());
 		Projectile->SetActorScale3D(FVector(0.6f));

@@ -24,6 +24,11 @@ public:
 	/** 가속 모디파이어를 반영한 쿨다운 */
 	virtual float GetEffectiveCooldown() const override;
 
+protected:
+	virtual void ApplySkillRow(const FVXSkillRow& Row) override;
+
+public:
+
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 		const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 

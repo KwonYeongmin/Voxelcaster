@@ -3,6 +3,7 @@
 #include "Modifier/VXUpgradeSubsystem.h"
 #include "GAS/VXGameplayTags.h"
 #include "UI/VXText.h"
+#include "Data/VXModifierData.h"
 #include "Voxelcaster.h"
 
 FString FVXUpgradeCard::GetLabel() const
@@ -13,14 +14,16 @@ FString FVXUpgradeCard::GetLabel() const
 
 FString FVXUpgradeCard::GetDescription() const
 {
+	// 수치는 DT_Modifiers (없으면 코드 기본값)
+	const FVXModifierRow& Data = VXModifierData::Get(Modifier);
 	const int32 N = ResultStack;
 	switch (Modifier)
 	{
-	case EVXModifierType::Pierce:  return VXText::Format(TEXT("Desc.Pierce"), { N });
-	case EVXModifierType::Split:   return VXText::Format(TEXT("Desc.Split"), { N + 1 });
-	case EVXModifierType::Explode: return VXText::Format(TEXT("Desc.Explode"), { FString::Printf(TEXT("%.1f"), 1.5f + 0.5f * (N - 1)) });
-	case EVXModifierType::Chain:   return VXText::Format(TEXT("Desc.Chain"), { N });
-	case EVXModifierType::Haste:   return VXText::Format(TEXT("Desc.Haste"), { 15 * N });
+	case EVXModifierType::Pierce:  return VXText::Format(TEXT("Desc.Pierce"), { Data.GetCount(N) });
+	case EVXModifierType::Split:   return VXText::Format(TEXT("Desc.Split"), { Data.GetCount(N) });
+	case EVXModifierType::Explode: return VXText::Format(TEXT("Desc.Explode"), { FString::Printf(TEXT("%.1f"), Data.GetValue(N) / 100.f) });
+	case EVXModifierType::Chain:   return VXText::Format(TEXT("Desc.Chain"), { Data.GetCount(N) });
+	case EVXModifierType::Haste:   return VXText::Format(TEXT("Desc.Haste"), { FMath::RoundToInt(Data.GetValue(N) * 100.f) });
 	}
 	return FString();
 }

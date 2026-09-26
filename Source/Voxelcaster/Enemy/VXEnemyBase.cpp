@@ -71,6 +71,7 @@ namespace
 }
 
 bool AVXEnemyBase::bEasyMode = false;
+TArray<TWeakObjectPtr<AVXEnemyBase>> AVXEnemyBase::AliveEnemies;
 
 float AVXEnemyBase::GetAdjustedAttackDamage(float BaseDamage) const
 {
@@ -101,6 +102,8 @@ void AVXEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	AliveEnemies.Add(this);
+
 	// HP 바는 캡슐 위쪽에 띄운다 (적마다 키가 달라서 캡슐 높이 기준)
 	HealthBarComponent->SetRelativeLocation(FVector(0.f, 0.f, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 30.f));
 	HealthBarComponent->InitWidget();
@@ -124,6 +127,50 @@ void AVXEnemyBase::BeginPlay()
 bool AVXEnemyBase::HasSkeletalMesh() const
 {
 	return nullptr != GetMesh() && nullptr != GetMesh()->GetSkeletalMeshAsset();
+}
+
+void AVXEnemyBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	AliveEnemies.RemoveAll([this](const TWeakObjectPtr<AVXEnemyBase>& Entry) { return false == Entry.IsValid() || Entry.Get() == this; });
+	Super::EndPlay(EndPlayReason);
+}
+
+void AVXEnemyBase::ApplySeparation()
+{
+	if (SeparationWeight <= 0.f)
+	{
+		return;
+	}
+
+	// 가까운 적에게서 멀어지는 방향의 합 (가까울수록 강하게). 적이 최대 30마리 정도라 전체를 훑어도 가볍다.
+	const FVector MyLocation = GetActorLocation();
+	const float RadiusSq = SeparationRadius * SeparationRadius;
+	FVector Push = FVector::ZeroVector;
+
+	for (const TWeakObjectPtr<AVXEnemyBase>& Entry : AliveEnemies)
+	{
+		const AVXEnemyBase* Other = Entry.Get();
+		if (nullptr == Other || Other == this || Other->IsDead() || Other->GetWorld() != GetWorld())
+		{
+			continue;
+		}
+
+		const FVector Away = FVector(MyLocation.X - Other->GetActorLocation().X, MyLocation.Y - Other->GetActorLocation().Y, 0.f);
+		const float DistSq = Away.SizeSquared();
+		if (DistSq >= RadiusSq)
+		{
+			continue;
+		}
+
+		// 완전히 겹쳐 있으면 무작위 방향으로 떼어 낸다
+		const FVector Direction = DistSq > KINDA_SMALL_NUMBER ? Away.GetSafeNormal() : FVector(FMath::FRandRange(-1.f, 1.f), FMath::FRandRange(-1.f, 1.f), 0.f).GetSafeNormal();
+		Push += Direction * (1.f - FMath::Sqrt(DistSq) / SeparationRadius);
+	}
+
+	if (false == Push.IsNearlyZero())
+	{
+		AddMovementInput(Push.GetClampedToMaxSize(1.f), SeparationWeight);
+	}
 }
 
 USceneComponent* AVXEnemyBase::GetVisualMesh() const
@@ -151,6 +198,11 @@ void AVXEnemyBase::HandleDamaged(float Amount)
 void AVXEnemyBase::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	if (false == IsDead())
+	{
+		ApplySeparation();
+	}
 
 	USceneComponent* Visual = GetVisualMesh();
 
@@ -212,6 +264,7 @@ void AVXEnemyBase::HandleDeath()
 	// 처치 타격감: 히트스톱, 엘리트는 진동 (DES-FEEL-001)
 	FlashEndRealTime = 0.0;
 	DeathWorldTime = GetWorld()->GetTimeSeconds();
+	AliveEnemies.RemoveAll([this](const TWeakObjectPtr<AVXEnemyBase>& Entry) { return false == Entry.IsValid() || Entry.Get() == this; });
 	if (UVXGameFeelSubsystem* Feel = UVXGameFeelSubsystem::Get(this))
 	{
 		Feel->RequestHitStop(KillHitStop);

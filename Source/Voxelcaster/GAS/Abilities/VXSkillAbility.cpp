@@ -9,6 +9,7 @@
 #include "Modifier/VXModifierComponent.h"
 #include "Feel/VXGameFeelSubsystem.h"
 #include "GameFramework/PlayerController.h"
+#include "Data/VXSkillData.h"
 
 UVXSkillAbility::UVXSkillAbility()
 {
@@ -19,6 +20,15 @@ UVXModifierComponent* UVXSkillAbility::GetModifierComponent() const
 {
 	const AActor* Avatar = GetAvatarActorFromActorInfo();
 	return nullptr != Avatar ? Avatar->FindComponentByClass<UVXModifierComponent>() : nullptr;
+}
+
+void UVXSkillAbility::ApplySkillRow(const FVXSkillRow& Row)
+{
+	Super::ApplySkillRow(Row);
+	if (Row.Damage > 0.f)
+	{
+		Damage = Row.Damage;
+	}
 }
 
 float UVXSkillAbility::GetEffectiveCooldown() const
