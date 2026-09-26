@@ -247,7 +247,7 @@ void AVXShooter::SpawnProjectile(const FVector& BaseDirection, float AngleOffset
 		AVXProjectile::StaticClass(), SpawnTransform, this, this, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (Projectile)
 	{
-		Projectile->Init(this, FGameplayTag(), ProjectileDamage, ProjectileSpeed, ProjectileMaxRange, FLinearColor(1.f, 0.35f, 0.1f));
+		Projectile->Init(this, FGameplayTag(), GetAdjustedAttackDamage(ProjectileDamage), ProjectileSpeed, ProjectileMaxRange, FLinearColor(1.f, 0.35f, 0.1f));
 		Projectile->FinishSpawning(SpawnTransform);
 	}
 }

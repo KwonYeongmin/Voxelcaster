@@ -5,6 +5,7 @@
 #include "Character/VXCharacterBase.h"
 #include "Core/VXGameMode.h"
 #include "Enemy/VXElite.h"
+#include "Enemy/VXEnemyBase.h"
 #include "Enemy/VXRunner.h"
 #include "Enemy/VXShooter.h"
 #include "Engine/World.h"
@@ -21,6 +22,20 @@ APawn* UVXCheatManager::GetPlayerPawn() const
 {
 	const APlayerController* PC = GetOuterAPlayerController();
 	return nullptr != PC ? PC->GetPawn() : nullptr;
+}
+
+void UVXCheatManager::EasyMode()
+{
+	const bool bEnable = false == AVXEnemyBase::IsEasyMode();
+	AVXEnemyBase::SetEasyMode(bEnable);
+
+	const FString Message = FString::Printf(TEXT("Easy mode %s (enemy attack damage -%.0f)"),
+		bEnable ? TEXT("ON") : TEXT("OFF"), AVXEnemyBase::EasyModeDamageReduction);
+	UE_LOG(LogVX, Log, TEXT("%s"), *Message);
+	if (APlayerController* PC = GetOuterAPlayerController())
+	{
+		PC->ClientMessage(Message);
+	}
 }
 
 void UVXCheatManager::God()

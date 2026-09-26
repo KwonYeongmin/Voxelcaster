@@ -31,6 +31,13 @@ public:
 
 	FVXMinionSpawnedSignature OnMinionSpawned;
 
+	/** 치트 EasyMode: 켜면 모든 적의 공격력이 이 값만큼 줄어든다 (0 미만으로는 내려가지 않는다) */
+	static constexpr float EasyModeDamageReduction = 5.f;
+
+	/** EasyMode 켜기/끄기. 이미 나와 있는 적과 이후에 나오는 적 모두 공격할 때 적용된다 */
+	static void SetEasyMode(bool bEnable) { bEasyMode = bEnable; }
+	static bool IsEasyMode() { return bEasyMode; }
+
 	/** 이 적의 행동을 구동하는 StateTree 에셋. 비어 있으면 적 클래스의 기본 행동을 쓴다. */
 	const TSoftObjectPtr<UStateTree>& GetStateTreeAsset() const { return StateTreeAsset; }
 
@@ -65,6 +72,9 @@ protected:
 	/** DT_Enemies에서 찾을 행 이름 (Runner, Shooter, Elite) */
 	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Enemy")
 	FName StatRowName;
+
+	/** 공격할 때 실제로 주는 피해 (EasyMode 반영) */
+	float GetAdjustedAttackDamage(float BaseDamage) const;
 
 	/** 살아 있는 플레이어 캐릭터. 없으면 nullptr */
 	AVXCharacterBase* FindLivePlayer() const;
@@ -116,5 +126,7 @@ private:
 	/** 피격 플래시·펀치가 끝나는 실제 시간. 0이면 진행 중 아님 */
 	double FlashEndRealTime = 0.0;
 	FVector VisualBaseScale = FVector::OneVector;
+
+	static bool bEasyMode;
 	float DeathWorldTime = -1.f;
 };

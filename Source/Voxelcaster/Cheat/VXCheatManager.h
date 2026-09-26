@@ -19,6 +19,10 @@ public:
 	/** 무적 토글: 켜면 플레이어 HP가 줄지 않는다. (State.Invincible 태그) */
 	virtual void God() override;
 
+	/** 쉬운 모드 토글: 켜면 모든 적의 공격력 -5 (최소 0). 다시 입력하면 끈다 */
+	UFUNCTION(Exec)
+	void EasyMode();
+
 	UFUNCTION(Exec)
 	void DebugDamage(float Amount = 10.f);
 

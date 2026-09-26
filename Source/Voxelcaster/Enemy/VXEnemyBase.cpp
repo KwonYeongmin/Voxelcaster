@@ -70,6 +70,13 @@ namespace
 	}
 }
 
+bool AVXEnemyBase::bEasyMode = false;
+
+float AVXEnemyBase::GetAdjustedAttackDamage(float BaseDamage) const
+{
+	return bEasyMode ? FMath::Max(BaseDamage - EasyModeDamageReduction, 0.f) : BaseDamage;
+}
+
 void AVXEnemyBase::PostInitializeComponents()
 {
 	// 부모(AVXCharacterBase)가 DefaultMaxHealth·DefaultMoveSpeed로 어트리뷰트를 초기화하므로 그 전에 적용한다.

@@ -5,6 +5,7 @@
 #include "Character/VXCharacterBase.h"
 #include "Core/VXGameMode.h"
 #include "Enemy/VXElite.h"
+#include "Enemy/VXEnemyBase.h"
 #include "Enemy/VXRunner.h"
 #include "Enemy/VXShooter.h"
 #include "Engine/Engine.h"
@@ -537,6 +538,10 @@ void AVXPlayerController::UpdateHudViewModel()
 	if (ASC && ASC->HasMatchingGameplayTag(VXTags::State_God))
 	{
 		HealthString += TEXT("   [GOD]");
+	}
+	if (AVXEnemyBase::IsEasyMode())
+	{
+		HealthString += TEXT("   [EASY]");
 	}
 	HudViewModel->SetHealthPercent(Ratio);
 	HudViewModel->SetbLowHealth(Ratio <= 0.3f);

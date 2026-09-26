@@ -54,6 +54,6 @@ void AVXRunner::Tick(float DeltaSeconds)
 	if (ToPlayer.Size2D() <= ContactRange && Now - LastContactTime >= ContactCooldown)
 	{
 		LastContactTime = Now;
-		VXEffects::ApplyDamage(Player->GetAbilitySystemComponent(), ContactDamage, GetVoxelAbilitySystemComponent());
+		VXEffects::ApplyDamage(Player->GetAbilitySystemComponent(), GetAdjustedAttackDamage(ContactDamage), GetVoxelAbilitySystemComponent());
 	}
 }
