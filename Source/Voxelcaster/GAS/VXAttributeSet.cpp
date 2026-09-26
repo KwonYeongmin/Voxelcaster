@@ -29,7 +29,7 @@ bool UVXAttributeSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData& D
 	if (Data.EvaluatedData.Attribute == GetIncomingDamageAttribute() && Data.EvaluatedData.Magnitude > 0.f)
 	{
 		const UAbilitySystemComponent& ASC = Data.Target;
-		if (ASC.HasMatchingGameplayTag(VoxelTags::State_Invincible) || ASC.HasMatchingGameplayTag(VoxelTags::State_Dead))
+		if (ASC.HasMatchingGameplayTag(VXTags::State_Invincible) || ASC.HasMatchingGameplayTag(VXTags::State_Dead))
 		{
 			return false;
 		}

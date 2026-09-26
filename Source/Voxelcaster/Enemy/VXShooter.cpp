@@ -64,7 +64,7 @@ float AVXShooter::GetDistanceToTarget() const
 
 bool AVXShooter::HasLineOfSightTo(const AVXCharacterBase* Target) const
 {
-	FCollisionQueryParams Params(SCENE_QUERY_STAT(VoxelShooterLOS), false, this);
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(VXShooterLOS), false, this);
 	Params.AddIgnoredActor(Target);
 
 	FHitResult Hit;

@@ -35,7 +35,7 @@ bool UVXUpgradeSubsystem::DrawChoices(UVXModifierComponent* Modifiers, int32 Cou
 	}
 
 	// 후보 풀: 장착 가능한 모든 (스킬, 모디파이어)
-	const FGameplayTag Skills[] = { VoxelTags::Cooldown_MagicBolt, VoxelTags::Cooldown_Nova, VoxelTags::Cooldown_BladeSweep };
+	const FGameplayTag Skills[] = { VXTags::Cooldown_MagicBolt, VXTags::Cooldown_Nova, VXTags::Cooldown_BladeSweep };
 	TArray<FVXUpgradeCard> Pool;
 	for (const FGameplayTag& Skill : Skills)
 	{
@@ -55,7 +55,7 @@ bool UVXUpgradeSubsystem::DrawChoices(UVXModifierComponent* Modifiers, int32 Cou
 
 	if (Pool.IsEmpty())
 	{
-		UE_LOG(LogVoxel, Log, TEXT("Upgrade: no available cards, skipping reward"));
+		UE_LOG(LogVX, Log, TEXT("Upgrade: no available cards, skipping reward"));
 		return false;
 	}
 
@@ -104,7 +104,7 @@ bool UVXUpgradeSubsystem::ApplyChoice(int32 Index)
 		return false;
 	}
 
-	UE_LOG(LogVoxel, Log, TEXT("Upgrade: picked %s"), *Card.GetLabel());
+	UE_LOG(LogVX, Log, TEXT("Upgrade: picked %s"), *Card.GetLabel());
 	OnChoiceApplied.Broadcast(Card);
 	return true;
 }

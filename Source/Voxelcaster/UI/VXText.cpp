@@ -81,7 +81,7 @@ namespace
 			}
 			else
 			{
-				UE_LOG(LogVoxel, Log, TEXT("%s not found or wrong row struct: using built-in texts"),
+				UE_LOG(LogVX, Log, TEXT("%s not found or wrong row struct: using built-in texts"),
 					bKorean ? TEXT("DS_UIText_Kor") : TEXT("DS_UIText_Eng"));
 			}
 		}

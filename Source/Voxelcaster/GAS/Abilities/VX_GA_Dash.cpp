@@ -17,7 +17,7 @@ UVX_GA_Dash::UVX_GA_Dash()
 
 FGameplayTag UVX_GA_Dash::GetCooldownTag() const
 {
-	return VoxelTags::Cooldown_Dash;
+	return VXTags::Cooldown_Dash;
 }
 
 void UVX_GA_Dash::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -26,7 +26,7 @@ void UVX_GA_Dash::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 	// 쿨다운 시작 (코스트는 없음)
 	if (false == CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{
-		UE_LOG(LogVoxel, Warning, TEXT("Dash: CommitAbility failed"));
+		UE_LOG(LogVX, Warning, TEXT("Dash: CommitAbility failed"));
 		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		return;
 	}
@@ -44,11 +44,11 @@ void UVX_GA_Dash::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 
 	// 대시 상태 + 무적 (대시 시작부터 InvincibleTime 동안)
 	FGameplayTagContainer StateTags;
-	StateTags.AddTag(VoxelTags::State_Dashing);
-	StateTags.AddTag(VoxelTags::State_Invincible);
+	StateTags.AddTag(VXTags::State_Dashing);
+	StateTags.AddTag(VXTags::State_Invincible);
 	if (nullptr == DashStateEffect)
 	{
-		DashStateEffect = VoxelEffects::MakeTagDurationEffect(this, TEXT("GE_DashState"), StateTags, InvincibleTime);
+		DashStateEffect = VXEffects::MakeTagDurationEffect(this, TEXT("GE_DashState"), StateTags, InvincibleTime);
 	}
 	ApplyRuntimeEffectToOwner(Handle, ActorInfo, DashStateEffect);
 

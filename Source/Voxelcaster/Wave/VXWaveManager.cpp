@@ -78,20 +78,20 @@ bool UVXWaveManager::LoadWavesFromTable()
 {
 	if (WaveTable.IsNull())
 	{
-		UE_LOG(LogVoxel, Log, TEXT("WaveTable not set: using default waves in code"));
+		UE_LOG(LogVX, Log, TEXT("WaveTable not set: using default waves in code"));
 		return false;
 	}
 
 	const UDataTable* Table = WaveTable.LoadSynchronous();
 	if (nullptr == Table)
 	{
-		UE_LOG(LogVoxel, Warning, TEXT("WaveTable '%s' could not be loaded: using default waves in code"), *WaveTable.ToString());
+		UE_LOG(LogVX, Warning, TEXT("WaveTable '%s' could not be loaded: using default waves in code"), *WaveTable.ToString());
 		return false;
 	}
 
 	if (Table->GetRowStruct() != FVXWaveRow::StaticStruct())
 	{
-		UE_LOG(LogVoxel, Error, TEXT("WaveTable '%s' row struct must be VXWaveRow: using default waves in code"), *Table->GetName());
+		UE_LOG(LogVX, Error, TEXT("WaveTable '%s' row struct must be VXWaveRow: using default waves in code"), *Table->GetName());
 		return false;
 	}
 
@@ -100,7 +100,7 @@ bool UVXWaveManager::LoadWavesFromTable()
 	Rows.RemoveAll([](const FVXWaveRow* Row) { return nullptr == Row; });
 	if (Rows.IsEmpty())
 	{
-		UE_LOG(LogVoxel, Warning, TEXT("WaveTable '%s' has no rows: using default waves in code"), *Table->GetName());
+		UE_LOG(LogVX, Warning, TEXT("WaveTable '%s' has no rows: using default waves in code"), *Table->GetName());
 		return false;
 	}
 
@@ -114,7 +114,7 @@ bool UVXWaveManager::LoadWavesFromTable()
 		Waves.Add(Wave);
 	}
 
-	UE_LOG(LogVoxel, Log, TEXT("Loaded %d waves from '%s'"), Waves.Num(), *Table->GetName());
+	UE_LOG(LogVX, Log, TEXT("Loaded %d waves from '%s'"), Waves.Num(), *Table->GetName());
 	return true;
 }
 
@@ -126,7 +126,7 @@ void UVXWaveManager::StartWave(int32 WaveIndex)
 {
 	if (false == Waves.IsValidIndex(WaveIndex - 1))
 	{
-		UE_LOG(LogVoxel, Warning, TEXT("StartWave: invalid wave index %d (total %d)"), WaveIndex, Waves.Num());
+		UE_LOG(LogVX, Warning, TEXT("StartWave: invalid wave index %d (total %d)"), WaveIndex, Waves.Num());
 		return;
 	}
 
@@ -138,7 +138,7 @@ void UVXWaveManager::StartWave(int32 WaveIndex)
 
 	BuildSpawnQueue(Waves[WaveIndex - 1]);
 
-	UE_LOG(LogVoxel, Log, TEXT("Wave %d start: %d enemies to spawn"), CurrentWave, SpawnQueue.Num());
+	UE_LOG(LogVX, Log, TEXT("Wave %d start: %d enemies to spawn"), CurrentWave, SpawnQueue.Num());
 	OnWaveStarted.Broadcast(CurrentWave);
 }
 
@@ -181,7 +181,7 @@ void UVXWaveManager::BuildSpawnQueue(const FVXWaveDef& Wave)
 	{
 		if (nullptr == Spawn.EnemyClass.Get())
 		{
-			UE_LOG(LogVoxel, Warning, TEXT("Wave %d: spawn rule without EnemyClass, skipping %d"), CurrentWave, Spawn.TotalCount);
+			UE_LOG(LogVX, Warning, TEXT("Wave %d: spawn rule without EnemyClass, skipping %d"), CurrentWave, Spawn.TotalCount);
 			continue;
 		}
 
@@ -299,13 +299,13 @@ void UVXWaveManager::UpdateClearCondition()
 
 	State = EVXWaveState::Cleared;
 	StateTime = 0.f;
-	UE_LOG(LogVoxel, Log, TEXT("Wave %d cleared (kills: %d)"), CurrentWave, KillCount);
+	UE_LOG(LogVX, Log, TEXT("Wave %d cleared (kills: %d)"), CurrentWave, KillCount);
 	OnWaveCleared.Broadcast(CurrentWave);
 
 	if (CurrentWave >= Waves.Num())
 	{
 		State = EVXWaveState::Finished;
-		UE_LOG(LogVoxel, Log, TEXT("All waves cleared: victory"));
+		UE_LOG(LogVX, Log, TEXT("All waves cleared: victory"));
 		OnGameWon.Broadcast();
 		return;
 	}
@@ -314,7 +314,7 @@ void UVXWaveManager::UpdateClearCondition()
 	AVXCharacterBase* Player = FindLivePlayer();
 	if (Player)
 	{
-		VoxelEffects::ApplyHeal(Player->GetAbilitySystemComponent(), ClearHealAmount);
+		VXEffects::ApplyHeal(Player->GetAbilitySystemComponent(), ClearHealAmount);
 	}
 
 	// 보상 카드 3장 중 1장 선택. 고르면 HandleChoiceApplied에서 다음 웨이브를 시작한다.
@@ -388,7 +388,7 @@ bool UVXWaveManager::FindSpawnLocation(const AVXCharacterBase* Player, float Cap
 
 	// 링 위의 후보 지점을 잡고, 아래로 트레이스해서 플레이어와 같은 높이의 바닥 위인 곳만 쓴다.
 	// (아레나 밖이나 벽 위는 바닥이 없거나 높이가 달라 걸러진다)
-	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(VoxelSpawnTrace), false, Player);
+	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(VXSpawnTrace), false, Player);
 	for (int32 Attempt = 0; Attempt < 16; ++Attempt)
 	{
 		const float Angle = FMath::FRandRange(0.f, 360.f);
@@ -459,7 +459,7 @@ void UVXWaveManager::HandlePlayerDeath(AVXCharacterBase* Player)
 	}
 
 	State = EVXWaveState::Finished;
-	UE_LOG(LogVoxel, Log, TEXT("Player died at wave %d: defeat (kills: %d)"), CurrentWave, KillCount);
+	UE_LOG(LogVX, Log, TEXT("Player died at wave %d: defeat (kills: %d)"), CurrentWave, KillCount);
 	OnGameLost.Broadcast();
 }
 

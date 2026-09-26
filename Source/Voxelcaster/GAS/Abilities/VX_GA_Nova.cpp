@@ -15,7 +15,7 @@ UVX_GA_Nova::UVX_GA_Nova()
 
 FGameplayTag UVX_GA_Nova::GetCooldownTag() const
 {
-	return VoxelTags::Cooldown_Nova;
+	return VXTags::Cooldown_Nova;
 }
 
 void UVX_GA_Nova::ExecuteSkill(AVXCharacterBase* Caster)

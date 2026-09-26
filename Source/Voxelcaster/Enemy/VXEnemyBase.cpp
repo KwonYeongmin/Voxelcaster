@@ -58,7 +58,7 @@ namespace
 			}
 			else
 			{
-				UE_LOG(LogVoxel, Log, TEXT("DT_Enemies not found or wrong row struct: using enemy defaults in code"));
+				UE_LOG(LogVX, Log, TEXT("DT_Enemies not found or wrong row struct: using enemy defaults in code"));
 			}
 		}
 		return Cached.Get();

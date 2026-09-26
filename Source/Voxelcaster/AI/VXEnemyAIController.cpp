@@ -33,7 +33,7 @@ void AVXEnemyAIController::OnPossess(APawn* InPawn)
 	UStateTree* StateTree = Enemy->GetStateTreeAsset().LoadSynchronous();
 	if (nullptr == StateTree)
 	{
-		UE_LOG(LogVoxel, Warning, TEXT("%s: StateTree '%s' could not be loaded, falling back to built-in behavior"),
+		UE_LOG(LogVX, Warning, TEXT("%s: StateTree '%s' could not be loaded, falling back to built-in behavior"),
 			*GetNameSafe(InPawn), *Enemy->GetStateTreeAsset().ToString());
 		return;
 	}

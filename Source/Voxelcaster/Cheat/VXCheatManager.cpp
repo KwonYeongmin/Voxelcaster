@@ -33,19 +33,19 @@ void UVXCheatManager::God()
 	}
 
 	// 피해는 GAS로 들어오므로 엔진 기본 God(bCanBeDamaged) 대신 무적 태그로 막는다.
-	const bool bEnable = false == ASC->HasMatchingGameplayTag(VoxelTags::State_God);
+	const bool bEnable = false == ASC->HasMatchingGameplayTag(VXTags::State_God);
 	if (bEnable)
 	{
-		ASC->AddLooseGameplayTag(VoxelTags::State_God);
-		ASC->AddLooseGameplayTag(VoxelTags::State_Invincible);
+		ASC->AddLooseGameplayTag(VXTags::State_God);
+		ASC->AddLooseGameplayTag(VXTags::State_Invincible);
 	}
 	else
 	{
-		ASC->RemoveLooseGameplayTag(VoxelTags::State_God);
-		ASC->RemoveLooseGameplayTag(VoxelTags::State_Invincible);
+		ASC->RemoveLooseGameplayTag(VXTags::State_God);
+		ASC->RemoveLooseGameplayTag(VXTags::State_Invincible);
 	}
 
-	UE_LOG(LogVoxel, Log, TEXT("God mode %s"), bEnable ? TEXT("ON") : TEXT("OFF"));
+	UE_LOG(LogVX, Log, TEXT("God mode %s"), bEnable ? TEXT("ON") : TEXT("OFF"));
 	if (APlayerController* PC = GetOuterAPlayerController())
 	{
 		PC->ClientMessage(bEnable ? TEXT("God mode ON") : TEXT("God mode OFF"));
@@ -61,7 +61,7 @@ void UVXCheatManager::DebugDamage(float Amount)
 	}
 	if (const AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPlayerPawn()))
 	{
-		VoxelEffects::ApplyDamage(VoxelChar->GetAbilitySystemComponent(), Amount);
+		VXEffects::ApplyDamage(VoxelChar->GetAbilitySystemComponent(), Amount);
 	}
 }
 
@@ -73,7 +73,7 @@ void UVXCheatManager::DebugHeal(float Amount)
 	}
 	if (const AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPlayerPawn()))
 	{
-		VoxelEffects::ApplyHeal(VoxelChar->GetAbilitySystemComponent(), Amount);
+		VXEffects::ApplyHeal(VoxelChar->GetAbilitySystemComponent(), Amount);
 	}
 }
 
@@ -81,7 +81,7 @@ void UVXCheatManager::DebugKill()
 {
 	if (const AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPlayerPawn()))
 	{
-		VoxelEffects::ApplyDamage(VoxelChar->GetAbilitySystemComponent(), VoxelChar->GetMaxHealth() * 10.f);
+		VXEffects::ApplyDamage(VoxelChar->GetAbilitySystemComponent(), VoxelChar->GetMaxHealth() * 10.f);
 	}
 }
 
@@ -135,7 +135,7 @@ void UVXCheatManager::DebugSpawnEnemy(const FString& EnemyType, int32 Count)
 	const AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPlayerPawn());
 	if (nullptr == EnemyClass.Get() || nullptr == VoxelChar)
 	{
-		UE_LOG(LogVoxel, Warning, TEXT("DebugSpawnEnemy: unknown type '%s' (Runner, Shooter, Elite)"), *EnemyType);
+		UE_LOG(LogVX, Warning, TEXT("DebugSpawnEnemy: unknown type '%s' (Runner, Shooter, Elite)"), *EnemyType);
 		return;
 	}
 
@@ -162,7 +162,7 @@ void UVXCheatManager::DebugDamageEnemies(float Amount)
 	{
 		if (It->GetTeam() == EVXTeam::Enemy && false == It->IsDead())
 		{
-			VoxelEffects::ApplyDamage(It->GetAbilitySystemComponent(), Amount);
+			VXEffects::ApplyDamage(It->GetAbilitySystemComponent(), Amount);
 		}
 	}
 }
@@ -172,15 +172,15 @@ void UVXCheatManager::GiveModifier(const FString& Skill, const FString& Modifier
 	FGameplayTag SkillTag;
 	if (Skill.Equals(TEXT("MagicBolt"), ESearchCase::IgnoreCase))
 	{
-		SkillTag = VoxelTags::Cooldown_MagicBolt;
+		SkillTag = VXTags::Cooldown_MagicBolt;
 	}
 	else if (Skill.Equals(TEXT("Nova"), ESearchCase::IgnoreCase))
 	{
-		SkillTag = VoxelTags::Cooldown_Nova;
+		SkillTag = VXTags::Cooldown_Nova;
 	}
 	else if (Skill.Equals(TEXT("BladeSweep"), ESearchCase::IgnoreCase))
 	{
-		SkillTag = VoxelTags::Cooldown_BladeSweep;
+		SkillTag = VXTags::Cooldown_BladeSweep;
 	}
 
 	const UEnum* ModifierEnum = StaticEnum<EVXModifierType>();
@@ -189,18 +189,18 @@ void UVXCheatManager::GiveModifier(const FString& Skill, const FString& Modifier
 	UVXModifierComponent* Modifiers = nullptr != GetPlayerPawn() ? GetPlayerPawn()->FindComponentByClass<UVXModifierComponent>() : nullptr;
 	if (false == SkillTag.IsValid() || INDEX_NONE == ModifierValue || nullptr == Modifiers)
 	{
-		UE_LOG(LogVoxel, Warning, TEXT("GiveModifier: usage GiveModifier <MagicBolt|Nova|BladeSweep> <Pierce|Split|Explode|Chain|Haste>"));
+		UE_LOG(LogVX, Warning, TEXT("GiveModifier: usage GiveModifier <MagicBolt|Nova|BladeSweep> <Pierce|Split|Explode|Chain|Haste>"));
 		return;
 	}
 
 	const EVXModifierType Type = static_cast<EVXModifierType>(ModifierValue);
 	if (Modifiers->AddModifier(SkillTag, Type))
 	{
-		UE_LOG(LogVoxel, Log, TEXT("GiveModifier: %s + %s (stack %d)"), *Skill, *Modifier, Modifiers->GetStack(SkillTag, Type));
+		UE_LOG(LogVX, Log, TEXT("GiveModifier: %s + %s (stack %d)"), *Skill, *Modifier, Modifiers->GetStack(SkillTag, Type));
 	}
 	else
 	{
-		UE_LOG(LogVoxel, Warning, TEXT("GiveModifier: cannot add %s to %s (slots full, max stack, or no effect on this skill)"), *Modifier, *Skill);
+		UE_LOG(LogVX, Warning, TEXT("GiveModifier: cannot add %s to %s (slots full, max stack, or no effect on this skill)"), *Modifier, *Skill);
 	}
 }
 
@@ -228,7 +228,7 @@ void UVXCheatManager::DebugKillEnemies()
 	{
 		if (It->GetTeam() == EVXTeam::Enemy && false == It->IsDead())
 		{
-			VoxelEffects::ApplyDamage(It->GetAbilitySystemComponent(), It->GetMaxHealth() * 10.f);
+			VXEffects::ApplyDamage(It->GetAbilitySystemComponent(), It->GetMaxHealth() * 10.f);
 		}
 	}
 }

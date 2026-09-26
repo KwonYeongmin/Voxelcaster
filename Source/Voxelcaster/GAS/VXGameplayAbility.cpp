@@ -27,11 +27,11 @@ bool UVXGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Han
 		return false;
 	}
 
-	if (ASC->HasMatchingGameplayTag(VoxelTags::State_Dead))
+	if (ASC->HasMatchingGameplayTag(VXTags::State_Dead))
 	{
 		return false;
 	}
-	if (bBlockedWhileDashing && ASC->HasMatchingGameplayTag(VoxelTags::State_Dashing))
+	if (bBlockedWhileDashing && ASC->HasMatchingGameplayTag(VXTags::State_Dashing))
 	{
 		return false;
 	}
@@ -52,7 +52,7 @@ UGameplayEffect* UVXGameplayAbility::GetCooldownGameplayEffect() const
 	{
 		FGameplayTagContainer Tags;
 		Tags.AddTag(CooldownTag);
-		CooldownEffect = VoxelEffects::MakeTagDurationEffect(const_cast<UVXGameplayAbility*>(this), TEXT("GE_Cooldown"), Tags, Duration);
+		CooldownEffect = VXEffects::MakeTagDurationEffect(const_cast<UVXGameplayAbility*>(this), TEXT("GE_Cooldown"), Tags, Duration);
 		CachedCooldownDuration = Duration;
 	}
 	return CooldownEffect;

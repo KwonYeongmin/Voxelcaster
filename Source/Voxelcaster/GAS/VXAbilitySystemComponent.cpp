@@ -40,14 +40,14 @@ void UVXAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& Input
 			if (false == Spec.IsActive())
 			{
 				const bool bActivated = TryActivateAbility(Spec.Handle);
-				UE_LOG(LogVoxel, Log, TEXT("Input %s pressed -> %s TryActivate=%s"), *InputTag.ToString(), *GetNameSafe(Spec.Ability), bActivated ? TEXT("true") : TEXT("false"));
+				UE_LOG(LogVX, Log, TEXT("Input %s pressed -> %s TryActivate=%s"), *InputTag.ToString(), *GetNameSafe(Spec.Ability), bActivated ? TEXT("true") : TEXT("false"));
 			}
 		}
 	}
 
 	if (MatchCount == 0)
 	{
-		UE_LOG(LogVoxel, Warning, TEXT("Input %s pressed but no granted ability matches (granted: %d)"), *InputTag.ToString(), ActivatableAbilities.Items.Num());
+		UE_LOG(LogVX, Warning, TEXT("Input %s pressed but no granted ability matches (granted: %d)"), *InputTag.ToString(), ActivatableAbilities.Items.Num());
 	}
 }
 
@@ -95,7 +95,7 @@ void UVXAbilitySystemComponent::ApplySkillHit(const FVXHitContext& Context)
 
 	if (const IAbilitySystemInterface* TargetInterface = Cast<IAbilitySystemInterface>(TargetActor))
 	{
-		VoxelEffects::ApplyDamage(TargetInterface->GetAbilitySystemComponent(), Context.Damage, this);
+		VXEffects::ApplyDamage(TargetInterface->GetAbilitySystemComponent(), Context.Damage, this);
 	}
 
 	OnSkillHit.Broadcast(Context);

@@ -6,7 +6,7 @@
 #include "GameplayEffectComponents/TargetTagsGameplayEffectComponent.h"
 #include "GAS/VXAttributeSet.h"
 
-namespace VoxelEffects
+namespace VXEffects
 {
 	UGameplayEffect* MakeTagDurationEffect(UObject* Outer, FName Name, const FGameplayTagContainer& GrantedTags, float Duration)
 	{

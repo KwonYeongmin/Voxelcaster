@@ -6,7 +6,7 @@
 #include "NativeGameplayTags.h"
 
 /** 프로젝트 공용 네이티브 게임플레이 태그. CDO 생성자에서는 쓰지 말고 런타임 코드에서만 사용한다. */
-namespace VoxelTags
+namespace VXTags
 {
 	// 입력 (InputAction -> Ability 연결용)
 	VOXELCASTER_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Input_Skill1);

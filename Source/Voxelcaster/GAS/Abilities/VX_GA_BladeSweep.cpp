@@ -13,7 +13,7 @@ UVX_GA_BladeSweep::UVX_GA_BladeSweep()
 
 FGameplayTag UVX_GA_BladeSweep::GetCooldownTag() const
 {
-	return VoxelTags::Cooldown_BladeSweep;
+	return VXTags::Cooldown_BladeSweep;
 }
 
 void UVX_GA_BladeSweep::ExecuteSkill(AVXCharacterBase* Caster)

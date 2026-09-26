@@ -48,10 +48,10 @@ AVXPlayerCharacter::AVXPlayerCharacter()
 void AVXPlayerCharacter::GrantStartupAbilities()
 {
 	UVXAbilitySystemComponent* ASC = GetVoxelAbilitySystemComponent();
-	ASC->GiveAbilityWithInput(UVX_GA_Dash::StaticClass(), VoxelTags::Input_Dash);
+	ASC->GiveAbilityWithInput(UVX_GA_Dash::StaticClass(), VXTags::Input_Dash);
 
 	// 스킬 3종: 스킬 1 = 매직 볼트(좌클릭/RT), 스킬 2 = 노바(우클릭/LT), 스킬 3 = 블레이드 스윕(Q/RB)
-	ASC->GiveAbilityWithInput(UVX_GA_MagicBolt::StaticClass(), VoxelTags::Input_Skill1);
-	ASC->GiveAbilityWithInput(UVX_GA_Nova::StaticClass(), VoxelTags::Input_Skill2);
-	ASC->GiveAbilityWithInput(UVX_GA_BladeSweep::StaticClass(), VoxelTags::Input_Skill3);
+	ASC->GiveAbilityWithInput(UVX_GA_MagicBolt::StaticClass(), VXTags::Input_Skill1);
+	ASC->GiveAbilityWithInput(UVX_GA_Nova::StaticClass(), VXTags::Input_Skill2);
+	ASC->GiveAbilityWithInput(UVX_GA_BladeSweep::StaticClass(), VXTags::Input_Skill3);
 }

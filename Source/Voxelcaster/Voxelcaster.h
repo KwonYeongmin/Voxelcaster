@@ -4,5 +4,5 @@
 
 #include "CoreMinimal.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogVoxel, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogVX, Log, All);
 

@@ -9,7 +9,7 @@ class UAbilitySystemComponent;
 class UGameplayEffect;
 
 /** 코드로 조립하는 간단한 GameplayEffect 헬퍼. 에셋 없이 수치를 코드/데이터에서 만든다. */
-namespace VoxelEffects
+namespace VXEffects
 {
 	/** 지정한 시간 동안 태그를 부여하는 GE (무적, 쿨다운 등) */
 	VOXELCASTER_API UGameplayEffect* MakeTagDurationEffect(UObject* Outer, FName Name, const FGameplayTagContainer& GrantedTags, float Duration);

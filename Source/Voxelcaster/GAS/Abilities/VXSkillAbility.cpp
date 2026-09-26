@@ -53,7 +53,7 @@ void UVXSkillAbility::GatherHostilesInRadius(const AVXCharacterBase* Caster, con
 	}
 
 	TArray<FOverlapResult> Overlaps;
-	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(VoxelSkillOverlap), false, Caster);
+	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(VXSkillOverlap), false, Caster);
 	World->OverlapMultiByObjectType(Overlaps, Center, FQuat::Identity, FCollisionObjectQueryParams(ECC_Pawn),
 		FCollisionShape::MakeSphere(Radius), QueryParams);
 

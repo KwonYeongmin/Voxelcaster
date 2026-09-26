@@ -57,7 +57,7 @@ bool UVXModifierComponent::IsModifierValidForSkill(const FGameplayTag& SkillTag,
 	// 관통은 투사체(매직 볼트)에만 효과가 있다. (DES-MOD-001)
 	if (EVXModifierType::Pierce == Type)
 	{
-		return SkillTag == VoxelTags::Cooldown_MagicBolt;
+		return SkillTag == VXTags::Cooldown_MagicBolt;
 	}
 	return SkillTag.IsValid();
 }
@@ -132,15 +132,15 @@ FString UVXModifierComponent::GetModifierName(EVXModifierType Type)
 
 FString UVXModifierComponent::GetSkillName(const FGameplayTag& SkillTag)
 {
-	if (SkillTag == VoxelTags::Cooldown_MagicBolt)
+	if (SkillTag == VXTags::Cooldown_MagicBolt)
 	{
 		return TEXT("MagicBolt");
 	}
-	if (SkillTag == VoxelTags::Cooldown_Nova)
+	if (SkillTag == VXTags::Cooldown_Nova)
 	{
 		return TEXT("Nova");
 	}
-	if (SkillTag == VoxelTags::Cooldown_BladeSweep)
+	if (SkillTag == VXTags::Cooldown_BladeSweep)
 	{
 		return TEXT("BladeSweep");
 	}
@@ -358,7 +358,7 @@ void UVXModifierComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 		return;
 	}
 
-	const FGameplayTag Skills[] = { VoxelTags::Cooldown_MagicBolt, VoxelTags::Cooldown_Nova, VoxelTags::Cooldown_BladeSweep };
+	const FGameplayTag Skills[] = { VXTags::Cooldown_MagicBolt, VXTags::Cooldown_Nova, VXTags::Cooldown_BladeSweep };
 	FString Text = VXText::Get(TEXT("UI.Build"));
 	for (const FGameplayTag& Skill : Skills)
 	{

@@ -15,7 +15,7 @@ UVX_GA_MagicBolt::UVX_GA_MagicBolt()
 
 FGameplayTag UVX_GA_MagicBolt::GetCooldownTag() const
 {
-	return VoxelTags::Cooldown_MagicBolt;
+	return VXTags::Cooldown_MagicBolt;
 }
 
 void UVX_GA_MagicBolt::ExecuteSkill(AVXCharacterBase* Caster)

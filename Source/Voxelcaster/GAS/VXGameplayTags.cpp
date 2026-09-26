@@ -2,7 +2,7 @@
 
 #include "GAS/VXGameplayTags.h"
 
-namespace VoxelTags
+namespace VXTags
 {
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Skill1, "Input.Skill1", "스킬 1 입력");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Input_Skill2, "Input.Skill2", "스킬 2 입력");

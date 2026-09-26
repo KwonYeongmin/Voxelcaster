@@ -328,10 +328,10 @@ void AVXPlayerController::BindInputActions()
 		EnhancedInput->BindAction(Action, ETriggerEvent::Completed, this, &AVXPlayerController::HandleAbilityReleased, Tag);
 	};
 
-	BindAbility(Skill1Action, VoxelTags::Input_Skill1);
-	BindAbility(Skill2Action, VoxelTags::Input_Skill2);
-	BindAbility(Skill3Action, VoxelTags::Input_Skill3);
-	BindAbility(DashAction, VoxelTags::Input_Dash);
+	BindAbility(Skill1Action, VXTags::Input_Skill1);
+	BindAbility(Skill2Action, VXTags::Input_Skill2);
+	BindAbility(Skill3Action, VXTags::Input_Skill3);
+	BindAbility(DashAction, VXTags::Input_Dash);
 
 	EnhancedInput->BindAction(PauseAction, ETriggerEvent::Started, this, &AVXPlayerController::HandlePause);
 }
@@ -534,7 +534,7 @@ void AVXPlayerController::UpdateHudViewModel()
 	const UAbilitySystemComponent* ASC = VoxelPlayer->GetAbilitySystemComponent();
 
 	FString HealthString = FString::Printf(TEXT("HP %.0f / %.0f"), Health, MaxHealth);
-	if (ASC && ASC->HasMatchingGameplayTag(VoxelTags::State_God))
+	if (ASC && ASC->HasMatchingGameplayTag(VXTags::State_God))
 	{
 		HealthString += TEXT("   [GOD]");
 	}
@@ -561,10 +561,10 @@ void AVXPlayerController::UpdateHudViewModel()
 	struct FSlotDef { UVX_VM_SkillSlot* ViewModel; FGameplayTag Tag; const TCHAR* NameKey; const TCHAR* Kbm; const TCHAR* Pad; };
 	const FSlotDef Defs[] =
 	{
-		{ HudViewModel->GetSkillSlot0(), VoxelTags::Cooldown_MagicBolt,  TEXT("Skill.MagicBolt"),  TEXT("LMB"),   TEXT("RT") },
-		{ HudViewModel->GetSkillSlot1(), VoxelTags::Cooldown_Nova,       TEXT("Skill.Nova"),       TEXT("RMB"),   TEXT("LT") },
-		{ HudViewModel->GetSkillSlot2(), VoxelTags::Cooldown_BladeSweep, TEXT("Skill.BladeSweep"), TEXT("Q"),     TEXT("RB") },
-		{ HudViewModel->GetSkillSlot3(), VoxelTags::Cooldown_Dash,       TEXT("UI.Dash"),          TEXT("Space"), TEXT("A") },
+		{ HudViewModel->GetSkillSlot0(), VXTags::Cooldown_MagicBolt,  TEXT("Skill.MagicBolt"),  TEXT("LMB"),   TEXT("RT") },
+		{ HudViewModel->GetSkillSlot1(), VXTags::Cooldown_Nova,       TEXT("Skill.Nova"),       TEXT("RMB"),   TEXT("LT") },
+		{ HudViewModel->GetSkillSlot2(), VXTags::Cooldown_BladeSweep, TEXT("Skill.BladeSweep"), TEXT("Q"),     TEXT("RB") },
+		{ HudViewModel->GetSkillSlot3(), VXTags::Cooldown_Dash,       TEXT("UI.Dash"),          TEXT("Space"), TEXT("A") },
 	};
 
 	const bool bGamepad = EVXInputDevice::Gamepad == InputDevice;
@@ -632,7 +632,7 @@ void AVXPlayerController::ShowDebugInfo() const
 		: FString::Printf(TEXT("HP %.0f / %.0f"), Health, MaxHealth);
 	if (const UAbilitySystemComponent* ASC = VoxelChar->GetAbilitySystemComponent())
 	{
-		if (ASC->HasMatchingGameplayTag(VoxelTags::State_God))
+		if (ASC->HasMatchingGameplayTag(VXTags::State_God))
 		{
 			Text += TEXT("   [GOD]");
 		}

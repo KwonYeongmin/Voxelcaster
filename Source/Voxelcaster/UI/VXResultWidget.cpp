@@ -98,7 +98,7 @@ void UVXResultWidget::SetResult(const FVXRunResult& Result, const UVXModifierCom
 
 	// 최종 빌드: 스킬 3개와 장착 모디파이어 (영상에서 한눈에 읽혀야 한다)
 	FString Build = VXText::Get(TEXT("UI.FinalBuild"));
-	const FGameplayTag Skills[] = { VoxelTags::Cooldown_MagicBolt, VoxelTags::Cooldown_Nova, VoxelTags::Cooldown_BladeSweep };
+	const FGameplayTag Skills[] = { VXTags::Cooldown_MagicBolt, VXTags::Cooldown_Nova, VXTags::Cooldown_BladeSweep };
 	for (const FGameplayTag& Skill : Skills)
 	{
 		Build += FString::Printf(TEXT("\n%s :"), *UVXModifierComponent::GetSkillDisplayName(Skill));

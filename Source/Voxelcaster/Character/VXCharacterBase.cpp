@@ -101,11 +101,11 @@ void AVXCharacterBase::BeginPlay()
 
 	AbilitySystemComponent->AbilityFailedCallbacks.AddLambda([](const UGameplayAbility* Ability, const FGameplayTagContainer& FailureTags)
 	{
-		UE_LOG(LogVoxel, Warning, TEXT("Ability failed: %s tags=[%s]"), *GetNameSafe(Ability), *FailureTags.ToStringSimple());
+		UE_LOG(LogVX, Warning, TEXT("Ability failed: %s tags=[%s]"), *GetNameSafe(Ability), *FailureTags.ToStringSimple());
 	});
 
 	GrantStartupAbilities();
-	UE_LOG(LogVoxel, Log, TEXT("%s granted %d abilities"), *GetName(), AbilitySystemComponent->GetActivatableAbilities().Num());
+	UE_LOG(LogVX, Log, TEXT("%s granted %d abilities"), *GetName(), AbilitySystemComponent->GetActivatableAbilities().Num());
 
 	OnHealthChanged.Broadcast(GetHealth(), GetMaxHealth());
 }
@@ -117,7 +117,7 @@ void AVXCharacterBase::OnHealthAttributeChanged(const FOnAttributeChangeData& Da
 	if (CVarShowHealth.GetValueOnGameThread() > 0)
 	{
 		const FString Text = FString::Printf(TEXT("%.0f / %.0f"), Data.NewValue, GetMaxHealth());
-		UE_LOG(LogVoxel, Log, TEXT("%s HP %s (%+.0f)"), *GetName(), *Text, Data.NewValue - Data.OldValue);
+		UE_LOG(LogVX, Log, TEXT("%s HP %s (%+.0f)"), *GetName(), *Text, Data.NewValue - Data.OldValue);
 #if ENABLE_DRAW_DEBUG
 		const FColor Color = Team == EVXTeam::Player ? FColor::Green : FColor::Red;
 		DrawDebugString(GetWorld(), FVector(0.f, 0.f, 150.f), Text, this, Color, 1.f, true, 1.5f);
@@ -139,7 +139,7 @@ void AVXCharacterBase::HandleDeath()
 {
 	bIsDead = true;
 
-	AbilitySystemComponent->AddLooseGameplayTag(VoxelTags::State_Dead);
+	AbilitySystemComponent->AddLooseGameplayTag(VXTags::State_Dead);
 	AbilitySystemComponent->CancelAllAbilities();
 
 	GetCharacterMovement()->DisableMovement();
