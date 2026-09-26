@@ -9,6 +9,7 @@
 #include "Engine/World.h"
 #include "GAS/VoxelAbilitySystemComponent.h"
 #include "GAS/VoxelGameplayTags.h"
+#include "UI/VXText.h"
 
 int32 FVXModifierSlots::GetStack(EVXModifierType Type) const
 {
@@ -144,6 +145,16 @@ FString UVXModifierComponent::GetSkillName(const FGameplayTag& SkillTag)
 		return TEXT("BladeSweep");
 	}
 	return SkillTag.ToString();
+}
+
+FString UVXModifierComponent::GetModifierDisplayName(EVXModifierType Type)
+{
+	return VXText::Get(*(TEXT("Mod.") + GetModifierName(Type)));
+}
+
+FString UVXModifierComponent::GetSkillDisplayName(const FGameplayTag& SkillTag)
+{
+	return VXText::Get(*(TEXT("Skill.") + GetSkillName(SkillTag)));
 }
 
 // ---------------------------------------------------------------------------
@@ -348,15 +359,15 @@ void UVXModifierComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	}
 
 	const FGameplayTag Skills[] = { VoxelTags::Cooldown_MagicBolt, VoxelTags::Cooldown_Nova, VoxelTags::Cooldown_BladeSweep };
-	FString Text = TEXT("BUILD");
+	FString Text = VXText::Get(TEXT("UI.Build"));
 	for (const FGameplayTag& Skill : Skills)
 	{
-		Text += FString::Printf(TEXT("\n  %s:"), *GetSkillName(Skill));
+		Text += FString::Printf(TEXT("\n  %s:"), *GetSkillDisplayName(Skill));
 		const FVXModifierSlots* Slots = Equipped.Find(Skill);
 		for (int32 i = 0; i < MaxSlots; ++i)
 		{
 			Text += (nullptr != Slots && Slots->Slots.IsValidIndex(i))
-				? FString::Printf(TEXT(" [%s]"), *GetModifierName(Slots->Slots[i]))
+				? FString::Printf(TEXT(" [%s]"), *GetModifierDisplayName(Slots->Slots[i]))
 				: FString(TEXT(" [ ]"));
 		}
 	}

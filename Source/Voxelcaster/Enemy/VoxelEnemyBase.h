@@ -10,6 +10,7 @@ class UStaticMeshComponent;
 class UMaterialInstanceDynamic;
 class UStateTree;
 class UAnimMontage;
+class UWidgetComponent;
 class AVXEnemyBase;
 
 /** 적이 다른 적을 소환했을 때 (웨이브 매니저가 클리어 조건에 포함시킨다) */
@@ -76,4 +77,10 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> BodyMaterial;
+
+	/** 머리 위 HP 바 (화면 공간 빌보드) */
+	UPROPERTY(VisibleAnywhere, Category = "Voxel|Visual")
+	TObjectPtr<UWidgetComponent> HealthBarComponent;
+
+	void UpdateHealthBar(float Current, float Max);
 };

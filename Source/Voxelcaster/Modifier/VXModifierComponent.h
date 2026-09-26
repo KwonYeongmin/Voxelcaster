@@ -70,8 +70,13 @@ public:
 	/** 효과가 있는 조합인지 (관통은 투사체 스킬에만) */
 	static bool IsModifierValidForSkill(const FGameplayTag& SkillTag, EVXModifierType Type);
 
+	/** 내부 이름 (치트·로그용, 영어 고정) */
 	static FString GetModifierName(EVXModifierType Type);
 	static FString GetSkillName(const FGameplayTag& SkillTag);
+
+	/** 화면 표시 이름 (DT_UIText, 현재 언어) */
+	static FString GetModifierDisplayName(EVXModifierType Type);
+	static FString GetSkillDisplayName(const FGameplayTag& SkillTag);
 
 	/** 장착이 바뀔 때 (HUD, 결과 화면) */
 	FVXModifiersChangedSignature OnModifiersChanged;

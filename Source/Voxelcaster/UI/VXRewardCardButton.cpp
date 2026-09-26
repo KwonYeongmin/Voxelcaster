@@ -8,6 +8,7 @@
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "Styling/CoreStyle.h"
+#include "UI/VXText.h"
 
 namespace
 {
@@ -71,12 +72,12 @@ void UVXRewardCardButton::SetCard(const FVXUpgradeCard& InCard, int32 InIndex)
 
 	if (SkillText)
 	{
-		SkillText->SetText(FText::FromString(UVXModifierComponent::GetSkillName(Card.SkillTag)));
+		SkillText->SetText(FText::FromString(UVXModifierComponent::GetSkillDisplayName(Card.SkillTag)));
 	}
 	if (ModifierText)
 	{
-		ModifierText->SetText(FText::FromString(FString::Printf(TEXT("%s  Lv.%d"),
-			*UVXModifierComponent::GetModifierName(Card.Modifier), Card.ResultStack)));
+		ModifierText->SetText(FText::FromString(FString::Printf(TEXT("%s  %s"),
+			*UVXModifierComponent::GetModifierDisplayName(Card.Modifier), *VXText::Format(TEXT("UI.Level"), { Card.ResultStack }))));
 	}
 	if (DescText)
 	{
@@ -84,7 +85,7 @@ void UVXRewardCardButton::SetCard(const FVXUpgradeCard& InCard, int32 InIndex)
 	}
 	if (TagText)
 	{
-		TagText->SetText(Card.IsStackUpgrade() ? FText::FromString(TEXT("UPGRADE")) : FText::FromString(TEXT("NEW")));
+		TagText->SetText(FText::FromString(VXText::Get(Card.IsStackUpgrade() ? TEXT("UI.Upgrade") : TEXT("UI.New"))));
 	}
 }
 

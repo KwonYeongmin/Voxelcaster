@@ -1,0 +1,102 @@
+[
+ {
+  "Name": "Skill.MagicBolt",
+  "Ko": "매직 볼트",
+  "En": "Magic Bolt"
+ },
+ {
+  "Name": "Skill.Nova",
+  "Ko": "노바",
+  "En": "Nova"
+ },
+ {
+  "Name": "Skill.BladeSweep",
+  "Ko": "블레이드 스윕",
+  "En": "Blade Sweep"
+ },
+ {
+  "Name": "Mod.Pierce",
+  "Ko": "관통",
+  "En": "Pierce"
+ },
+ {
+  "Name": "Mod.Split",
+  "Ko": "분열",
+  "En": "Split"
+ },
+ {
+  "Name": "Mod.Explode",
+  "Ko": "폭발",
+  "En": "Explode"
+ },
+ {
+  "Name": "Mod.Chain",
+  "Ko": "연쇄",
+  "En": "Chain"
+ },
+ {
+  "Name": "Mod.Haste",
+  "Ko": "가속",
+  "En": "Haste"
+ },
+ {
+  "Name": "Desc.Pierce",
+  "Ko": "적 {0}명을 관통",
+  "En": "Pierces {0} enemies"
+ },
+ {
+  "Name": "Desc.Split",
+  "Ko": "명중 시 작은 투사체 {0}발\n(피해 40%)",
+  "En": "Splits into {0} bolts on hit\n(40% damage)"
+ },
+ {
+  "Name": "Desc.Explode",
+  "Ko": "명중 지점에 반경 {0}m 폭발\n(피해 50%)",
+  "En": "Explodes in a {0}m radius on hit\n(50% damage)"
+ },
+ {
+  "Name": "Desc.Chain",
+  "Ko": "가까운 적 {0}명에게 번개 전이\n(피해 70%)",
+  "En": "Lightning chains to {0} enemies\n(70% damage)"
+ },
+ {
+  "Name": "Desc.Haste",
+  "Ko": "쿨다운 -{0}%",
+  "En": "Cooldown -{0}%"
+ },
+ {
+  "Name": "UI.Level",
+  "Ko": "Lv.{0}",
+  "En": "Lv.{0}"
+ },
+ {
+  "Name": "UI.New",
+  "Ko": "신규",
+  "En": "NEW"
+ },
+ {
+  "Name": "UI.Upgrade",
+  "Ko": "강화",
+  "En": "UPGRADE"
+ },
+ {
+  "Name": "UI.RewardTitle",
+  "Ko": "웨이브 {0} 클리어  -  강화를 선택하세요",
+  "En": "WAVE {0} CLEAR  -  Choose an upgrade"
+ },
+ {
+  "Name": "UI.RewardHint",
+  "Ko": "좌우로 선택   ·   Enter / 클릭 / (A) 로 확정",
+  "En": "Left / Right to choose   ·   Enter / Click / (A) to confirm"
+ },
+ {
+  "Name": "UI.BuildOf",
+  "Ko": "{0} 빌드:",
+  "En": "{0} build:"
+ },
+ {
+  "Name": "UI.Build",
+  "Ko": "빌드",
+  "En": "BUILD"
+ }
+]

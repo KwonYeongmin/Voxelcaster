@@ -14,6 +14,7 @@
 #include "Modifier/VXModifierComponent.h"
 #include "Styling/CoreStyle.h"
 #include "UI/VXRewardCardButton.h"
+#include "UI/VXText.h"
 
 namespace
 {
@@ -57,7 +58,6 @@ bool UVXRewardSelectWidget::Initialize()
 
 		BuildText = AddText(WidgetTree, Box, 18, FLinearColor(0.7f, 0.9f, 1.f), FMargin(0, 40, 0, 8));
 		HintText = AddText(WidgetTree, Box, 16, FLinearColor(0.8f, 0.8f, 0.8f), FMargin(0, 8, 0, 0));
-		HintText->SetText(FText::FromString(TEXT("Left / Right to choose   -   Enter / Click / (A) to confirm")));
 	}
 
 	// 뒤로가기 핸들러(bIsBackHandler)는 켜지 않는다. 켜면 CommonUI 뒤로가기 액션 데이터가 필요하다.
@@ -69,7 +69,12 @@ void UVXRewardSelectWidget::SetChoices(const TArray<FVXUpgradeCard>& InChoices, 
 {
 	if (TitleText)
 	{
-		TitleText->SetText(FText::FromString(FString::Printf(TEXT("WAVE %d CLEAR  -  Choose an upgrade"), WaveIndex)));
+		TitleText->SetText(FText::FromString(VXText::Format(TEXT("UI.RewardTitle"), { WaveIndex })));
+	}
+
+	if (HintText)
+	{
+		HintText->SetText(FText::FromString(VXText::Get(TEXT("UI.RewardHint"))));
 	}
 
 	CardRow->ClearChildren();
@@ -146,7 +151,7 @@ void UVXRewardSelectWidget::UpdateBuildText(const FVXUpgradeCard& Card)
 		return;
 	}
 
-	FString Text = FString::Printf(TEXT("%s build:"), *UVXModifierComponent::GetSkillName(Card.SkillTag));
+	FString Text = VXText::Format(TEXT("UI.BuildOf"), { UVXModifierComponent::GetSkillDisplayName(Card.SkillTag) });
 	const APlayerController* PC = GetOwningPlayer();
 	const UVXModifierComponent* Modifiers = (PC && PC->GetPawn()) ? PC->GetPawn()->FindComponentByClass<UVXModifierComponent>() : nullptr;
 	const FVXModifierSlots* Slots = nullptr != Modifiers ? Modifiers->FindSlots(Card.SkillTag) : nullptr;
@@ -156,12 +161,12 @@ void UVXRewardSelectWidget::UpdateBuildText(const FVXUpgradeCard& Card)
 	{
 		if (i < Used)
 		{
-			Text += FString::Printf(TEXT("  [%s]"), *UVXModifierComponent::GetModifierName(Slots->Slots[i]));
+			Text += FString::Printf(TEXT("  [%s]"), *UVXModifierComponent::GetModifierDisplayName(Slots->Slots[i]));
 		}
 		else if (i == Used)
 		{
 			// 이 카드를 고르면 들어갈 자리 (미리보기)
-			Text += FString::Printf(TEXT("  [+%s]"), *UVXModifierComponent::GetModifierName(Card.Modifier));
+			Text += FString::Printf(TEXT("  [+%s]"), *UVXModifierComponent::GetModifierDisplayName(Card.Modifier));
 		}
 		else
 		{

@@ -20,6 +20,7 @@
 #include "InputActionValue.h"
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
+#include "Cheat/VXCheatManager.h"
 #include "Modifier/VXModifierComponent.h"
 #include "Modifier/VXUpgradeSubsystem.h"
 #include "UI/VXRewardSelectWidget.h"
@@ -28,6 +29,8 @@
 
 AVXPlayerController::AVXPlayerController()
 {
+	CheatClass = UVXCheatManager::StaticClass();
+
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
 }
@@ -112,6 +115,11 @@ void AVXPlayerController::BeginPlay()
 }
 
 void AVXPlayerController::HandleChoicesReady(const TArray<FVXUpgradeCard>& Choices)
+{
+	OpenRewardSelect(Choices);
+}
+
+void AVXPlayerController::OpenRewardSelect(const TArray<FVXUpgradeCard>& Choices)
 {
 	UVXRewardSelectWidget* Widget = CreateWidget<UVXRewardSelectWidget>(this, UVXRewardSelectWidget::StaticClass());
 	if (nullptr == Widget)
@@ -373,215 +381,17 @@ void AVXPlayerController::ShowDebugInfo() const
 
 	// 30% 이하는 빨강, 60% 이하는 주황 (저체력 경고)
 	const FColor Color = Ratio <= 0.3f ? FColor::Red : (Ratio <= 0.6f ? FColor::Orange : FColor::Green);
-	const FString Text = VoxelChar->IsDead()
+	FString Text = VoxelChar->IsDead()
 		? FString::Printf(TEXT("HP 0 / %.0f   [DEAD]"), MaxHealth)
 		: FString::Printf(TEXT("HP %.0f / %.0f"), Health, MaxHealth);
+	if (const UAbilitySystemComponent* ASC = VoxelChar->GetAbilitySystemComponent())
+	{
+		if (ASC->HasMatchingGameplayTag(VoxelTags::State_God))
+		{
+			Text += TEXT("   [GOD]");
+		}
+	}
 
 	// 웨이브 표시(키 7001) 바로 아래에 오도록 다음 키를 쓴다.
 	GEngine->AddOnScreenDebugMessage(7002, 0.f, Color, Text, true, FVector2D(1.5f, 1.5f));
-}
-
-// ---------------------------------------------------------------------------
-// 디버그 콘솔 명령
-// ---------------------------------------------------------------------------
-
-void AVXPlayerController::DebugDamage(float Amount)
-{
-	if (Amount <= 0.f)
-	{
-		Amount = 10.f;
-	}
-	if (const AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPawn()))
-	{
-		VoxelEffects::ApplyDamage(VoxelChar->GetAbilitySystemComponent(), Amount);
-	}
-}
-
-void AVXPlayerController::DebugHeal(float Amount)
-{
-	if (Amount <= 0.f)
-	{
-		Amount = 30.f;
-	}
-	if (const AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPawn()))
-	{
-		VoxelEffects::ApplyHeal(VoxelChar->GetAbilitySystemComponent(), Amount);
-	}
-}
-
-void AVXPlayerController::DebugKill()
-{
-	if (const AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPawn()))
-	{
-		VoxelEffects::ApplyDamage(VoxelChar->GetAbilitySystemComponent(), VoxelChar->GetMaxHealth() * 10.f);
-	}
-}
-
-void AVXPlayerController::DebugSpawnRunners(int32 Count)
-{
-	// Exec 명령은 C++ 기본 인자를 적용하지 않는다. 인자를 생략하면 0이 들어오므로 기본값으로 보정한다.
-	if (Count <= 0)
-	{
-		Count = 10;
-	}
-
-	const AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPawn());
-	if (nullptr == VoxelChar || nullptr == GetWorld())
-	{
-		return;
-	}
-
-	for (int32 i = 0; i < Count; ++i)
-	{
-		const float Angle = FMath::FRandRange(0.f, 360.f);
-		const float Distance = FMath::FRandRange(800.f, 1200.f);
-		const FVector Offset = FVector::ForwardVector.RotateAngleAxis(Angle, FVector::UpVector) * Distance;
-
-		FActorSpawnParameters Params;
-		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		GetWorld()->SpawnActor<AVXRunner>(AVXRunner::StaticClass(), VoxelChar->GetActorLocation() + Offset, FRotator::ZeroRotator, Params);
-	}
-}
-
-void AVXPlayerController::DebugSpawnEnemy(const FString& EnemyType, int32 Count)
-{
-	if (Count <= 0)
-	{
-		Count = 1;
-	}
-
-	TSubclassOf<AVXEnemyBase> EnemyClass;
-	if (EnemyType.Equals(TEXT("Runner"), ESearchCase::IgnoreCase))
-	{
-		EnemyClass = AVXRunner::StaticClass();
-	}
-	else if (EnemyType.Equals(TEXT("Shooter"), ESearchCase::IgnoreCase))
-	{
-		EnemyClass = AVXShooter::StaticClass();
-	}
-	else if (EnemyType.Equals(TEXT("Elite"), ESearchCase::IgnoreCase))
-	{
-		EnemyClass = AVXElite::StaticClass();
-	}
-
-	const AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPawn());
-	if (nullptr == EnemyClass.Get() || nullptr == VoxelChar)
-	{
-		UE_LOG(LogVoxel, Warning, TEXT("DebugSpawnEnemy: unknown type '%s' (Runner, Shooter, Elite)"), *EnemyType);
-		return;
-	}
-
-	for (int32 i = 0; i < Count; ++i)
-	{
-		const float Angle = FMath::FRandRange(0.f, 360.f);
-		const float Distance = FMath::FRandRange(800.f, 1200.f);
-		const FVector Offset = FVector::ForwardVector.RotateAngleAxis(Angle, FVector::UpVector) * Distance;
-
-		FActorSpawnParameters Params;
-		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		GetWorld()->SpawnActor<AVXEnemyBase>(EnemyClass, VoxelChar->GetActorLocation() + Offset, FRotator::ZeroRotator, Params);
-	}
-}
-
-void AVXPlayerController::DebugDamageEnemies(float Amount)
-{
-	if (Amount <= 0.f)
-	{
-		Amount = 20.f;
-	}
-
-	for (TActorIterator<AVXCharacterBase> It(GetWorld()); It; ++It)
-	{
-		if (It->GetTeam() == EVXTeam::Enemy && false == It->IsDead())
-		{
-			VoxelEffects::ApplyDamage(It->GetAbilitySystemComponent(), Amount);
-		}
-	}
-}
-
-void AVXPlayerController::GiveModifier(const FString& Skill, const FString& Modifier)
-{
-	FGameplayTag SkillTag;
-	if (Skill.Equals(TEXT("MagicBolt"), ESearchCase::IgnoreCase))
-	{
-		SkillTag = VoxelTags::Cooldown_MagicBolt;
-	}
-	else if (Skill.Equals(TEXT("Nova"), ESearchCase::IgnoreCase))
-	{
-		SkillTag = VoxelTags::Cooldown_Nova;
-	}
-	else if (Skill.Equals(TEXT("BladeSweep"), ESearchCase::IgnoreCase))
-	{
-		SkillTag = VoxelTags::Cooldown_BladeSweep;
-	}
-
-	const UEnum* ModifierEnum = StaticEnum<EVXModifierType>();
-	const int64 ModifierValue = ModifierEnum->GetValueByNameString(Modifier);
-
-	UVXModifierComponent* Modifiers = nullptr != GetPawn() ? GetPawn()->FindComponentByClass<UVXModifierComponent>() : nullptr;
-	if (false == SkillTag.IsValid() || INDEX_NONE == ModifierValue || nullptr == Modifiers)
-	{
-		UE_LOG(LogVoxel, Warning, TEXT("GiveModifier: usage GiveModifier <MagicBolt|Nova|BladeSweep> <Pierce|Split|Explode|Chain|Haste>"));
-		return;
-	}
-
-	const EVXModifierType Type = static_cast<EVXModifierType>(ModifierValue);
-	if (Modifiers->AddModifier(SkillTag, Type))
-	{
-		UE_LOG(LogVoxel, Log, TEXT("GiveModifier: %s + %s (stack %d)"), *Skill, *Modifier, Modifiers->GetStack(SkillTag, Type));
-	}
-	else
-	{
-		UE_LOG(LogVoxel, Warning, TEXT("GiveModifier: cannot add %s to %s (slots full, max stack, or no effect on this skill)"), *Modifier, *Skill);
-	}
-}
-
-void AVXPlayerController::ShowUpgradeSelect()
-{
-	UVXUpgradeSubsystem* Upgrades = GetWorld()->GetSubsystem<UVXUpgradeSubsystem>();
-	UVXModifierComponent* Modifiers = nullptr != GetPawn() ? GetPawn()->FindComponentByClass<UVXModifierComponent>() : nullptr;
-	if (Upgrades && Modifiers)
-	{
-		Upgrades->DrawChoices(Modifiers);
-	}
-}
-
-void AVXPlayerController::ClearModifiers()
-{
-	if (UVXModifierComponent* Modifiers = nullptr != GetPawn() ? GetPawn()->FindComponentByClass<UVXModifierComponent>() : nullptr)
-	{
-		Modifiers->ResetModifiers();
-	}
-}
-
-void AVXPlayerController::DebugKillEnemies()
-{
-	for (TActorIterator<AVXCharacterBase> It(GetWorld()); It; ++It)
-	{
-		if (It->GetTeam() == EVXTeam::Enemy && false == It->IsDead())
-		{
-			VoxelEffects::ApplyDamage(It->GetAbilitySystemComponent(), It->GetMaxHealth() * 10.f);
-		}
-	}
-}
-
-void AVXPlayerController::DebugStartWave(int32 WaveIndex)
-{
-	if (WaveIndex <= 0)
-	{
-		WaveIndex = 1;
-	}
-
-	if (const AVoxelGameMode* GameMode = GetWorld()->GetAuthGameMode<AVoxelGameMode>())
-	{
-		GameMode->GetWaveManager()->StartWave(WaveIndex);
-	}
-}
-
-void AVXPlayerController::DebugStopWaves()
-{
-	if (const AVoxelGameMode* GameMode = GetWorld()->GetAuthGameMode<AVoxelGameMode>())
-	{
-		GameMode->GetWaveManager()->StopWaves();
-	}
 }

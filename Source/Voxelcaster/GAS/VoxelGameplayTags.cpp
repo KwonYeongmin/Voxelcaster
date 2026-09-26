@@ -12,6 +12,7 @@ namespace VoxelTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Dead, "State.Dead", "사망 상태");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Dashing, "State.Dashing", "대시 중 (스킬 사용 불가)");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_Invincible, "State.Invincible", "무적 (피해 무시)");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(State_God, "State.God", "치트 무적 (God 명령)");
 
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Cooldown_Dash, "Cooldown.Dash", "대시 쿨다운");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Cooldown_MagicBolt, "Cooldown.MagicBolt", "매직 볼트 쿨다운");

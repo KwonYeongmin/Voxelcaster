@@ -2,6 +2,7 @@
 
 #include "Modifier/VXUpgradeSubsystem.h"
 #include "GAS/VoxelGameplayTags.h"
+#include "UI/VXText.h"
 #include "Voxelcaster.h"
 
 FString FVXUpgradeCard::GetLabel() const
@@ -15,11 +16,11 @@ FString FVXUpgradeCard::GetDescription() const
 	const int32 N = ResultStack;
 	switch (Modifier)
 	{
-	case EVXModifierType::Pierce:  return FString::Printf(TEXT("Pierces %d enemies"), N);
-	case EVXModifierType::Split:   return FString::Printf(TEXT("Splits into %d bolts (40%% dmg)"), N + 1);
-	case EVXModifierType::Explode: return FString::Printf(TEXT("Explodes %.1fm (50%% dmg)"), 1.5f + 0.5f * (N - 1));
-	case EVXModifierType::Chain:   return FString::Printf(TEXT("Chains to %d enemies (70%% dmg)"), N);
-	case EVXModifierType::Haste:   return FString::Printf(TEXT("Cooldown -%d%%"), 15 * N);
+	case EVXModifierType::Pierce:  return VXText::Format(TEXT("Desc.Pierce"), { N });
+	case EVXModifierType::Split:   return VXText::Format(TEXT("Desc.Split"), { N + 1 });
+	case EVXModifierType::Explode: return VXText::Format(TEXT("Desc.Explode"), { FString::Printf(TEXT("%.1f"), 1.5f + 0.5f * (N - 1)) });
+	case EVXModifierType::Chain:   return VXText::Format(TEXT("Desc.Chain"), { N });
+	case EVXModifierType::Haste:   return VXText::Format(TEXT("Desc.Haste"), { 15 * N });
 	}
 	return FString();
 }
