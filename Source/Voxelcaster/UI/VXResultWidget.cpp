@@ -77,6 +77,16 @@ void UVXResultWidget::NativeOnInitialized()
 	ViewModel->SetQuitText(FText::FromString(VXText::Get(TEXT("UI.Quit"))));
 	VXUI::SetViewModel(this, ViewModel);
 
+	// 메뉴 버튼 글자 (버튼은 별도 WBP라 부모 뷰모델에 바인딩할 수 없어서 코드로 넣는다)
+	if (UVXMenuButton* Button = Cast<UVXMenuButton>(RestartButton))
+	{
+		Button->SetLabel(ViewModel->GetRestartText().ToString());
+	}
+	if (UVXMenuButton* Button = Cast<UVXMenuButton>(QuitButton))
+	{
+		Button->SetLabel(ViewModel->GetQuitText().ToString());
+	}
+
 	if (RestartButton)
 	{
 		RestartButton->OnClicked().AddUObject(this, &UVXResultWidget::HandleRestart);
