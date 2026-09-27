@@ -13,6 +13,8 @@ UVX_GA_MagicBolt::UVX_GA_MagicBolt()
 {
 	Damage = 20.f;
 	CooldownDuration = 0.4f;
+	// 연사하므로 출렁임은 약하게
+	AttackBounceStrength = 0.5f;
 	SkillRowName = TEXT("MagicBolt");
 }
 

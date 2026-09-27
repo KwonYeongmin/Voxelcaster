@@ -1,4 +1,4 @@
-﻿"Name","MaxHealth","MoveSpeed","AttackDamage","AttackInterval","ProjectileSpeed","FlockRadius","SeparationWeight","AlignmentWeight","CohesionWeight"
-"Runner","40","500","10","0.8","0","400","0.8","0.35","0.25"
-"Shooter","60","250","8","1.5","800","400","0.8","0","0"
-"Elite","400","200","8","2.0","800","400","0.8","0","0"
+﻿"Name","MaxHealth","MoveSpeed","AttackDamage","AttackInterval","ProjectileSpeed","FlockRadius","SeparationWeight","AlignmentWeight","CohesionWeight","SkeletalMesh","AnimClass","MeshScale","MeshOffsetZ","LocomotionBlendSpace","IdleAnimation"
+"Runner","40","500","10","0.8","0","400","0.8","0.35","0.25","/Game/ParagonMinions/Characters/Minions/Dusk_Minions/Meshes/Minion_Lane_Super_Core_Dusk.Minion_Lane_Super_Core_Dusk","","0.8","0","/Game/ParagonMinions/Characters/Minions/Down_Minions/Animations/Super/Blendspaces/Idle2Run_Super.Idle2Run_Super",""
+"Shooter","60","250","8","1.5","800","400","0.8","0","0","/Game/ParagonGRIMexe/Characters/Heroes/GRIM/Meshes/GRIM_GDC.GRIM_GDC","/Game/ParagonGRIMexe/Characters/Heroes/GRIM/GRIMexe_AnimBlueprint.GRIMexe_AnimBlueprint_C","0.8","0","",""
+"Elite","400","200","8","2.0","800","400","0.8","0","0","/Game/ParagonMinions/Characters/Buff/Buff_Blue/Meshes/Buff_Blue.Buff_Blue","","1.0","0","/Game/ParagonMinions/Characters/Buff/Buff_Blue/Animations/Blendspaces/Fly_MidSpeed_FullSpeed.Fly_MidSpeed_FullSpeed","/Game/ParagonMinions/Characters/Buff/Buff_Blue/Animations/Idle_A.Idle_A"

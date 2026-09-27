@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "UI/VXHUDWidget.h"
+#include "CommonBorder.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/HorizontalBox.h"
@@ -29,13 +30,13 @@ namespace
 
 bool UVXHUDWidget::Initialize()
 {
-	if (nullptr == WidgetTree)
+	if (false == VXUI::HasDesignerTree(this) && nullptr == WidgetTree)
 	{
 		WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"), RF_Transient);
 	}
 
 	// WBP_VX_HUD면 디자이너가 만든 트리가 이미 있다. 없을 때만 기본 트리를 만든다.
-	if (nullptr == WidgetTree->RootWidget)
+	if (false == VXUI::HasDesignerTree(this) && nullptr == WidgetTree->RootWidget)
 	{
 		BuildDefaultTree();
 		bBuiltInCode = true;
@@ -174,7 +175,7 @@ void UVXHUDWidget::BuildDefaultTree()
 			SizeSlot->SetPadding(FMargin(8, 0));
 			SizeSlot->SetVerticalAlignment(VAlign_Bottom);
 
-			UBorder* Panel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
+			UBorder* Panel = WidgetTree->ConstructWidget<UCommonBorder>(UCommonBorder::StaticClass());
 			Panel->SetBrushColor(VXUI::Panel);
 			Panel->SetPadding(FMargin(10));
 			Size->AddChild(Panel);

@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "UI/VXResultWidget.h"
+#include "CommonBorder.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
@@ -17,11 +18,11 @@
 
 bool UVXResultWidget::Initialize()
 {
-	if (nullptr == WidgetTree)
+	if (false == VXUI::HasDesignerTree(this) && nullptr == WidgetTree)
 	{
 		WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"), RF_Transient);
 	}
-	if (nullptr == WidgetTree->RootWidget)
+	if (false == VXUI::HasDesignerTree(this) && nullptr == WidgetTree->RootWidget)
 	{
 		BuildDefaultTree();
 		bBuiltInCode = true;
@@ -31,7 +32,7 @@ bool UVXResultWidget::Initialize()
 
 void UVXResultWidget::BuildDefaultTree()
 {
-	UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
+	UBorder* Dim = WidgetTree->ConstructWidget<UCommonBorder>(UCommonBorder::StaticClass());
 	Dim->SetBrushColor(FLinearColor(0.f, 0.f, 0.f, 0.8f));
 	Dim->SetHorizontalAlignment(HAlign_Center);
 	Dim->SetVerticalAlignment(VAlign_Center);

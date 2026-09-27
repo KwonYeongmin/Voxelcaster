@@ -33,11 +33,21 @@ AVXCharacterBase::AVXCharacterBase()
 
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
 	Movement->bOrientRotationToMovement = false;
-	Movement->bConstrainToPlane = true;
-	Movement->SetPlaneConstraintNormal(FVector::UpVector);
 	Movement->MaxAcceleration = 4000.f;
 	Movement->BrakingDecelerationWalking = 4000.f;
 	Movement->GroundFriction = 12.f;
+
+	// 높이 이동 허용: 계단·경사·굴곡을 오르내리고 떨어지면 바닥으로 내려간다.
+	// (예전에는 평면 고정이라 바닥보다 높게 생성되면 공중에 뜬 채 멈췄다)
+	Movement->bConstrainToPlane = false;
+	Movement->MaxStepHeight = 60.f;            // 계단 한 칸 높이 (기본 45)
+	Movement->SetWalkableFloorAngle(50.f);     // 걸을 수 있는 경사 (기본 약 45도)
+	Movement->bCanWalkOffLedges = true;
+	Movement->GravityScale = 2.f;              // 낙하를 빠르게 (탑다운이라 체공 시간이 길면 답답하다)
+
+	// 잠깐 떠 있을 때(계단 끝, 턱)도 땅처럼 조작되게
+	Movement->AirControl = 1.f;
+	Movement->BrakingDecelerationFalling = 4000.f;
 
 	// 캡슐 반경 0.4m (design: DES-CHAR-001)
 	GetCapsuleComponent()->InitCapsuleSize(40.f, 90.f);

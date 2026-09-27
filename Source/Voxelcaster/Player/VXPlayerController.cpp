@@ -484,7 +484,8 @@ void AVXPlayerController::HandleWaveStarted(int32 WaveIndex)
 		SubText = VXText::Get(TEXT("UI.FinalWave"));
 	}
 
-	HudViewModel->SetBannerText(FText::FromString(VXText::Format(TEXT("UI.WaveBanner"), { WaveIndex })));
+	const bool bTest = nullptr != Waves && Waves->IsTestWave();
+	HudViewModel->SetBannerText(FText::FromString(bTest ? VXText::Get(TEXT("UI.TestWave")) : VXText::Format(TEXT("UI.WaveBanner"), { WaveIndex })));
 	HudViewModel->SetBannerSubText(FText::FromString(SubText));
 	BannerStartTime = GetWorld()->GetRealTimeSeconds();
 	UpdateWaveBanner();
@@ -631,7 +632,9 @@ void AVXPlayerController::UpdateHudViewModel()
 	if (const AVXGameMode* GameMode = GetWorld()->GetAuthGameMode<AVXGameMode>())
 	{
 		const UVXWaveManager* Waves = GameMode->GetWaveManager();
-		HudViewModel->SetWaveText(FText::FromString(VXText::Format(TEXT("UI.Wave"), { Waves->GetCurrentWave(), Waves->GetTotalWaves() })));
+		HudViewModel->SetWaveText(FText::FromString(Waves->IsTestWave()
+			? VXText::Get(TEXT("UI.TestWave"))
+			: VXText::Format(TEXT("UI.Wave"), { Waves->GetCurrentWave(), Waves->GetTotalWaves() })));
 		HudViewModel->SetEnemiesText(FText::FromString(
 			VXText::Format(TEXT("UI.Remaining"), { Waves->GetRemainingEnemies() }) + TEXT("     ") +
 			VXText::Format(TEXT("UI.Kills"), { Waves->GetKillCount() })));

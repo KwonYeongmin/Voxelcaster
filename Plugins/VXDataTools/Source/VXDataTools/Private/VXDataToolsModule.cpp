@@ -6,6 +6,7 @@
 #include "Styling/AppStyle.h"
 #include "ToolMenus.h"
 #include "VXDataReimporter.h"
+#include "VXToonPostProcess.h"
 #include "Widgets/Docking/SDockTab.h"
 
 /**
@@ -64,6 +65,7 @@ private:
 				{
 					FToolMenuSection& MenuSection = Menu->AddSection(TEXT("VXDataTools"));
 					AddOpenPanelEntry(MenuSection);
+					AddToonPostProcessEntry(MenuSection);
 				}),
 				FText::FromString(TEXT("데이터 도구")),
 				FText::FromString(TEXT("VX Data Tools")),
@@ -76,6 +78,7 @@ private:
 		{
 			FToolMenuSection& Section = ToolsMenu->FindOrAddSection(TEXT("VXDataTools"), FText::FromString(TEXT("Voxelcaster")));
 			AddOpenPanelEntry(Section);
+			AddToonPostProcessEntry(Section);
 		}
 	}
 
@@ -87,6 +90,16 @@ private:
 			FText::FromString(TEXT("DataTable 목록·원본 파일·리임포트 결과를 보는 패널")),
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), TEXT("ClassIcon.DataTable")),
 			FUIAction(FExecuteAction::CreateLambda([]() { FGlobalTabmanager::Get()->TryInvokeTab(TabName); })));
+	}
+
+	void AddToonPostProcessEntry(FToolMenuSection& Section)
+	{
+		Section.AddMenuEntry(
+			TEXT("VXApplyToonPostProcess"),
+			FText::FromString(TEXT("카툰 포스트 프로세스 적용")),
+			FText::FromString(TEXT("현재 레벨의 Post Process Volume에 MI_PP_Toon, 할레이션, 필름 그레인, 색수차, 비네트를 설정한다 (Ctrl+Z로 되돌리기)")),
+			FSlateIcon(FAppStyle::GetAppStyleSetName(), TEXT("ClassIcon.PostProcessVolume")),
+			FUIAction(FExecuteAction::CreateLambda([]() { VXToonPostProcess::ApplyToCurrentLevel(); })));
 	}
 
 	/** 툴바 버튼: 패널이 열려 있으면 패널 목록도 갱신된다 */

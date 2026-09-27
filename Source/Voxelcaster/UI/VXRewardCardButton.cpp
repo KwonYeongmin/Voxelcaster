@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "UI/VXRewardCardButton.h"
+#include "CommonBorder.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/SizeBox.h"
@@ -14,11 +15,11 @@
 bool UVXRewardCardButton::Initialize()
 {
 	// CommonButtonBase가 루트를 버튼으로 감싸기 전에 트리가 있어야 한다. WBP면 이미 있다.
-	if (nullptr == WidgetTree)
+	if (false == VXUI::HasDesignerTree(this) && nullptr == WidgetTree)
 	{
 		WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"), RF_Transient);
 	}
-	if (nullptr == WidgetTree->RootWidget)
+	if (false == VXUI::HasDesignerTree(this) && nullptr == WidgetTree->RootWidget)
 	{
 		BuildDefaultTree();
 		bBuiltInCode = true;
@@ -38,7 +39,7 @@ void UVXRewardCardButton::BuildDefaultTree()
 	Size->SetHeightOverride(340.f);
 	WidgetTree->RootWidget = Size;
 
-	CardBorder = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
+	CardBorder = WidgetTree->ConstructWidget<UCommonBorder>(UCommonBorder::StaticClass());
 	CardBorder->SetBrushColor(VXUI::Panel);
 	CardBorder->SetPadding(FMargin(16.f));
 	Size->AddChild(CardBorder);

@@ -11,7 +11,8 @@ public class VXDataTools : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
 			"Core", "CoreUObject", "Engine", "InputCore",
-			"Slate", "SlateCore", "ToolMenus", "UnrealEd", "AssetRegistry"
+			"Slate", "SlateCore", "ToolMenus", "UnrealEd", "AssetRegistry", "MaterialEditor", "RHI", "RenderCore",
+			"UMG", "UMGEditor", "CommonUI", "ModelViewViewModel", "ModelViewViewModelBlueprint", "ModelViewViewModelEditor", "FieldNotification", "Kismet"
 		});
 	}
 }

@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "UI/VXPauseWidget.h"
+#include "CommonBorder.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
@@ -15,11 +16,11 @@
 
 bool UVXPauseWidget::Initialize()
 {
-	if (nullptr == WidgetTree)
+	if (false == VXUI::HasDesignerTree(this) && nullptr == WidgetTree)
 	{
 		WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"), RF_Transient);
 	}
-	if (nullptr == WidgetTree->RootWidget)
+	if (false == VXUI::HasDesignerTree(this) && nullptr == WidgetTree->RootWidget)
 	{
 		BuildDefaultTree();
 	}
@@ -28,7 +29,7 @@ bool UVXPauseWidget::Initialize()
 
 void UVXPauseWidget::BuildDefaultTree()
 {
-	UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
+	UBorder* Dim = WidgetTree->ConstructWidget<UCommonBorder>(UCommonBorder::StaticClass());
 	Dim->SetBrushColor(VXUI::Dim);
 	Dim->SetHorizontalAlignment(HAlign_Center);
 	Dim->SetVerticalAlignment(VAlign_Center);

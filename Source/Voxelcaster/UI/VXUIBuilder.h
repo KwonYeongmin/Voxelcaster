@@ -25,7 +25,7 @@ namespace VXUI
 	extern VOXELCASTER_API const FLinearColor PanelHighlight;
 	extern VOXELCASTER_API const FLinearColor Dim;
 
-	/** 텍스트 블록을 만든다 (C++ 기본 위젯 트리용) */
+	/** 글자 위젯(CommonTextBlock)을 만든다 (C++ 기본 위젯 트리용) */
 	VOXELCASTER_API UTextBlock* MakeText(UWidgetTree* Tree, int32 Size, const FLinearColor& Color, bool bBold = true);
 
 	/**
@@ -33,6 +33,12 @@ namespace VXUI
 	 * C++ 기본 위젯 트리에는 MVVM 뷰가 없으므로 아무 일도 하지 않는다.
 	 */
 	VOXELCASTER_API void SetViewModel(UUserWidget* Widget, UMVVMViewModelBase* ViewModel);
+
+	/**
+	 * 이 위젯이 디자이너 트리를 가진 WBP인지. Initialize에서 Super 호출 전에는 WidgetTree가 아직 복사되지 않아서
+	 * WidgetTree로는 판단할 수 없고, 클래스(WBP 생성 클래스)의 트리 원본으로 판단한다.
+	 */
+	VOXELCASTER_API bool HasDesignerTree(const UUserWidget* Widget);
 
 	/** 텍스트 블록이 있으면 글자를 넣는다 */
 	VOXELCASTER_API void SetText(UTextBlock* Text, const FText& Value);

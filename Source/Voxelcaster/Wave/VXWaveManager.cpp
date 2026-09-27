@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Wave/VXWaveManager.h"
+#include "Enemy/VXEnemyClasses.h"
 #include "Data/VXDataManager.h"
 #include "Character/VXCharacterBase.h"
 #include "Components/CapsuleComponent.h"
@@ -135,6 +136,7 @@ void UVXWaveManager::StartWave(int32 WaveIndex)
 	}
 
 	CurrentWave = WaveIndex;
+	bIsTestWave = false;
 	State = EVXWaveState::Intro;
 	StateTime = 0.f;
 	CombatTime = 0.f;
@@ -151,8 +153,43 @@ void UVXWaveManager::StartNextWave()
 	StartWave(CurrentWave + 1);
 }
 
+void UVXWaveManager::StartTestWave(int32 RunnerCount, int32 ShooterCount, int32 EliteCount)
+{
+	// 세 종류를 시작 0초에 한 번에 소환한다 (BP가 있으면 BP)
+	FVXWaveDef Wave;
+	const TPair<const TCHAR*, int32> Entries[] = { { TEXT("Runner"), RunnerCount }, { TEXT("Shooter"), ShooterCount }, { TEXT("Elite"), EliteCount } };
+	for (const TPair<const TCHAR*, int32>& Entry : Entries)
+	{
+		if (Entry.Value <= 0)
+		{
+			continue;
+		}
+		FVXWaveSpawn Spawn;
+		Spawn.EnemyClass = VXEnemyClasses::Resolve(Entry.Key);
+		Spawn.StartTime = 0.f;
+		Spawn.Interval = 0.f;
+		Spawn.CountPerSpawn = Entry.Value;
+		Spawn.TotalCount = Entry.Value;
+		Wave.Spawns.Add(Spawn);
+	}
+
+	CurrentWave = 0;
+	bIsTestWave = true;
+	State = EVXWaveState::Intro;
+	StateTime = 0.f;
+	CombatTime = 0.f;
+	AutoStartTimer = -1.f;
+	bWaitingForReward = false;
+
+	BuildSpawnQueue(Wave);
+
+	UE_LOG(LogVX, Log, TEXT("Test wave start: runner %d, shooter %d, elite %d (%d enemies)"), RunnerCount, ShooterCount, EliteCount, SpawnQueue.Num());
+	OnWaveStarted.Broadcast(CurrentWave);
+}
+
 void UVXWaveManager::StopWaves()
 {
+	bIsTestWave = false;
 	State = EVXWaveState::Idle;
 	AutoStartTimer = -1.f;
 	SpawnQueue.Reset();
@@ -298,6 +335,16 @@ void UVXWaveManager::UpdateClearCondition()
 {
 	if (NextSpawnIndex < SpawnQueue.Num() || AliveEnemies.Num() > 0)
 	{
+		return;
+	}
+
+	// 테스트 웨이브는 클리어 후 처리 없이 대기 상태로
+	if (bIsTestWave)
+	{
+		bIsTestWave = false;
+		State = EVXWaveState::Idle;
+		UE_LOG(LogVX, Log, TEXT("Test wave cleared (kills: %d)"), KillCount);
+		OnWaveCleared.Broadcast(CurrentWave);
 		return;
 	}
 

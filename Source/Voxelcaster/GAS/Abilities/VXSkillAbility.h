@@ -52,6 +52,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Feel")
 	float CastVibrationDuration = 0.05f;
 
+	/** 시전 시 캐릭터 출렁임 세기 배율 (0이면 없음) */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Feel")
+	float AttackBounceStrength = 1.f;
+
 	/** 원본 피해 (design 수치, 추후 데이터 테이블로 이동) */
 	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Skill")
 	float Damage = 0.f;

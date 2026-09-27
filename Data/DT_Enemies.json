@@ -9,7 +9,13 @@
   "FlockRadius": 400,
   "SeparationWeight": 0.8,
   "AlignmentWeight": 0.35,
-  "CohesionWeight": 0.25
+  "CohesionWeight": 0.25,
+  "SkeletalMesh": "/Game/ParagonMinions/Characters/Minions/Dusk_Minions/Meshes/Minion_Lane_Super_Core_Dusk.Minion_Lane_Super_Core_Dusk",
+  "AnimClass": "",
+  "MeshScale": 0.8,
+  "MeshOffsetZ": 0,
+  "LocomotionBlendSpace": "/Game/ParagonMinions/Characters/Minions/Down_Minions/Animations/Super/Blendspaces/Idle2Run_Super.Idle2Run_Super",
+  "IdleAnimation": ""
  },
  {
   "Name": "Shooter",
@@ -21,7 +27,13 @@
   "FlockRadius": 400,
   "SeparationWeight": 0.8,
   "AlignmentWeight": 0,
-  "CohesionWeight": 0
+  "CohesionWeight": 0,
+  "SkeletalMesh": "/Game/ParagonGRIMexe/Characters/Heroes/GRIM/Meshes/GRIM_GDC.GRIM_GDC",
+  "AnimClass": "/Game/ParagonGRIMexe/Characters/Heroes/GRIM/GRIMexe_AnimBlueprint.GRIMexe_AnimBlueprint_C",
+  "MeshScale": 0.8,
+  "MeshOffsetZ": 0,
+  "LocomotionBlendSpace": "",
+  "IdleAnimation": ""
  },
  {
   "Name": "Elite",
@@ -33,6 +45,12 @@
   "FlockRadius": 400,
   "SeparationWeight": 0.8,
   "AlignmentWeight": 0,
-  "CohesionWeight": 0
+  "CohesionWeight": 0,
+  "SkeletalMesh": "/Game/ParagonMinions/Characters/Buff/Buff_Blue/Meshes/Buff_Blue.Buff_Blue",
+  "AnimClass": "",
+  "MeshScale": 1.0,
+  "MeshOffsetZ": 0,
+  "LocomotionBlendSpace": "/Game/ParagonMinions/Characters/Buff/Buff_Blue/Animations/Blendspaces/Fly_MidSpeed_FullSpeed.Fly_MidSpeed_FullSpeed",
+  "IdleAnimation": "/Game/ParagonMinions/Characters/Buff/Buff_Blue/Animations/Idle_A.Idle_A"
  }
 ]

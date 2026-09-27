@@ -2,7 +2,9 @@
 
 #include "Character/VXPlayerCharacter.h"
 #include "Camera/CameraComponent.h"
-#include "Components/StaticMeshComponent.h"
+#include "Character/VXCameraOcclusionComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GAS/Abilities/VX_GA_BladeSweep.h"
 #include "GAS/Abilities/VX_GA_Dash.h"
@@ -13,7 +15,6 @@
 #include "Modifier/VXModifierComponent.h"
 #include "Feel/VXGameFeelSubsystem.h"
 #include "GameFramework/PlayerController.h"
-#include "UObject/ConstructorHelpers.h"
 
 AVXPlayerCharacter::AVXPlayerCharacter()
 {
@@ -37,17 +38,9 @@ AVXPlayerCharacter::AVXPlayerCharacter()
 	TopDownCamera->FieldOfView = 50.f;
 
 	ModifierComponent = CreateDefaultSubobject<UVXModifierComponent>(TEXT("ModifierComponent"));
+	CameraOcclusion = CreateDefaultSubobject<UVXCameraOcclusionComponent>(TEXT("CameraOcclusion"));
 
-	BodyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyMesh"));
-	BodyMesh->SetupAttachment(RootComponent);
-	BodyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	BodyMesh->SetRelativeScale3D(FVector(0.6f, 0.6f, 1.6f));
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
-	if (CubeMesh.Succeeded())
-	{
-		BodyMesh->SetStaticMesh(CubeMesh.Object);
-	}
+	// 외형은 BP_VXCharacter의 Mesh(스켈레탈 메시)로 지정한다
 }
 
 void AVXPlayerCharacter::HandleDamaged(float Amount)
@@ -70,6 +63,8 @@ void AVXPlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	TickAttackBounce(DeltaSeconds);
+
 	if (ShakeEndRealTime <= 0.0)
 	{
 		return;
@@ -86,6 +81,66 @@ void AVXPlayerCharacter::Tick(float DeltaSeconds)
 
 	const float Strength = ShakeAmplitude * static_cast<float>(Remaining / FMath::Max(ShakeDuration, 0.01f));
 	CameraBoom->SocketOffset = BaseSocketOffset + FVector(0.f, FMath::FRandRange(-1.f, 1.f), FMath::FRandRange(-1.f, 1.f)) * Strength;
+}
+
+void AVXPlayerCharacter::PlayAttackBounce(float Strength)
+{
+	USkeletalMeshComponent* MeshComponent = GetMesh();
+	if (nullptr == MeshComponent || AttackBounceAmount <= 0.f)
+	{
+		return;
+	}
+
+	// 처음 한 번 BP에서 맞춘 위치·크기를 기억한다 (출렁이는 중에 다시 눌러도 원래 값 기준)
+	if (false == bMeshBaseCaptured)
+	{
+		MeshBaseLocation = MeshComponent->GetRelativeLocation();
+		MeshBaseScale = MeshComponent->GetRelativeScale3D();
+		bMeshBaseCaptured = true;
+	}
+
+	BounceElapsed = 0.f;
+	BounceStrength = Strength;
+}
+
+void AVXPlayerCharacter::TickAttackBounce(float DeltaSeconds)
+{
+	if (BounceElapsed < 0.f)
+	{
+		return;
+	}
+
+	// 게임 시간 기준: 히트스톱 중에는 같이 멈춘다
+	BounceElapsed += DeltaSeconds;
+	if (BounceElapsed >= AttackBounceDuration)
+	{
+		BounceElapsed = -1.f;
+		ApplyMeshSquash(1.f, 1.f);
+		return;
+	}
+
+	// 감쇠 진동: 처음에 위로 늘어나고(+) → 눌리고(-) → 점점 작아진다
+	const float Wave = FMath::Cos(2.f * PI * AttackBounceFrequency * BounceElapsed);
+	const float Stretch = AttackBounceAmount * BounceStrength * FMath::Exp(-AttackBounceDamping * BounceElapsed) * Wave;
+	const float ScaleZ = FMath::Max(1.f + Stretch, 0.3f);
+	const float ScaleXY = 1.f / FMath::Sqrt(ScaleZ);
+	ApplyMeshSquash(ScaleXY, ScaleZ);
+}
+
+void AVXPlayerCharacter::ApplyMeshSquash(float ScaleXY, float ScaleZ)
+{
+	USkeletalMeshComponent* MeshComponent = GetMesh();
+	if (nullptr == MeshComponent || false == bMeshBaseCaptured)
+	{
+		return;
+	}
+
+	// 캡슐 바닥 중앙(발밑)을 고정점으로 늘리고 줄인다. 메시 원점이 캐릭터 밖에 있어도 옆으로 밀리지 않는다.
+	// (메시 회전이 Yaw만 있을 때 정확하다. XY를 같은 비율로 바꾸므로 Yaw와 무관)
+	const FVector Pivot(0.f, 0.f, -GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight());
+	const FVector Offset = MeshBaseLocation - Pivot;
+	MeshComponent->SetRelativeLocation(Pivot + FVector(Offset.X * ScaleXY, Offset.Y * ScaleXY, Offset.Z * ScaleZ));
+	MeshComponent->SetRelativeScale3D(MeshBaseScale * FVector(ScaleXY, ScaleXY, ScaleZ));
 }
 
 void AVXPlayerCharacter::GrantStartupAbilities()

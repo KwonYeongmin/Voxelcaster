@@ -1,6 +1,16 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Cheat/VXCheatManager.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/WorldSettings.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "EngineUtils.h"
+#include "Engine/PostProcessVolume.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "TimerManager.h"
+#include "UnrealClient.h"
+#include "Enemy/VXEnemyClasses.h"
 #include "Data/VXDataManager.h"
 #include "AbilitySystemComponent.h"
 #include "Character/VXCharacterBase.h"
@@ -110,6 +120,7 @@ void UVXCheatManager::DebugSpawnRunners(int32 Count)
 	}
 
 	const AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPlayerPawn());
+	const TSubclassOf<AVXEnemyBase> RunnerClass = VXEnemyClasses::Resolve(TEXT("Runner"));
 	if (nullptr == VoxelChar || nullptr == GetWorld())
 	{
 		return;
@@ -123,7 +134,7 @@ void UVXCheatManager::DebugSpawnRunners(int32 Count)
 
 		FActorSpawnParameters Params;
 		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		GetWorld()->SpawnActor<AVXRunner>(AVXRunner::StaticClass(), VoxelChar->GetActorLocation() + Offset, FRotator::ZeroRotator, Params);
+		GetWorld()->SpawnActor<AVXEnemyBase>(RunnerClass, VoxelChar->GetActorLocation() + Offset, FRotator::ZeroRotator, Params);
 	}
 }
 
@@ -134,19 +145,8 @@ void UVXCheatManager::DebugSpawnEnemy(const FString& EnemyType, int32 Count)
 		Count = 1;
 	}
 
-	TSubclassOf<AVXEnemyBase> EnemyClass;
-	if (EnemyType.Equals(TEXT("Runner"), ESearchCase::IgnoreCase))
-	{
-		EnemyClass = AVXRunner::StaticClass();
-	}
-	else if (EnemyType.Equals(TEXT("Shooter"), ESearchCase::IgnoreCase))
-	{
-		EnemyClass = AVXShooter::StaticClass();
-	}
-	else if (EnemyType.Equals(TEXT("Elite"), ESearchCase::IgnoreCase))
-	{
-		EnemyClass = AVXElite::StaticClass();
-	}
+	// BP가 있으면 BP (메시·몽타주 포함), 없으면 C++ 클래스
+	const TSubclassOf<AVXEnemyBase> EnemyClass = VXEnemyClasses::Resolve(EnemyType);
 
 	const AVXCharacterBase* VoxelChar = Cast<AVXCharacterBase>(GetPlayerPawn());
 	if (nullptr == EnemyClass.Get() || nullptr == VoxelChar)
@@ -277,4 +277,244 @@ void UVXCheatManager::DataReload()
 		const bool bOk = Data->LoadAll();
 		UE_LOG(LogVX, Log, TEXT("DataReload: %s"), bOk ? TEXT("OK") : TEXT("problems found (see [Data] log)"));
 	}
+}
+
+void UVXCheatManager::DebugScreenshot(float Delay, int32 bQuit)
+{
+	if (Delay <= 0.f)
+	{
+		Delay = 5.f;
+	}
+	UWorld* World = GetWorld();
+	if (nullptr == World)
+	{
+		return;
+	}
+
+	// 게임 시간 기준 (웨이브를 멈추고 쓰면 된다)
+	FTimerDelegate Shot = FTimerDelegate::CreateWeakLambda(this, [this, bQuit]()
+	{
+		FScreenshotRequest::RequestScreenshot(true); // UI 포함
+		UE_LOG(LogVX, Log, TEXT("DebugScreenshot: requested"));
+		if (bQuit > 0)
+		{
+			FTimerHandle QuitTimer;
+			GetWorld()->GetTimerManager().SetTimer(QuitTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+			{
+				GetOuterAPlayerController()->ConsoleCommand(TEXT("quit"));
+			}), 1.f, false);
+		}
+	});
+	FTimerHandle Handle;
+	World->GetTimerManager().SetTimer(Handle, Shot, Delay, false);
+}
+
+UMaterialInstanceDynamic* UVXCheatManager::FindToonMaterial()
+{
+	if (ToonMID)
+	{
+		return ToonMID;
+	}
+	UWorld* World = GetWorld();
+	if (nullptr == World)
+	{
+		return nullptr;
+	}
+
+	for (TActorIterator<APostProcessVolume> It(World); It; ++It)
+	{
+		for (FWeightedBlendable& Blendable : It->Settings.WeightedBlendables.Array)
+		{
+			UMaterialInterface* Material = Cast<UMaterialInterface>(Blendable.Object);
+			if (nullptr == Material || false == Material->GetBaseMaterial()->GetName().Equals(TEXT("M_PP_Toon")))
+			{
+				continue;
+			}
+			// 게임 중에만 쓰는 동적 인스턴스로 바꿔 끼운다 (에셋은 바뀌지 않는다)
+			ToonMID = Cast<UMaterialInstanceDynamic>(Material);
+			if (nullptr == ToonMID)
+			{
+				ToonMID = UMaterialInstanceDynamic::Create(Material, this);
+				Blendable.Object = ToonMID;
+			}
+			return ToonMID;
+		}
+	}
+	UE_LOG(LogVX, Warning, TEXT("Toon: no Post Process Volume with M_PP_Toon in this level"));
+	return nullptr;
+}
+
+void UVXCheatManager::ToonParams()
+{
+	UMaterialInstanceDynamic* Material = FindToonMaterial();
+	if (nullptr == Material)
+	{
+		return;
+	}
+
+	TArray<FMaterialParameterInfo> Infos;
+	TArray<FGuid> Ids;
+	Material->GetAllScalarParameterInfo(Infos, Ids);
+	for (const FMaterialParameterInfo& Info : Infos)
+	{
+		float Value = 0.f;
+		Material->GetScalarParameterValue(Info, Value);
+		UE_LOG(LogVX, Log, TEXT("Toon scalar %s = %.4f"), *Info.Name.ToString(), Value);
+	}
+
+	Infos.Reset();
+	Ids.Reset();
+	Material->GetAllVectorParameterInfo(Infos, Ids);
+	for (const FMaterialParameterInfo& Info : Infos)
+	{
+		FLinearColor Value;
+		Material->GetVectorParameterValue(Info, Value);
+		UE_LOG(LogVX, Log, TEXT("Toon vector %s = (%.3f, %.3f, %.3f, %.3f)"), *Info.Name.ToString(), Value.R, Value.G, Value.B, Value.A);
+	}
+}
+
+void UVXCheatManager::ToonParam(const FString& Name, float Value)
+{
+	if (UMaterialInstanceDynamic* Material = FindToonMaterial())
+	{
+		Material->SetScalarParameterValue(*Name, Value);
+		UE_LOG(LogVX, Log, TEXT("Toon scalar %s -> %.4f"), *Name, Value);
+	}
+}
+
+void UVXCheatManager::DebugExposure(float Bias)
+{
+	int32 Count = 0;
+	for (TActorIterator<APostProcessVolume> It(GetWorld()); It; ++It)
+	{
+		It->Settings.bOverride_AutoExposureBias = true;
+		It->Settings.AutoExposureBias = Bias;
+		++Count;
+	}
+	UE_LOG(LogVX, Log, TEXT("DebugExposure: bias %.2f on %d volume(s)"), Bias, Count);
+}
+
+void UVXCheatManager::DebugComponents()
+{
+	const APawn* Pawn = GetPlayerController() ? GetPlayerController()->GetPawn() : nullptr;
+	if (nullptr == Pawn)
+	{
+		return;
+	}
+	UE_LOG(LogVX, Log, TEXT("Components of %s at %s"), *Pawn->GetName(), *Pawn->GetActorLocation().ToString());
+	TInlineComponentArray<USceneComponent*> Components(Pawn);
+	for (const USceneComponent* Component : Components)
+	{
+		const USceneComponent* Parent = Component->GetAttachParent();
+		UE_LOG(LogVX, Log, TEXT("  %s (%s) parent=%s rel=%s rot=%s scale=%s world=%s"),
+			*Component->GetName(), *Component->GetClass()->GetName(), Parent ? *Parent->GetName() : TEXT("-"),
+			*Component->GetRelativeLocation().ToString(), *Component->GetRelativeRotation().ToString(),
+			*Component->GetRelativeScale3D().ToString(), *Component->GetComponentLocation().ToString());
+	}
+}
+
+void UVXCheatManager::DebugEnemyFacing(float Delay)
+{
+	// Delay초 뒤에 찍는다 (소환 직후에는 아직 회전 전이라서)
+	if (Delay > 0.f)
+	{
+		FTimerHandle Handle;
+		GetWorld()->GetTimerManager().SetTimer(Handle, FTimerDelegate::CreateWeakLambda(this, [this]() { DebugEnemyFacing(0.f); }), Delay, false);
+		return;
+	}
+
+	const APawn* Player = GetPlayerController() ? GetPlayerController()->GetPawn() : nullptr;
+	if (nullptr == Player)
+	{
+		return;
+	}
+	for (TActorIterator<AVXEnemyBase> It(GetWorld()); It; ++It)
+	{
+		const FVector ToPlayer = (Player->GetActorLocation() - It->GetActorLocation()).GetSafeNormal2D();
+		const float WantYaw = ToPlayer.Rotation().Yaw;
+		const float ActorYaw = It->GetActorRotation().Yaw;
+		USkeletalMeshComponent* SkelMesh = It->GetMesh();
+		const bool bHasMesh = SkelMesh && SkelMesh->GetSkeletalMeshAsset();
+		UE_LOG(LogVX, Log, TEXT("Facing %s: want %.1f actor %.1f diff %.1f | mesh %s rel yaw %.1f world yaw %.1f | controller %s"),
+			*It->GetName(), WantYaw, ActorYaw, FMath::FindDeltaAngleDegrees(ActorYaw, WantYaw),
+			bHasMesh ? *SkelMesh->GetSkeletalMeshAsset()->GetName() : TEXT("(cube)"),
+			SkelMesh ? SkelMesh->GetRelativeRotation().Yaw : 0.f, SkelMesh ? SkelMesh->GetComponentRotation().Yaw : 0.f,
+			It->GetController() ? *It->GetController()->GetName() : TEXT("none"));
+		if (bHasMesh)
+		{
+			UE_LOG(LogVX, Log, TEXT("  mesh path %s | anim %s | rel loc %s scale %s | capsule half %.1f radius %.1f"),
+				*SkelMesh->GetSkeletalMeshAsset()->GetPathName(),
+				SkelMesh->GetAnimClass() ? *SkelMesh->GetAnimClass()->GetPathName() : TEXT("none"),
+				*SkelMesh->GetRelativeLocation().ToString(), *SkelMesh->GetRelativeScale3D().ToString(),
+				It->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight(), It->GetCapsuleComponent()->GetUnscaledCapsuleRadius());
+		}
+	}
+}
+
+void UVXCheatManager::TestWave(int32 Runners, int32 Shooters, int32 Elites)
+{
+	// Exec 명령은 C++ 기본 인자를 적용하지 않는다. 0(생략)이면 기본값으로 보정한다.
+	Runners = Runners > 0 ? Runners : 5;
+	Shooters = Shooters > 0 ? Shooters : 2;
+	Elites = Elites > 0 ? Elites : 1;
+
+	const AVXGameMode* GameMode = GetWorld()->GetAuthGameMode<AVXGameMode>();
+	if (nullptr == GameMode)
+	{
+		UE_LOG(LogVX, Warning, TEXT("TestWave: VXGameMode not found"));
+		return;
+	}
+	GameMode->GetWaveManager()->StartTestWave(Runners, Shooters, Elites);
+}
+
+void UVXCheatManager::DebugMoveTest(float Seconds, float Delay, float Yaw)
+{
+	// 로딩·셰이더 컴파일로 프레임이 낮은 시작 직후를 피하려면 Delay초 뒤에 시작한다
+	if (Delay > 0.f)
+	{
+		FTimerHandle DelayHandle;
+		GetWorld()->GetTimerManager().SetTimer(DelayHandle, FTimerDelegate::CreateWeakLambda(this, [this, Seconds, Yaw]() { DebugMoveTest(Seconds, 0.f, Yaw); }), Delay, false);
+		return;
+	}
+
+	MoveTestRemaining = Seconds > 0.f ? Seconds : 3.f;
+	MoveTestLogTimer = 0.f;
+	MoveTestDirection = FRotator(0.f, Yaw, 0.f).Vector();
+
+	// 매 프레임 앞으로 이동 입력을 넣고, 0.5초마다 상태를 기록한다
+	GetWorld()->GetTimerManager().SetTimer(MoveTestTimer, FTimerDelegate::CreateWeakLambda(this, [this]()
+	{
+		ACharacter* Character = Cast<ACharacter>(GetPlayerController() ? GetPlayerController()->GetPawn() : nullptr);
+		const float Delta = GetWorld()->GetDeltaSeconds();
+		MoveTestRemaining -= Delta;
+		MoveTestLogTimer -= Delta;
+		if (nullptr == Character || MoveTestRemaining <= 0.f)
+		{
+			GetWorld()->GetTimerManager().ClearTimer(MoveTestTimer);
+			return;
+		}
+
+		Character->AddMovementInput(MoveTestDirection, 1.f);
+		if (MoveTestLogTimer > 0.f)
+		{
+			return;
+		}
+		MoveTestLogTimer = 0.5f;
+
+		const UCharacterMovementComponent* Movement = Character->GetCharacterMovement();
+		const FFindFloorResult& Floor = Movement->CurrentFloor;
+		const UPrimitiveComponent* FloorComponent = Floor.HitResult.GetComponent();
+		// 발밑 50m까지 무엇이 있는지 (바닥 충돌 확인)
+		FHitResult Down;
+		FCollisionQueryParams DownParams(SCENE_QUERY_STAT(VXMoveTestDown), false, Character);
+		const FVector Start = Character->GetActorLocation();
+		const bool bHitDown = GetWorld()->LineTraceSingleByChannel(Down, Start, Start - FVector(0.f, 0.f, 5000.f), ECC_Visibility, DownParams);
+		UE_LOG(LogVX, Log, TEXT("MoveTest ground below: %s at %.0f cm"), bHitDown && Down.GetActor() ? *Down.GetActor()->GetName() : TEXT("nothing"), bHitDown ? Down.Distance : -1.f);
+		UE_LOG(LogVX, Log, TEXT("MoveTest %s: speed %.0f / max %.0f | mode %s | floor walkable %d dist %.1f on %s | fps %.0f | time dilation world %.2f actor %.2f | loc %s"),
+			*Character->GetClass()->GetName(), Character->GetVelocity().Size2D(), Movement->GetMaxSpeed(),
+			*Movement->GetMovementName(), Floor.bWalkableFloor ? 1 : 0, Floor.FloorDist,
+			FloorComponent ? *FloorComponent->GetOwner()->GetName() : TEXT("none"),
+			Delta > 0.f ? 1.f / Delta : 0.f, GetWorld()->GetWorldSettings()->TimeDilation, Character->CustomTimeDilation,
+			*Character->GetActorLocation().ToString());
+	}), 0.001f, true);
 }

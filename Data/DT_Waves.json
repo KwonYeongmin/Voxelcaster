@@ -4,7 +4,7 @@
   "Index": 1,
   "Spawns": [
    {
-    "EnemyClass": "/Script/Voxelcaster.VXRunner",
+    "EnemyClass": "/Game/Voxelcaster/Enemy/BP_VXRunner.BP_VXRunner_C",
     "StartTime": 0,
     "Interval": 4,
     "CountPerSpawn": 2,
@@ -17,14 +17,14 @@
   "Index": 2,
   "Spawns": [
    {
-    "EnemyClass": "/Script/Voxelcaster.VXRunner",
+    "EnemyClass": "/Game/Voxelcaster/Enemy/BP_VXRunner.BP_VXRunner_C",
     "StartTime": 0,
     "Interval": 4,
     "CountPerSpawn": 2,
     "TotalCount": 16
    },
    {
-    "EnemyClass": "/Script/Voxelcaster.VXShooter",
+    "EnemyClass": "/Game/Voxelcaster/Enemy/BP_VXShooter.BP_VXShooter_C",
     "StartTime": 10,
     "Interval": 10,
     "CountPerSpawn": 1,
@@ -37,14 +37,14 @@
   "Index": 3,
   "Spawns": [
    {
-    "EnemyClass": "/Script/Voxelcaster.VXRunner",
+    "EnemyClass": "/Game/Voxelcaster/Enemy/BP_VXRunner.BP_VXRunner_C",
     "StartTime": 0,
     "Interval": 4,
     "CountPerSpawn": 2,
     "TotalCount": 20
    },
    {
-    "EnemyClass": "/Script/Voxelcaster.VXShooter",
+    "EnemyClass": "/Game/Voxelcaster/Enemy/BP_VXShooter.BP_VXShooter_C",
     "StartTime": 8,
     "Interval": 8,
     "CountPerSpawn": 1,
@@ -57,14 +57,14 @@
   "Index": 4,
   "Spawns": [
    {
-    "EnemyClass": "/Script/Voxelcaster.VXRunner",
+    "EnemyClass": "/Game/Voxelcaster/Enemy/BP_VXRunner.BP_VXRunner_C",
     "StartTime": 0,
     "Interval": 3,
     "CountPerSpawn": 2,
     "TotalCount": 28
    },
    {
-    "EnemyClass": "/Script/Voxelcaster.VXShooter",
+    "EnemyClass": "/Game/Voxelcaster/Enemy/BP_VXShooter.BP_VXShooter_C",
     "StartTime": 6,
     "Interval": 6,
     "CountPerSpawn": 1,
@@ -77,21 +77,21 @@
   "Index": 5,
   "Spawns": [
    {
-    "EnemyClass": "/Script/Voxelcaster.VXRunner",
+    "EnemyClass": "/Game/Voxelcaster/Enemy/BP_VXRunner.BP_VXRunner_C",
     "StartTime": 0,
     "Interval": 3,
     "CountPerSpawn": 2,
     "TotalCount": 30
    },
    {
-    "EnemyClass": "/Script/Voxelcaster.VXShooter",
+    "EnemyClass": "/Game/Voxelcaster/Enemy/BP_VXShooter.BP_VXShooter_C",
     "StartTime": 6,
     "Interval": 8,
     "CountPerSpawn": 1,
     "TotalCount": 10
    },
    {
-    "EnemyClass": "/Script/Voxelcaster.VXElite",
+    "EnemyClass": "/Game/Voxelcaster/Enemy/BP_VXElite.BP_VXElite_C",
     "StartTime": 45,
     "Interval": 0,
     "CountPerSpawn": 1,

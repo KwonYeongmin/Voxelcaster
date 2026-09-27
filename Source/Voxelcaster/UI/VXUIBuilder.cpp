@@ -2,8 +2,9 @@
 
 #include "UI/VXUIBuilder.h"
 #include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetBlueprintGeneratedClass.h"
 #include "Blueprint/WidgetTree.h"
-#include "Components/TextBlock.h"
+#include "CommonTextBlock.h"
 #include "MVVMSubsystem.h"
 #include "MVVMViewModelBase.h"
 #include "Styling/CoreStyle.h"
@@ -21,7 +22,8 @@ namespace VXUI
 
 	UTextBlock* MakeText(UWidgetTree* Tree, int32 Size, const FLinearColor& Color, bool bBold)
 	{
-		UTextBlock* Text = Tree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+		// CommonUI 규칙: 글자는 CommonTextBlock (TextBlock을 상속하므로 반환 타입은 그대로)
+		UTextBlock* Text = Tree->ConstructWidget<UCommonTextBlock>(UCommonTextBlock::StaticClass());
 		Text->SetFont(FCoreStyle::GetDefaultFontStyle(bBold ? "Bold" : "Regular", Size));
 		Text->SetColorAndOpacity(FSlateColor(Color));
 		return Text;
@@ -38,6 +40,13 @@ namespace VXUI
 		{
 			View->SetViewModelByClass(TScriptInterface<INotifyFieldValueChanged>(ViewModel));
 		}
+	}
+
+	bool HasDesignerTree(const UUserWidget* Widget)
+	{
+		const UWidgetBlueprintGeneratedClass* Class = nullptr != Widget ? Cast<UWidgetBlueprintGeneratedClass>(Widget->GetClass()) : nullptr;
+		const UWidgetTree* Archetype = nullptr != Class ? Class->GetWidgetTreeArchetype() : nullptr;
+		return nullptr != Archetype && nullptr != Archetype->RootWidget;
 	}
 
 	void SetText(UTextBlock* Text, const FText& Value)

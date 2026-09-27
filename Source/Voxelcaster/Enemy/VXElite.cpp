@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Enemy/VXElite.h"
+#include "Enemy/VXEnemyClasses.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/World.h"
 #include "Enemy/VXRunner.h"
@@ -89,7 +90,12 @@ void AVXElite::FinishSummon()
 
 	// 러너 4마리를 엘리트 주변 2m에 균등하게 생성한다. 바닥 높이는 캡슐 높이 차이만큼 보정한다.
 	const float EliteHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
-	const float RunnerHalfHeight = AVXRunner::StaticClass()->GetDefaultObject<AVXRunner>()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	TSubclassOf<AVXEnemyBase> SpawnClass = MinionClass.Get();
+	if (nullptr == SpawnClass)
+	{
+		SpawnClass = VXEnemyClasses::Resolve(TEXT("Runner"));
+	}
+	const float RunnerHalfHeight = SpawnClass->GetDefaultObject<AVXEnemyBase>()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 	const float FeetZ = GetActorLocation().Z - EliteHalfHeight;
 
 	for (int32 i = 0; i < SummonCount; ++i)
@@ -100,7 +106,7 @@ void AVXElite::FinishSummon()
 
 		FActorSpawnParameters Params;
 		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		if (AVXRunner* Runner = GetWorld()->SpawnActor<AVXRunner>(AVXRunner::StaticClass(), Location, FRotator::ZeroRotator, Params))
+		if (AVXEnemyBase* Runner = GetWorld()->SpawnActor<AVXEnemyBase>(SpawnClass, Location, FRotator::ZeroRotator, Params))
 		{
 			OnMinionSpawned.Broadcast(Runner);
 		}

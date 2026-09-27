@@ -15,6 +15,7 @@ UVX_GA_Nova::UVX_GA_Nova()
 	SkillRowName = TEXT("Nova");
 	CastVibrationIntensity = 0.6f;
 	CastVibrationDuration = 0.1f;
+	AttackBounceStrength = 1.4f;
 }
 
 void UVX_GA_Nova::ApplySkillRow(const FVXSkillRow& Row)

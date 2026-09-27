@@ -51,6 +51,11 @@ void UVXSkillAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, c
 	{
 		ExecuteSkill(Caster);
 
+		if (AttackBounceStrength > 0.f)
+		{
+			Caster->PlayAttackBounce(AttackBounceStrength);
+		}
+
 		if (UVXGameFeelSubsystem* Feel = UVXGameFeelSubsystem::Get(Caster))
 		{
 			Feel->PlayVibration(Cast<APlayerController>(Caster->GetController()), CastVibrationIntensity, CastVibrationDuration);

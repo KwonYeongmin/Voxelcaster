@@ -6,6 +6,11 @@
 #include "Engine/DataTable.h"
 #include "VXEnemyData.generated.h"
 
+class USkeletalMesh;
+class UAnimInstance;
+class UBlendSpace;
+class UAnimSequenceBase;
+
 /**
  * 적 능력치 한 줄 (DES-DATA-001의 FEnemyRow). DT_Enemies의 행 구조체다.
  * 행 이름이 적 종류다: Runner, Shooter, Elite.
@@ -35,6 +40,32 @@ struct FVXEnemyRow : public FTableRowBase
 	/** 투사체 속도 (cm/s). 0이면 코드 기본값. 러너는 쓰지 않는다 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0"))
 	float ProjectileSpeed = 0.f;
+
+	// ---- 캐릭터 메시. 비워 두면 적 클래스(C++·BP)에 지정한 메시를 쓴다 ----
+
+	/** 스켈레탈 메시 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
+
+	/** 애니메이션 블루프린트 (AnimInstance 클래스) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	TSoftClassPtr<UAnimInstance> AnimClass;
+
+	/** 애님 BP가 없을 때 이동 속도로 재생할 블렌드스페이스 (가로축 = 속도) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	TSoftObjectPtr<UBlendSpace> LocomotionBlendSpace;
+
+	/** 멈춰 있을 때 재생할 애니메이션 (선택). 비우면 블렌드스페이스의 속도 0 위치를 쓴다 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	TSoftObjectPtr<UAnimSequenceBase> IdleAnimation;
+
+	/** 메시 크기. 음수면 코드 기본값 (1) */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	float MeshScale = -1.f;
+
+	/** 메시 높이 보정 (cm). 0이면 메시 원점(발바닥)이 캡슐 바닥에 온다 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	float MeshOffsetZ = 0.f;
 
 	// ---- 군집 이동 (Boids). 음수면 코드 기본값 ----
 

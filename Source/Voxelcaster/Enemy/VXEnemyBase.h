@@ -11,6 +11,10 @@ class UMaterialInstanceDynamic;
 class UStateTree;
 class UAnimMontage;
 class UWidgetComponent;
+class USkeletalMesh;
+class UAnimInstance;
+class UBlendSpace;
+class UAnimSequenceBase;
 struct FVXEnemyRow;
 class AVXEnemyBase;
 
@@ -48,6 +52,51 @@ public:
 
 protected:
 	virtual void PostInitializeComponents() override;
+	virtual void OnConstruction(const FTransform& Transform) override;
+
+	// ---- 캐릭터 메시 ----
+	// 우선순위: DT_Enemies의 SkeletalMesh > EnemySkeletalMesh(C++ 기본값·BP) > 메시 컴포넌트에 직접 넣은 메시 > 임시 큐브
+
+	/** 스켈레탈 메시. 비어 있으면 메시 컴포넌트에 직접 지정한 메시를 그대로 쓴다 */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Mesh")
+	TSoftObjectPtr<USkeletalMesh> EnemySkeletalMesh;
+
+	/** 애니메이션 블루프린트. 비어 있으면 메시 컴포넌트의 설정을 그대로 쓴다 */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Mesh")
+	TSoftClassPtr<UAnimInstance> EnemyAnimClass;
+
+	/**
+	 * 애님 BP 없이 쓰는 이동 애니메이션. EnemyAnimClass가 비어 있을 때만 쓴다.
+	 * 블렌드스페이스의 가로축을 (현재 속도 / 최대 속도)로 움직인다.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Mesh")
+	TSoftObjectPtr<UBlendSpace> LocomotionBlendSpace;
+
+	/** 멈춰 있을 때 재생할 애니메이션 (선택) */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Mesh")
+	TSoftObjectPtr<UAnimSequenceBase> IdleAnimation;
+
+	/** 이 속도(cm/s) 아래면 멈춘 것으로 본다 */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Mesh")
+	float IdleSpeedThreshold = 20.f;
+
+	/** 메시 위치 보정 (cm). 기본은 발이 캡슐 바닥에 오도록 캡슐 절반 높이만큼 내린 위치 기준 */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Mesh")
+	FVector MeshLocationOffset = FVector::ZeroVector;
+
+	/** 메시 회전 (Yaw). 언리얼 기본 캐릭터 메시는 Y축을 보고 있어 -90으로 돌린다 */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Mesh")
+	float MeshYaw = -90.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Mesh")
+	float MeshScale = 1.f;
+
+	/** EnemySkeletalMesh·EnemyAnimClass를 메시 컴포넌트에 적용한다 (지정되어 있을 때만) */
+	void ApplySkeletalMesh();
+
+	/** 블렌드스페이스 이동 애니메이션을 시작한다 (애님 BP가 없을 때) */
+	void StartBlendSpaceLocomotion();
+	void TickBlendSpaceLocomotion();
 	virtual void HandleDamaged(float Amount) override;
 
 	/** 처치 히트스톱 (실제 시간 초). 엘리트는 더 길다 (DES-FEEL-001) */
@@ -138,6 +187,7 @@ protected:
 	float DeathLifeSpan = 0.2f;
 
 private:
+	/** 임시 큐브. 스켈레탈 메시가 없을 때만 보인다 */
 	UPROPERTY(VisibleAnywhere, Category = "Voxel|Visual")
 	TObjectPtr<UStaticMeshComponent> BodyMesh;
 
@@ -161,6 +211,16 @@ private:
 
 	/** 살아 있는 적 목록 (겹침 방지 계산용). 월드가 여러 개(PIE)여도 같은 월드끼리만 계산한다 */
 	static TArray<TWeakObjectPtr<AVXEnemyBase>> AliveEnemies;
+
+	/** 블렌드스페이스로 이동 애니메이션을 재생 중인지 */
+	bool bBlendSpaceLocomotion = false;
+	bool bPlayingIdle = false;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UBlendSpace> LoadedBlendSpace;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimSequenceBase> LoadedIdle;
 
 	/** 군집 조향: 분리 + 정렬 + 결합을 이동 입력에 더한다 */
 	void ApplyFlocking();

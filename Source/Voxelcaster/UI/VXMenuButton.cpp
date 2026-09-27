@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "UI/VXMenuButton.h"
+#include "CommonBorder.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/SizeBox.h"
@@ -9,19 +10,19 @@
 
 bool UVXMenuButton::Initialize()
 {
-	if (nullptr == WidgetTree)
+	if (false == VXUI::HasDesignerTree(this) && nullptr == WidgetTree)
 	{
 		WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"), RF_Transient);
 	}
 
-	if (nullptr == WidgetTree->RootWidget)
+	if (false == VXUI::HasDesignerTree(this) && nullptr == WidgetTree->RootWidget)
 	{
 		USizeBox* Size = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
 		Size->SetWidthOverride(320.f);
 		Size->SetHeightOverride(56.f);
 		WidgetTree->RootWidget = Size;
 
-		ButtonBorder = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass());
+		ButtonBorder = WidgetTree->ConstructWidget<UCommonBorder>(UCommonBorder::StaticClass());
 		ButtonBorder->SetBrushColor(VXUI::Panel);
 		ButtonBorder->SetHorizontalAlignment(HAlign_Center);
 		ButtonBorder->SetVerticalAlignment(VAlign_Center);

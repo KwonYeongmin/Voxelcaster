@@ -6,6 +6,11 @@
 #include "Components/CapsuleComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimSingleNodeInstance.h"
+#include "Animation/BlendSpace.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Data/VXEnemyData.h"
@@ -74,13 +79,77 @@ void AVXEnemyBase::PostInitializeComponents()
 		}
 	}
 
+	// 테이블 적용 뒤, BeginPlay(큐브 숨김 판단) 전에 메시를 붙인다
+	ApplySkeletalMesh();
+
 	Super::PostInitializeComponents();
+}
+
+void AVXEnemyBase::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	// 레벨에 직접 놓은 적도 에디터에서 메시가 보이게 한다
+	ApplySkeletalMesh();
+}
+
+void AVXEnemyBase::ApplySkeletalMesh()
+{
+	USkeletalMeshComponent* MeshComponent = GetMesh();
+	if (nullptr == MeshComponent || EnemySkeletalMesh.IsNull())
+	{
+		return;
+	}
+
+	USkeletalMesh* LoadedMesh = EnemySkeletalMesh.LoadSynchronous();
+	if (nullptr == LoadedMesh)
+	{
+		UE_LOG(LogVX, Warning, TEXT("%s: skeletal mesh '%s' could not be loaded (using cube)"), *GetName(), *EnemySkeletalMesh.ToString());
+		return;
+	}
+
+	MeshComponent->SetSkeletalMeshAsset(LoadedMesh);
+	if (false == EnemyAnimClass.IsNull())
+	{
+		if (UClass* AnimClass = EnemyAnimClass.LoadSynchronous())
+		{
+			MeshComponent->SetAnimInstanceClass(AnimClass);
+		}
+	}
+
+	// 발을 캡슐 바닥에 맞춘다
+	const float HalfHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+	MeshComponent->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -HalfHeight) + MeshLocationOffset, FRotator(0.f, MeshYaw, 0.f));
+	MeshComponent->SetRelativeScale3D(FVector(MeshScale));
 }
 
 void AVXEnemyBase::ApplyEnemyStats(const FVXEnemyRow& Row)
 {
 	DefaultMaxHealth = Row.MaxHealth;
 	DefaultMoveSpeed = Row.MoveSpeed;
+
+	// 메시: 테이블에 지정했을 때만 덮어쓴다
+	if (false == Row.SkeletalMesh.IsNull())
+	{
+		EnemySkeletalMesh = Row.SkeletalMesh;
+	}
+	if (false == Row.AnimClass.IsNull())
+	{
+		EnemyAnimClass = Row.AnimClass;
+	}
+	if (false == Row.LocomotionBlendSpace.IsNull())
+	{
+		LocomotionBlendSpace = Row.LocomotionBlendSpace;
+	}
+	if (false == Row.IdleAnimation.IsNull())
+	{
+		IdleAnimation = Row.IdleAnimation;
+	}
+	if (Row.MeshScale > 0.f)
+	{
+		MeshScale = Row.MeshScale;
+	}
+	MeshLocationOffset.Z = Row.MeshOffsetZ;
 
 	// 군집: 음수(열 없음)면 코드 기본값 유지
 	if (Row.FlockRadius >= 0.f)
@@ -116,6 +185,7 @@ void AVXEnemyBase::BeginPlay()
 	// 실제 캐릭터 메시가 있으면 임시 큐브를 숨긴다.
 	if (HasSkeletalMesh())
 	{
+		StartBlendSpaceLocomotion();
 		BodyMesh->SetVisibility(false);
 		BodyMesh->SetHiddenInGame(true);
 		return;
@@ -226,6 +296,68 @@ void AVXEnemyBase::ApplyFlocking()
 #endif
 }
 
+void AVXEnemyBase::StartBlendSpaceLocomotion()
+{
+	USkeletalMeshComponent* MeshComponent = GetMesh();
+	// 애님 BP가 있으면 그쪽이 움직임을 맡는다
+	if (nullptr == MeshComponent || LocomotionBlendSpace.IsNull() || nullptr != MeshComponent->GetAnimClass())
+	{
+		return;
+	}
+
+	LoadedBlendSpace = LocomotionBlendSpace.LoadSynchronous();
+	LoadedIdle = IdleAnimation.IsNull() ? nullptr : IdleAnimation.LoadSynchronous();
+	if (nullptr == LoadedBlendSpace)
+	{
+		UE_LOG(LogVX, Warning, TEXT("%s: blend space '%s' could not be loaded"), *GetName(), *LocomotionBlendSpace.ToString());
+		return;
+	}
+
+	// 애님 BP 없이 애셋 하나를 바로 재생하는 모드 (Single Node)
+	MeshComponent->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+	MeshComponent->PlayAnimation(LoadedBlendSpace, true);
+	bBlendSpaceLocomotion = true;
+	bPlayingIdle = false;
+	TickBlendSpaceLocomotion();
+}
+
+void AVXEnemyBase::TickBlendSpaceLocomotion()
+{
+	if (false == bBlendSpaceLocomotion)
+	{
+		return;
+	}
+	UAnimSingleNodeInstance* Instance = GetMesh()->GetSingleNodeInstance();
+	if (nullptr == Instance)
+	{
+		return;
+	}
+
+	const float Speed = GetVelocity().Size2D();
+
+	// 멈춤 ↔ 이동 전환 (대기 애니메이션이 있을 때만)
+	if (LoadedIdle)
+	{
+		const bool bWantIdle = Speed < IdleSpeedThreshold;
+		if (bWantIdle != bPlayingIdle)
+		{
+			bPlayingIdle = bWantIdle;
+			Instance->SetAnimationAsset(bWantIdle ? static_cast<UAnimationAsset*>(LoadedIdle) : static_cast<UAnimationAsset*>(LoadedBlendSpace), true);
+			Instance->SetPlaying(true);
+		}
+		if (bPlayingIdle)
+		{
+			return;
+		}
+	}
+
+	// 가로축 = 속도 비율을 블렌드스페이스 범위에 맞춘다 (단위와 무관하게 최대 속도에서 끝값)
+	const FBlendParameter& Axis = LoadedBlendSpace->GetBlendParameter(0);
+	const float MaxSpeed = FMath::Max(GetCharacterMovement()->MaxWalkSpeed, 1.f);
+	const float Alpha = FMath::Clamp(Speed / MaxSpeed, 0.f, 1.f);
+	Instance->SetBlendSpacePosition(FVector(FMath::Lerp(Axis.Min, Axis.Max, Alpha), 0.f, 0.f));
+}
+
 USceneComponent* AVXEnemyBase::GetVisualMesh() const
 {
 	return HasSkeletalMesh() ? static_cast<USceneComponent*>(GetMesh()) : static_cast<USceneComponent*>(BodyMesh);
@@ -255,6 +387,7 @@ void AVXEnemyBase::Tick(float DeltaSeconds)
 	if (false == IsDead())
 	{
 		ApplyFlocking();
+		TickBlendSpaceLocomotion();
 	}
 
 	USceneComponent* Visual = GetVisualMesh();

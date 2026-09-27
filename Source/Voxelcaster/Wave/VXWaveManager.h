@@ -56,6 +56,13 @@ public:
 	void StartWave(int32 WaveIndex);
 	void StartNextWave();
 
+	/**
+	 * 테스트 웨이브: 러너·슈터·엘리트를 지정한 수만큼 한 번에 소환한다 (치트 TestWave).
+	 * 클리어해도 회복·보상·다음 웨이브·승리 처리를 하지 않고 대기 상태로 돌아간다.
+	 */
+	void StartTestWave(int32 RunnerCount, int32 ShooterCount, int32 EliteCount);
+	bool IsTestWave() const { return bIsTestWave; }
+
 	/** 진행을 멈춘다. 이미 나온 적은 남는다. */
 	void StopWaves();
 
@@ -154,6 +161,9 @@ private:
 
 	EVXWaveState State = EVXWaveState::Idle;
 	int32 CurrentWave = 0;
+
+	/** 테스트 웨이브 진행 중 (클리어 후 처리 생략) */
+	bool bIsTestWave = false;
 	int32 KillCount = 0;
 	float StateTime = 0.f;
 	float CombatTime = 0.f;

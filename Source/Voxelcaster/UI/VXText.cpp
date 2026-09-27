@@ -62,6 +62,7 @@ namespace
 		{ TEXT("UI.FinalWave"), TEXT("마지막 웨이브"), TEXT("FINAL WAVE") },
 		{ TEXT("UI.EliteIncoming"), TEXT("엘리트 출현"), TEXT("ELITE INCOMING") },
 		{ TEXT("Key.Click"), TEXT("클릭"), TEXT("Click") },
+		{ TEXT("UI.TestWave"), TEXT("테스트 웨이브"), TEXT("TEST WAVE") },
 		{ TEXT("UI.FinalBuild"),  TEXT("최종 빌드"),          TEXT("FINAL BUILD") },
 	};
 

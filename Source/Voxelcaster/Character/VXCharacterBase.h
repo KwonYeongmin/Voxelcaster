@@ -59,6 +59,9 @@ public:
 	/** 대시 방향: 이동 입력 방향, 없으면 조준 방향 */
 	FVector GetDashDirection() const;
 
+	/** 공격 순간의 "띠용" 출렁임 (스쿼시 앤 스트레치). Strength는 스킬별 배율. 기본은 아무것도 하지 않는다 */
+	virtual void PlayAttackBounce(float Strength) {}
+
 	/** 체력이 바뀔 때 (HUD 바인딩용) */
 	FVXHealthChangedSignature OnHealthChanged;
 	/** 사망 시 한 번만 호출 */

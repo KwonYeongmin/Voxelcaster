@@ -6,6 +6,8 @@
 #include "Enemy/VXShooter.h"
 #include "VXElite.generated.h"
 
+class AVXRunner;
+
 /**
  * 엘리트 (슈터 강화): 웨이브 5에 1마리. (DES-ENEMY-001, DES-AI-001)
  * - 체력 400, 이동 속도 2 m/s, 유지 거리 7m
@@ -51,6 +53,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Elite")
 	FLinearColor SummonColor = FLinearColor(1.f, 1.f, 1.f);
+
+	/** 소환할 러너 클래스. 비워 두면 BP_VXRunner (없으면 C++ 러너) */
+	UPROPERTY(EditDefaultsOnly, Category = "Elite")
+	TSubclassOf<AVXRunner> MinionClass;
 
 private:
 	void HandleHealthChanged(float Current, float Max);
