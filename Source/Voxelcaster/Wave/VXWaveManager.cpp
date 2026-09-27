@@ -406,10 +406,11 @@ bool UVXWaveManager::SpawnEnemy(TSubclassOf<AVXEnemyBase> EnemyClass)
 	}
 
 	const AVXEnemyBase* EnemyCDO = EnemyClass.GetDefaultObject();
+	const float Radius = EnemyCDO->GetCapsuleComponent()->GetScaledCapsuleRadius();
 	const float HalfHeight = EnemyCDO->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 
 	FVector Location;
-	if (false == FindSpawnLocation(Player, HalfHeight, Location))
+	if (false == FindSpawnLocation(Player, Radius, HalfHeight, Location))
 	{
 		return false;
 	}
@@ -433,7 +434,7 @@ void UVXWaveManager::RegisterEnemy(AVXEnemyBase* Enemy)
 	AliveEnemies.Add(Enemy);
 }
 
-bool UVXWaveManager::FindSpawnLocation(const AVXCharacterBase* Player, float CapsuleHalfHeight, FVector& OutLocation) const
+bool UVXWaveManager::FindSpawnLocation(const AVXCharacterBase* Player, float CapsuleRadius, float CapsuleHalfHeight, FVector& OutLocation) const
 {
 	UWorld* World = GetWorld();
 	const FVector PlayerLocation = Player->GetActorLocation();
@@ -466,6 +467,7 @@ bool UVXWaveManager::FindSpawnLocation(const AVXCharacterBase* Player, float Cap
 			continue;
 		}
 
+		FVector Floor = Hit.ImpactPoint;
 		if (bHasNavMesh)
 		{
 			// 계단 등 높이 차는 허용하되, 플레이어까지 끊기지 않는 경로가 있어야 한다
@@ -479,6 +481,8 @@ bool UVXWaveManager::FindSpawnLocation(const AVXCharacterBase* Player, float Cap
 			{
 				continue;
 			}
+			// 내비메시는 벽에서 에이전트 반지름만큼 떨어져 있으므로 투영된 지점을 쓴다
+			Floor = Projected.Location;
 		}
 		else
 		{
@@ -491,7 +495,16 @@ bool UVXWaveManager::FindSpawnLocation(const AVXCharacterBase* Player, float Cap
 			}
 		}
 
-		OutLocation = FVector(Hit.ImpactPoint.X, Hit.ImpactPoint.Y, Hit.ImpactPoint.Z + CapsuleHalfHeight + 2.f);
+		// 캡슐이 벽·기둥과 겹치면 버린다 (벽에 끼어 스폰되는 것 방지)
+		// (내비메시 높이는 실제 바닥과 조금 다를 수 있어 바닥에서 띄워 검사한다)
+		const FVector SpawnLocation(Floor.X, Floor.Y, Floor.Z + CapsuleHalfHeight + 2.f);
+		const FCollisionShape Capsule = FCollisionShape::MakeCapsule(CapsuleRadius + 5.f, CapsuleHalfHeight);
+		if (World->OverlapBlockingTestByChannel(SpawnLocation + FVector(0.f, 0.f, 15.f), FQuat::Identity, ECC_Pawn, Capsule, QueryParams))
+		{
+			continue;
+		}
+
+		OutLocation = SpawnLocation;
 		return true;
 	}
 	return false;

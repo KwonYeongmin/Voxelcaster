@@ -440,8 +440,14 @@ void UVXCheatManager::DebugEnemyFacing(float Delay)
 			bHasMesh ? *SkelMesh->GetSkeletalMeshAsset()->GetName() : TEXT("(cube)"),
 			SkelMesh ? SkelMesh->GetRelativeRotation().Yaw : 0.f, SkelMesh ? SkelMesh->GetComponentRotation().Yaw : 0.f,
 			It->GetController() ? *It->GetController()->GetName() : TEXT("none"));
-		UE_LOG(LogVX, Log, TEXT("  dist %.0f | path points %d | loc %s"), FVector::Dist2D(It->GetActorLocation(), Player->GetActorLocation()),
-			It->GetPathPointCount(), *It->GetActorLocation().ToString());
+		// 캡슐이 벽 등 고정 메시에 파묻혀 있는지 (스폰 위치 검사용)
+		const UCapsuleComponent* Capsule = It->GetCapsuleComponent();
+		FCollisionQueryParams WallParams(SCENE_QUERY_STAT(VXCheatWall), false, *It);
+		const bool bInWall = It->GetWorld()->OverlapAnyTestByObjectType(It->GetActorLocation() + FVector(0.f, 0.f, 10.f), FQuat::Identity,
+			FCollisionObjectQueryParams(ECC_WorldStatic),
+			FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius() - 2.f, Capsule->GetScaledCapsuleHalfHeight() - 12.f), WallParams);
+		UE_LOG(LogVX, Log, TEXT("  dist %.0f | path points %d | in wall %s | loc %s"), FVector::Dist2D(It->GetActorLocation(), Player->GetActorLocation()),
+			It->GetPathPointCount(), bInWall ? TEXT("YES") : TEXT("no"), *It->GetActorLocation().ToString());
 		if (bHasMesh)
 		{
 			UE_LOG(LogVX, Log, TEXT("  mesh path %s | anim %s | rel loc %s scale %s | capsule half %.1f radius %.1f"),

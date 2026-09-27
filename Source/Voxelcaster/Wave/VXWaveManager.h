@@ -148,7 +148,7 @@ private:
 	bool SpawnEnemy(TSubclassOf<AVXEnemyBase> EnemyClass);
 	/** 적을 추적 목록에 넣고 사망·소환 이벤트를 구독한다. (웨이브 스폰과 소환된 적 공통) */
 	void RegisterEnemy(AVXEnemyBase* Enemy);
-	bool FindSpawnLocation(const AVXCharacterBase* Player, float CapsuleHalfHeight, FVector& OutLocation) const;
+	bool FindSpawnLocation(const AVXCharacterBase* Player, float CapsuleRadius, float CapsuleHalfHeight, FVector& OutLocation) const;
 	void BuildSpawnQueue(const FVXWaveDef& Wave);
 	AVXCharacterBase* FindLivePlayer() const;
 	void BindPlayerIfNeeded();
