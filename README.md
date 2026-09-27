@@ -2,6 +2,14 @@
 
 > **UE5 C++ 탑다운 로그라이크 액션 — GAS 스킬 조합, CommonUI 게임패드 UI, 데이터 드리븐 설계**
 
+▶ **플레이 영상**: https://youtu.be/GHr2i3pWzog
+
+| 웨이브 시작 | 보상 선택 (모디파이어 카드) |
+| --- | --- |
+| ![웨이브 시작](Media/wave-start.png) | ![보상 선택](Media/reward-select.png) |
+| **전투 (군집 러너 · 카툰 렌더링)** | **노바 + 폭발 모디파이어** |
+| ![전투](Media/combat.png) | ![폭발 모디파이어](Media/explosion-modifier.png) |
+
 ---
 
 ## 게임 소개
