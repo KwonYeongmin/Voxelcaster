@@ -193,6 +193,7 @@ void AVXEnemyBase::BeginPlay()
 
 	BodyMesh->SetRelativeScale3D(BodyScale);
 	VisualBaseScale = BodyScale;
+	EnableSilhouette(BodyMesh);
 	BodyMaterial = BodyMesh->CreateAndSetMaterialInstanceDynamic(0);
 	SetBodyColor(BodyColor);
 }

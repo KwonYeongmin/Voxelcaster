@@ -1,6 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "VXToonFixupCommandlet.h"
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "Factories/MaterialFactoryNew.h"
 #include "FileHelpers.h"
 #include "MaterialEditingLibrary.h"
 #include "Materials/Material.h"
@@ -8,6 +10,11 @@
 #include "ReferenceSkeleton.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Materials/MaterialExpressionComponentMask.h"
+#include "Materials/MaterialExpressionConstant.h"
+#include "Materials/MaterialExpressionIf.h"
+#include "Materials/MaterialExpressionScalarParameter.h"
+#include "Materials/MaterialExpressionSubtract.h"
+#include "Materials/MaterialExpressionVectorParameter.h"
 #include "Materials/MaterialExpressionConstant3Vector.h"
 #include "Materials/MaterialExpressionDivide.h"
 #include "Materials/MaterialExpressionDotProduct.h"
@@ -36,6 +43,161 @@ namespace
 	}
 }
 
+namespace
+{
+	/**
+	 * 캐릭터가 벽 뒤에 가려진 픽셀(Custom Depth가 장면 깊이보다 앞)에 실루엣 색을 섞는다.
+	 * 스텐실 1 = 플레이어 색, 2 = 적 색. 가려지지 않은 캐릭터는 그대로.
+	 */
+	int32 AddSilhouette(UMaterial* Material)
+	{
+		UMaterialEditorOnlyData* EditorData = Material->GetEditorOnlyData();
+		FExpressionInput& Emissive = EditorData->EmissiveColor;
+		if (nullptr == Emissive.Expression)
+		{
+			UE_LOG(LogVXDataTools, Error, TEXT("Silhouette: Emissive Color is not connected"));
+			return 1;
+		}
+		for (UMaterialExpression* Expression : Material->GetExpressions())
+		{
+			if (Expression->Desc == TEXT("VX Silhouette"))
+			{
+				UE_LOG(LogVXDataTools, Display, TEXT("Silhouette: already added. Nothing to do."));
+				return 0;
+			}
+		}
+
+		const FExpressionInput Final = Emissive;
+		const int32 X = Emissive.Expression->MaterialExpressionEditorX + 300;
+		const int32 Y = Emissive.Expression->MaterialExpressionEditorY + 400;
+
+		Material->PreEditChange(nullptr);
+
+		auto MakeSceneR = [&](ESceneTextureId Id, int32 PosY) -> UMaterialExpression*
+		{
+			UMaterialExpressionSceneTexture* Texture = Create<UMaterialExpressionSceneTexture>(Material, X, PosY);
+			Texture->SceneTextureId = Id;
+			UMaterialExpressionComponentMask* Mask = Create<UMaterialExpressionComponentMask>(Material, X + 220, PosY);
+			Mask->R = 1; Mask->G = 0; Mask->B = 0; Mask->A = 0;
+			Mask->Input.Connect(0, Texture);
+			return Mask;
+		};
+
+		UMaterialExpression* CustomDepth = MakeSceneR(PPI_CustomDepth, Y);
+		UMaterialExpression* SceneDepth = MakeSceneR(PPI_SceneDepth, Y + 150);
+		UMaterialExpression* Stencil = MakeSceneR(PPI_CustomStencil, Y + 300);
+
+		UMaterialExpressionScalarParameter* Bias = Create<UMaterialExpressionScalarParameter>(Material, X + 220, Y + 450);
+		Bias->ParameterName = TEXT("SilhouetteDepthBias");
+		Bias->DefaultValue = 20.f;
+
+		// 캐릭터 깊이 < 장면 깊이 - Bias 이면 벽 뒤 (1), 아니면 0
+		UMaterialExpressionSubtract* SceneMinusBias = Create<UMaterialExpressionSubtract>(Material, X + 440, Y + 150);
+		SceneMinusBias->A.Connect(0, SceneDepth);
+		SceneMinusBias->B.Connect(0, Bias);
+		UMaterialExpressionIf* Behind = Create<UMaterialExpressionIf>(Material, X + 660, Y);
+		Behind->A.Connect(0, CustomDepth);
+		Behind->B.Connect(0, SceneMinusBias);
+		UMaterialExpressionConstant* Zero = Create<UMaterialExpressionConstant>(Material, X + 440, Y + 750);
+		Zero->R = 0.f;
+		Behind->AGreaterThanB.Connect(0, Zero);
+		Behind->AEqualsB.Connect(0, Zero);
+		UMaterialExpressionScalarParameter* Opacity = Create<UMaterialExpressionScalarParameter>(Material, X + 440, Y + 600);
+		Opacity->ParameterName = TEXT("SilhouetteOpacity");
+		Opacity->DefaultValue = 0.7f;
+		Behind->ALessThanB.Connect(0, Opacity);
+
+		// 스텐실 2 이상 = 적
+		UMaterialExpressionSubtract* StencilMinusOne = Create<UMaterialExpressionSubtract>(Material, X + 440, Y + 300);
+		StencilMinusOne->A.Connect(0, Stencil);
+		StencilMinusOne->ConstB = 1.f;
+		UMaterialExpressionSaturate* IsEnemy = Create<UMaterialExpressionSaturate>(Material, X + 660, Y + 300);
+		IsEnemy->Input.Connect(0, StencilMinusOne);
+
+		UMaterialExpressionVectorParameter* PlayerColor = Create<UMaterialExpressionVectorParameter>(Material, X + 660, Y + 450);
+		PlayerColor->ParameterName = TEXT("SilhouettePlayerColor");
+		PlayerColor->DefaultValue = FLinearColor(0.35f, 0.85f, 1.f);
+		UMaterialExpressionVectorParameter* EnemyColor = Create<UMaterialExpressionVectorParameter>(Material, X + 660, Y + 600);
+		EnemyColor->ParameterName = TEXT("SilhouetteEnemyColor");
+		EnemyColor->DefaultValue = FLinearColor(1.f, 0.3f, 0.25f);
+
+		UMaterialExpressionLinearInterpolate* Color = Create<UMaterialExpressionLinearInterpolate>(Material, X + 900, Y + 450);
+		Color->A.Connect(0, PlayerColor);
+		Color->B.Connect(0, EnemyColor);
+		Color->Alpha.Connect(0, IsEnemy);
+		UMaterialExpressionComponentMask* ColorRGB = Create<UMaterialExpressionComponentMask>(Material, X + 1100, Y + 450);
+		ColorRGB->R = 1; ColorRGB->G = 1; ColorRGB->B = 1; ColorRGB->A = 0;
+		ColorRGB->Input.Connect(0, Color);
+
+		UMaterialExpressionLinearInterpolate* Out = Create<UMaterialExpressionLinearInterpolate>(Material, X + 1300, Y);
+		Out->A = Final;
+		Out->B.Connect(0, ColorRGB);
+		Out->Alpha.Connect(0, Behind);
+		Out->Desc = TEXT("VX Silhouette");
+
+		Emissive.Connect(0, Out);
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+		UMaterialEditingLibrary::RecompileMaterial(Material);
+		const bool bSaved = UEditorLoadingAndSavingUtils::SavePackages({ Material->GetPackage() }, false);
+		UE_LOG(LogVXDataTools, Display, TEXT("Silhouette: added and saved = %d"), bSaved ? 1 : 0);
+		return bSaved ? 0 : 1;
+	}
+}
+
+namespace
+{
+	/** 탑다운 카메라를 가리는 벽에 씌우는 반투명 머티리얼 (UVXCameraOcclusionComponent) */
+	int32 MakeOcclusionFadeMaterial()
+	{
+		const TCHAR* PackagePath = TEXT("/Game/Voxelcaster/Materials/M_VX_OcclusionFade");
+		if (nullptr != LoadObject<UMaterial>(nullptr, TEXT("/Game/Voxelcaster/Materials/M_VX_OcclusionFade.M_VX_OcclusionFade")))
+		{
+			UE_LOG(LogVXDataTools, Display, TEXT("MakeFade: already exists. Nothing to do."));
+			return 0;
+		}
+
+		UPackage* Package = CreatePackage(PackagePath);
+		UMaterialFactoryNew* Factory = NewObject<UMaterialFactoryNew>();
+		UMaterial* Material = Cast<UMaterial>(Factory->FactoryCreateNew(UMaterial::StaticClass(), Package, TEXT("M_VX_OcclusionFade"),
+			RF_Public | RF_Standalone | RF_Transactional, nullptr, GWarn));
+		if (nullptr == Material)
+		{
+			UE_LOG(LogVXDataTools, Error, TEXT("MakeFade: failed to create material"));
+			return 1;
+		}
+		FAssetRegistryModule::AssetCreated(Material);
+
+		Material->PreEditChange(nullptr);
+		Material->BlendMode = BLEND_Translucent;
+		Material->SetShadingModel(MSM_Unlit);
+		Material->TwoSided = true;
+
+		UMaterialExpressionVectorParameter* Color = Create<UMaterialExpressionVectorParameter>(Material, -400, 0);
+		Color->ParameterName = TEXT("FadeColor");
+		Color->DefaultValue = FLinearColor(0.10f, 0.08f, 0.16f);
+		UMaterialExpressionComponentMask* ColorRGB = Create<UMaterialExpressionComponentMask>(Material, -200, 0);
+		ColorRGB->R = 1; ColorRGB->G = 1; ColorRGB->B = 1; ColorRGB->A = 0;
+		ColorRGB->Input.Connect(0, Color);
+
+		UMaterialExpressionScalarParameter* Opacity = Create<UMaterialExpressionScalarParameter>(Material, -400, 200);
+		Opacity->ParameterName = TEXT("FadeOpacity");
+		Opacity->DefaultValue = 0.3f;
+
+		UMaterialEditorOnlyData* EditorData = Material->GetEditorOnlyData();
+		EditorData->EmissiveColor.Connect(0, ColorRGB);
+		EditorData->Opacity.Connect(0, Opacity);
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+		UMaterialEditingLibrary::RecompileMaterial(Material);
+		const bool bSaved = UEditorLoadingAndSavingUtils::SavePackages({ Package }, false);
+		UE_LOG(LogVXDataTools, Display, TEXT("MakeFade: created M_VX_OcclusionFade, saved = %d"), bSaved ? 1 : 0);
+		return bSaved ? 0 : 1;
+	}
+}
+
 UVXToonFixupCommandlet::UVXToonFixupCommandlet()
 {
 	IsClient = false;
@@ -46,6 +208,12 @@ UVXToonFixupCommandlet::UVXToonFixupCommandlet()
 
 int32 UVXToonFixupCommandlet::Main(const FString& Params)
 {
+	// -makefade: 벽 반투명용 머티리얼 M_VX_OcclusionFade를 만든다 (이미 있으면 건너뜀)
+	if (Params.Contains(TEXT("-makefade")))
+	{
+		return MakeOcclusionFadeMaterial();
+	}
+
 	// -reimportdata: 데이터 폴더의 DataTable을 원본 CSV/JSON에서 전부 다시 읽고 저장한다 (에디터 버튼과 같은 동작)
 	if (Params.Contains(TEXT("-reimportdata")))
 	{
@@ -107,6 +275,12 @@ int32 UVXToonFixupCommandlet::Main(const FString& Params)
 		const bool bSaved = UEditorLoadingAndSavingUtils::SavePackages({ Instance->GetPackage() }, false);
 		UE_LOG(LogVXDataTools, Display, TEXT("ToonFixup fixmi: parent set to M_PP_Toon, saved = %d"), bSaved ? 1 : 0);
 		return bSaved ? 0 : 1;
+	}
+
+	// -silhouette: 최종 출력(Emissive) 앞에 "벽 뒤 캐릭터 실루엣"을 끼운다
+	if (Params.Contains(TEXT("-silhouette")))
+	{
+		return AddSilhouette(Material);
 	}
 
 	// -check: 컴파일 에러만 출력한다

@@ -56,6 +56,13 @@ public:
 	void SetMoveInputDirection(const FVector& NewDirection) { MoveInputDirection = NewDirection; }
 	FVector GetMoveInputDirection() const { return MoveInputDirection; }
 
+	/** 벽 뒤 실루엣용 스텐실 값 (M_PP_Toon이 읽는다): 1 = 플레이어, 2 = 적 */
+	static constexpr int32 StencilPlayer = 1;
+	static constexpr int32 StencilEnemy = 2;
+
+	/** 이 캐릭터의 보이는 메시에 Custom Depth·스텐실을 켠다 (벽에 가려지면 실루엣으로 보인다) */
+	void EnableSilhouette(class UPrimitiveComponent* Component) const;
+
 	/** 대시 방향: 이동 입력 방향, 없으면 조준 방향 */
 	FVector GetDashDirection() const;
 

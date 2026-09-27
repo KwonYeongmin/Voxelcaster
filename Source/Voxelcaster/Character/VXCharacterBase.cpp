@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Character/VXCharacterBase.h"
+#include "Components/PrimitiveComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/VXAbilitySystemComponent.h"
@@ -100,6 +101,15 @@ void AVXCharacterBase::PostInitializeComponents()
 	GetCharacterMovement()->MaxWalkSpeed = DefaultMoveSpeed;
 }
 
+void AVXCharacterBase::EnableSilhouette(UPrimitiveComponent* Component) const
+{
+	if (Component)
+	{
+		Component->SetRenderCustomDepth(true);
+		Component->SetCustomDepthStencilValue(EVXTeam::Player == Team ? StencilPlayer : StencilEnemy);
+	}
+}
+
 void AVXCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
@@ -113,6 +123,9 @@ void AVXCharacterBase::BeginPlay()
 	{
 		UE_LOG(LogVX, Warning, TEXT("Ability failed: %s tags=[%s]"), *GetNameSafe(Ability), *FailureTags.ToStringSimple());
 	});
+
+	// 벽 뒤에서도 보이도록 캐릭터 메시를 Custom Depth에 그린다 (M_PP_Toon 실루엣)
+	EnableSilhouette(GetMesh());
 
 	GrantStartupAbilities();
 	UE_LOG(LogVX, Log, TEXT("%s granted %d abilities"), *GetName(), AbilitySystemComponent->GetActivatableAbilities().Num());

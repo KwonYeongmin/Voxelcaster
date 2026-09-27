@@ -3,7 +3,9 @@
 #include "Character/VXCameraOcclusionComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/MeshComponent.h"
 #include "Components/PrimitiveComponent.h"
+#include "Materials/MaterialInterface.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
@@ -23,6 +25,17 @@ UVXCameraOcclusionComponent::UVXCameraOcclusionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.TickGroup = TG_PostPhysics;
+	FadeMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(TEXT("/Game/Voxelcaster/Materials/M_VX_OcclusionFade.M_VX_OcclusionFade")));
+}
+
+void UVXCameraOcclusionComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	LoadedFadeMaterial = FadeMaterial.IsNull() ? nullptr : FadeMaterial.LoadSynchronous();
+	if (EVXOcclusionMode::Translucent == Mode && nullptr == LoadedFadeMaterial)
+	{
+		UE_LOG(LogVX, Warning, TEXT("CameraOcclusion: fade material '%s' not found, walls will be hidden instead"), *FadeMaterial.ToString());
+	}
 }
 
 void UVXCameraOcclusionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -61,6 +74,11 @@ void UVXCameraOcclusionComponent::TickComponent(float DeltaTime, ELevelTick Tick
 		{
 			continue;
 		}
+		// 움직이는 물체(탄환, 문 등)는 건드리지 않는다. 벽·기둥 같은 고정 메시만
+		if (EComponentMobility::Movable == Component->Mobility)
+		{
+			continue;
+		}
 		// 밟고 있는 바닥(계단 포함)은 숨기지 않는다
 		if (Component == StandingOn)
 		{
@@ -75,46 +93,82 @@ void UVXCameraOcclusionComponent::TickComponent(float DeltaTime, ELevelTick Tick
 	}
 
 	// 더 이상 가리지 않는 것은 다시 보이게, 새로 가리는 것은 숨긴다
-	for (const TWeakObjectPtr<UPrimitiveComponent>& Previous : HiddenComponents)
+	for (const TWeakObjectPtr<UPrimitiveComponent>& Previous : OccludingComponents)
 	{
 		if (false == NowHidden.Contains(Previous) && Previous.IsValid())
 		{
-			SetHidden(Previous.Get(), false);
+			SetOccluding(Previous.Get(), false);
 		}
 	}
 	for (const TWeakObjectPtr<UPrimitiveComponent>& Current : NowHidden)
 	{
-		if (false == HiddenComponents.Contains(Current))
+		if (false == OccludingComponents.Contains(Current))
 		{
-			SetHidden(Current.Get(), true);
+			SetOccluding(Current.Get(), true);
 		}
 	}
-	HiddenComponents = MoveTemp(NowHidden);
+	OccludingComponents = MoveTemp(NowHidden);
 }
 
-void UVXCameraOcclusionComponent::SetHidden(UPrimitiveComponent* Component, bool bHide)
+void UVXCameraOcclusionComponent::SetOccluding(UPrimitiveComponent* Component, bool bOccluding)
 {
-	if (Component)
+	if (nullptr == Component)
+	{
+		return;
+	}
+
+	UMeshComponent* Mesh = Cast<UMeshComponent>(Component);
+	const bool bTranslucent = EVXOcclusionMode::Translucent == Mode && nullptr != LoadedFadeMaterial && nullptr != Mesh;
+
+	if (bTranslucent)
+	{
+		if (bOccluding)
+		{
+			// 원래 머티리얼을 기억하고 모든 슬롯을 반투명 머티리얼로
+			TArray<TWeakObjectPtr<UMaterialInterface>>& Saved = SavedMaterials.FindOrAdd(Component);
+			Saved.Reset();
+			for (int32 Index = 0; Index < Mesh->GetNumMaterials(); ++Index)
+			{
+				UMaterialInterface* Original = Mesh->GetMaterial(Index);
+				Saved.Add(Original);
+				KeepAlive.AddUnique(Original);
+				Mesh->SetMaterial(Index, LoadedFadeMaterial);
+			}
+		}
+		else if (TArray<TWeakObjectPtr<UMaterialInterface>>* Saved = SavedMaterials.Find(Component))
+		{
+			for (int32 Index = 0; Index < Saved->Num(); ++Index)
+			{
+				Mesh->SetMaterial(Index, (*Saved)[Index].Get());
+			}
+			SavedMaterials.Remove(Component);
+		}
+	}
+	else
 	{
 		// 메인 패스에서만 빼서 그림자와 충돌은 유지한다
-		Component->SetRenderInMainPass(false == bHide);
-		if (CVarDebugOcclusion.GetValueOnGameThread() > 0)
-		{
-			UE_LOG(LogVX, Log, TEXT("CameraOcclusion: %s %s"), bHide ? TEXT("hide") : TEXT("show"), *Component->GetOwner()->GetName());
-		}
+		Component->SetRenderInMainPass(false == bOccluding);
+	}
+
+	if (CVarDebugOcclusion.GetValueOnGameThread() > 0)
+	{
+		UE_LOG(LogVX, Log, TEXT("CameraOcclusion: %s %s (%s)"), bOccluding ? TEXT("occlude") : TEXT("restore"),
+			*Component->GetOwner()->GetName(), bTranslucent ? TEXT("translucent") : TEXT("hide"));
 	}
 }
 
 void UVXCameraOcclusionComponent::RestoreAll()
 {
-	for (const TWeakObjectPtr<UPrimitiveComponent>& Previous : HiddenComponents)
+	for (const TWeakObjectPtr<UPrimitiveComponent>& Previous : OccludingComponents)
 	{
 		if (Previous.IsValid())
 		{
-			SetHidden(Previous.Get(), false);
+			SetOccluding(Previous.Get(), false);
 		}
 	}
-	HiddenComponents.Reset();
+	OccludingComponents.Reset();
+	SavedMaterials.Reset();
+	KeepAlive.Reset();
 }
 
 void UVXCameraOcclusionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
