@@ -13,7 +13,7 @@
 
 namespace
 {
-	const TCHAR* ToonMaterialPath = TEXT("/Game/Voxelcaster/Materials/MI_PP_Toon.MI_PP_Toon");
+	const TCHAR* ToonInstancePath = TEXT("/Game/Voxelcaster/Materials/MI_PP_Toon.MI_PP_Toon");
 
 	void Notify(const FString& Message, bool bSuccess)
 	{
@@ -93,7 +93,7 @@ namespace VXToonPostProcess
 			return 0;
 		}
 
-		UMaterialInterface* ToonMaterial = LoadObject<UMaterialInterface>(nullptr, ToonMaterialPath);
+		UMaterialInterface* ToonMaterial = LoadObject<UMaterialInterface>(nullptr, ToonInstancePath);
 		if (nullptr == ToonMaterial)
 		{
 			Notify(TEXT("MI_PP_Toon을 찾지 못했습니다. /Game/Voxelcaster/Materials/MI_PP_Toon 이 있는지 확인하세요"), false);

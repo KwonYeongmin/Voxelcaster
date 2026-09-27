@@ -83,6 +83,9 @@ private:
 	void UpdateHudViewModel();
 
 	void SetInputDevice(EVXInputDevice NewDevice);
+
+	/** 게임 입력 상태로 되돌린다: 입력 모드, 일시정지, CommonUI 입력 설정 (레벨 시작·메뉴 닫기·재시작) */
+	void ApplyGameInput();
 	/** CommonUI가 감지한 입력 방식 (메뉴처럼 UI 전용 입력일 때도 알려 준다) */
 	void HandleInputMethodChanged(ECommonInputType InputType);
 	void HandleWaveStarted(int32 WaveIndex);

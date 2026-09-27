@@ -37,6 +37,7 @@
 #include "Wave/VXWaveManager.h"
 #include "Voxelcaster.h"
 #include "CommonInputSubsystem.h"
+#include "Input/CommonUIActionRouterBase.h"
 #include "UI/VXInputPrompt.h"
 
 AVXPlayerController::AVXPlayerController()
@@ -168,6 +169,13 @@ void AVXPlayerController::BeginPlay()
 	if (IsLocalController())
 	{
 		HudViewModel = NewObject<UVX_VM_Hud>(this);
+		// 이전 레벨(재시작 전)의 메뉴 입력 설정이 남아 있을 수 있어 게임 입력으로 되돌린다
+		if (const UCommonUIActionRouterBase* Router = ULocalPlayer::GetSubsystem<UCommonUIActionRouterBase>(GetLocalPlayer()))
+		{
+			UE_LOG(LogVX, Log, TEXT("Input on start: CommonUI mode was %s"), *UEnum::GetValueAsString(Router->GetActiveInputMode()));
+		}
+		ApplyGameInput();
+
 		HUDWidget = CreateWidget<UVXHUDWidget>(this, ResolveWidgetClass(HUDWidgetClass));
 		if (HUDWidget)
 		{
@@ -224,15 +232,29 @@ void AVXPlayerController::CloseMenu()
 	CurrentMenu->RemoveFromParent();
 	CurrentMenu = nullptr;
 
+	ApplyGameInput();
+}
+
+void AVXPlayerController::ApplyGameInput()
+{
 	SetPause(false);
 	FInputModeGameOnly InputMode;
 	InputMode.SetConsumeCaptureMouseDown(false);
 	SetInputMode(InputMode);
+
+	// CommonUI 입력 설정은 로컬 플레이어에 붙어 있어 레벨이 바뀌어도 남는다.
+	// 메뉴(결과·일시정지)가 켜 둔 Menu 모드가 남으면 게임 입력이 막히므로 Game 모드로 되돌린다.
+	if (UCommonUIActionRouterBase* Router = ULocalPlayer::GetSubsystem<UCommonUIActionRouterBase>(GetLocalPlayer()))
+	{
+		Router->SetActiveUIInputConfig(FUIInputConfig(ECommonInputMode::Game, EMouseCaptureMode::CapturePermanently_IncludingInitialMouseDown, false), this);
+	}
 }
 
 void AVXPlayerController::RestartGame()
 {
-	SetPause(false);
+	// 열린 메뉴를 먼저 닫아 CommonUI 입력 설정을 정리한 뒤 레벨을 다시 연다
+	CloseMenu();
+	ApplyGameInput();
 	UGameplayStatics::OpenLevel(this, FName(*UGameplayStatics::GetCurrentLevelName(this)));
 }
 
