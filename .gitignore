@@ -61,3 +61,10 @@ docs/
 # ---- 외부 에셋 팩 (용량이 커서 Git에 올리지 않음. Fab에서 받아 같은 위치에 둔다) ----
 Content/ParagonGRIMexe/
 Content/Fantastic_Dungeon_Pack/
+Content/ParagonMinions/
+# 외부에서 받은 플레이어 캐릭터 모델 (블렌더 씬 임포트)
+Content/Hero/
+
+# ---- 패키징 결과물 ----
+Windows/
+Windows.zip
