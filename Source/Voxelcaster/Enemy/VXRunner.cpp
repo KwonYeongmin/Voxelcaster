@@ -44,7 +44,8 @@ void AVXRunner::Tick(float DeltaSeconds)
 	}
 
 	const FVector ToPlayer = Player->GetActorLocation() - GetActorLocation();
-	const FVector Direction = ToPlayer.GetSafeNormal2D();
+	// 벽에 가려 있으면 내비메시 경로를 따라 돌아온다
+	const FVector Direction = GetPathDirectionTo(Player);
 
 	// Chase: 플레이어를 향해 최대 속도로 이동한다.
 	AddMovementInput(Direction, 1.f);

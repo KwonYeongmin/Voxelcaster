@@ -440,6 +440,8 @@ void UVXCheatManager::DebugEnemyFacing(float Delay)
 			bHasMesh ? *SkelMesh->GetSkeletalMeshAsset()->GetName() : TEXT("(cube)"),
 			SkelMesh ? SkelMesh->GetRelativeRotation().Yaw : 0.f, SkelMesh ? SkelMesh->GetComponentRotation().Yaw : 0.f,
 			It->GetController() ? *It->GetController()->GetName() : TEXT("none"));
+		UE_LOG(LogVX, Log, TEXT("  dist %.0f | path points %d | loc %s"), FVector::Dist2D(It->GetActorLocation(), Player->GetActorLocation()),
+			It->GetPathPointCount(), *It->GetActorLocation().ToString());
 		if (bHasMesh)
 		{
 			UE_LOG(LogVX, Log, TEXT("  mesh path %s | anim %s | rel loc %s scale %s | capsule half %.1f radius %.1f"),

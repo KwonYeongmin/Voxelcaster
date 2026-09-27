@@ -121,8 +121,11 @@ void AVXShooter::MoveRelativeToTarget(bool bAway)
 		return;
 	}
 
-	const FVector Direction = (Player->GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
-	AddMovementInput(bAway ? -Direction : Direction, 1.f);
+	// 다가갈 때는 길찾기(벽을 돌아서), 물러날 때는 반대 방향으로 곧게
+	const FVector Direction = bAway
+		? -(Player->GetActorLocation() - GetActorLocation()).GetSafeNormal2D()
+		: GetPathDirectionTo(Player);
+	AddMovementInput(Direction, 1.f);
 	FaceTarget();
 }
 

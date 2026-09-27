@@ -50,6 +50,9 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;
 
+	/** 디버그: 지금 따라가는 경로 지점 수 (0이면 직진) */
+	int32 GetPathPointCount() const { return PathPoints.Num(); }
+
 protected:
 	virtual void PostInitializeComponents() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
@@ -90,6 +93,17 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Mesh")
 	float MeshScale = 1.f;
+
+	/**
+	 * Target에게 가려면 지금 어느 방향으로 움직여야 하는지 (수평 단위 벡터).
+	 * - 사이에 벽이 없으면 직진
+	 * - 벽에 가려 있으면 내비메시 경로의 다음 지점으로 (레벨에 Nav Mesh Bounds Volume이 있어야 한다. 없으면 직진)
+	 */
+	FVector GetPathDirectionTo(const AActor* Target);
+
+	/** 경로를 다시 계산하는 간격 (초) */
+	UPROPERTY(EditDefaultsOnly, Category = "Voxel|Enemy")
+	float PathRefreshInterval = 0.3f;
 
 	/** EnemySkeletalMesh·EnemyAnimClass를 메시 컴포넌트에 적용한다 (지정되어 있을 때만) */
 	void ApplySkeletalMesh();
@@ -224,5 +238,10 @@ private:
 
 	/** 군집 조향: 분리 + 정렬 + 결합을 이동 입력에 더한다 */
 	void ApplyFlocking();
+
+	/** 길찾기 경로 (월드 좌표). 비어 있으면 직진 */
+	TArray<FVector> PathPoints;
+	int32 PathIndex = 0;
+	float NextPathTime = 0.f;
 	float DeathWorldTime = -1.f;
 };

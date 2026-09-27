@@ -11,6 +11,8 @@
 #include "Animation/AnimSingleNodeInstance.h"
 #include "Animation/BlendSpace.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Data/VXEnemyData.h"
@@ -295,6 +297,54 @@ void AVXEnemyBase::ApplyFlocking()
 		DrawDebugLine(GetWorld(), Origin, Origin + CohesionForce * Length, FColor::Green, false, 0.f, 0, 3.f);
 	}
 #endif
+}
+
+FVector AVXEnemyBase::GetPathDirectionTo(const AActor* Target)
+{
+	if (nullptr == Target)
+	{
+		return FVector::ZeroVector;
+	}
+
+	UWorld* World = GetWorld();
+	const FVector Location = GetActorLocation();
+	const FVector Goal = Target->GetActorLocation();
+	const float Now = World->GetTimeSeconds();
+
+	if (Now >= NextPathTime)
+	{
+		NextPathTime = Now + PathRefreshInterval;
+		PathPoints.Reset();
+		PathIndex = 0;
+
+		// 사이에 벽(고정 메시)이 없으면 직진이 가장 자연스럽다
+		FHitResult Hit;
+		FCollisionQueryParams Params(SCENE_QUERY_STAT(VXEnemySight), false, this);
+		Params.AddIgnoredActor(Target);
+		const bool bBlocked = World->LineTraceSingleByObjectType(Hit, Location, Goal, FCollisionObjectQueryParams(ECC_WorldStatic), Params);
+
+		if (bBlocked)
+		{
+			if (UNavigationSystemV1* Nav = FNavigationSystem::GetCurrent<UNavigationSystemV1>(World))
+			{
+				const UNavigationPath* Path = Nav->FindPathToLocationSynchronously(World, Location, Goal, this);
+				if (Path && Path->IsValid() && Path->PathPoints.Num() > 1)
+				{
+					PathPoints = Path->PathPoints;
+					PathIndex = 1;
+				}
+			}
+		}
+	}
+
+	// 가까워진 경로 지점은 건너뛴다
+	while (PathPoints.IsValidIndex(PathIndex) && FVector::Dist2D(Location, PathPoints[PathIndex]) < 80.f)
+	{
+		++PathIndex;
+	}
+
+	const FVector Next = PathPoints.IsValidIndex(PathIndex) ? PathPoints[PathIndex] : Goal;
+	return (Next - Location).GetSafeNormal2D();
 }
 
 void AVXEnemyBase::StartBlendSpaceLocomotion()

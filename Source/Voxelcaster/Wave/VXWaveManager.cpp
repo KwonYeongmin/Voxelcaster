@@ -1,6 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Wave/VXWaveManager.h"
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
 #include "Enemy/VXEnemyClasses.h"
 #include "Data/VXDataManager.h"
 #include "Character/VXCharacterBase.h"
@@ -437,10 +439,19 @@ bool UVXWaveManager::FindSpawnLocation(const AVXCharacterBase* Player, float Cap
 	const FVector PlayerLocation = Player->GetActorLocation();
 	const float FeetZ = PlayerLocation.Z - Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 
-	// 링 위의 후보 지점을 잡고, 아래로 트레이스해서 플레이어와 같은 높이의 바닥 위인 곳만 쓴다.
-	// (아레나 밖이나 벽 위는 바닥이 없거나 높이가 달라 걸러진다)
+	// 링 위의 후보 지점을 잡고, 아래로 트레이스해서 바닥 위인 곳만 쓴다.
+	// 내비메시가 있으면 플레이어까지 걸어서 갈 수 있는 곳(경로가 끊기지 않음)만 쓴다. 벽 너머 막힌 방·지붕 위 제외.
+	// 내비메시가 없으면 예전처럼 플레이어와 같은 높이(±60cm)이고 사이에 벽이 없는 곳만 쓴다.
+	UNavigationSystemV1* Nav = FNavigationSystem::GetCurrent<UNavigationSystemV1>(World);
+	const bool bHasNavMesh = nullptr != Nav && nullptr != Nav->GetDefaultNavDataInstance(FNavigationSystem::DontCreate);
+	static bool bLoggedNavMode = false;
+	if (false == bLoggedNavMode)
+	{
+		bLoggedNavMode = true;
+		UE_LOG(LogVX, Log, TEXT("Spawn: %s"), bHasNavMesh ? TEXT("navmesh found (reachable spawn points only)") : TEXT("no navmesh (same height, in sight)"));
+	}
 	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(VXSpawnTrace), false, Player);
-	for (int32 Attempt = 0; Attempt < 16; ++Attempt)
+	for (int32 Attempt = 0; Attempt < 24; ++Attempt)
 	{
 		const float Angle = FMath::FRandRange(0.f, 360.f);
 		const float Distance = FMath::FRandRange(SpawnRingMin, SpawnRingMax);
@@ -450,13 +461,38 @@ bool UVXWaveManager::FindSpawnLocation(const AVXCharacterBase* Player, float Cap
 		const FVector End(Candidate.X, Candidate.Y, FeetZ - 300.f);
 
 		FHitResult Hit;
-		if (World->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, QueryParams)
-			&& Hit.ImpactNormal.Z > 0.9f
-			&& FMath::Abs(Hit.ImpactPoint.Z - FeetZ) <= 60.f)
+		if (false == World->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, QueryParams) || Hit.ImpactNormal.Z <= 0.9f)
 		{
-			OutLocation = FVector(Hit.ImpactPoint.X, Hit.ImpactPoint.Y, Hit.ImpactPoint.Z + CapsuleHalfHeight + 2.f);
-			return true;
+			continue;
 		}
+
+		if (bHasNavMesh)
+		{
+			// 계단 등 높이 차는 허용하되, 플레이어까지 끊기지 않는 경로가 있어야 한다
+			FNavLocation Projected;
+			if (false == Nav->ProjectPointToNavigation(Hit.ImpactPoint, Projected, FVector(100.f, 100.f, 250.f)))
+			{
+				continue;
+			}
+			const UNavigationPath* Path = Nav->FindPathToLocationSynchronously(World, Projected.Location, PlayerLocation);
+			if (nullptr == Path || false == Path->IsValid() || Path->IsPartial())
+			{
+				continue;
+			}
+		}
+		else
+		{
+			FHitResult Wall;
+			const FVector Chest(Hit.ImpactPoint.X, Hit.ImpactPoint.Y, PlayerLocation.Z);
+			if (FMath::Abs(Hit.ImpactPoint.Z - FeetZ) > 60.f
+				|| World->LineTraceSingleByObjectType(Wall, PlayerLocation, Chest, FCollisionObjectQueryParams(ECC_WorldStatic), QueryParams))
+			{
+				continue;
+			}
+		}
+
+		OutLocation = FVector(Hit.ImpactPoint.X, Hit.ImpactPoint.Y, Hit.ImpactPoint.Z + CapsuleHalfHeight + 2.f);
+		return true;
 	}
 	return false;
 }
